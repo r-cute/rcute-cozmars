@@ -1,0 +1,6 @@
+cv2
+numpy
+soundfile
+sounddevice
+websockets
+wsmprpc
