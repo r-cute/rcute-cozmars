@@ -4,3 +4,4 @@ soundfile
 sounddevice
 websockets
 wsmprpc
+Pillow
