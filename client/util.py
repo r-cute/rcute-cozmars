@@ -10,9 +10,12 @@ class Component:
         return self._robot._mode
 
     @property
-    def rpc(self):
-        return self._robot.connection.rpc
+    def _loop(self):
+        return self._robot._loop
 
+    @property
+    def rpc(self):
+        return self._robot._stub
 
 def mode(force_sync=False):
     def func_deco(func):
@@ -26,7 +29,7 @@ def mode(force_sync=False):
             if self._mode == 'aio':
                 return func(*args, **kwargs)
 
-            fut = asyncio.run_coroutine_threadsafe(func(*args, **kwargs), asyncio.get_event_loop())
+            fut = asyncio.run_coroutine_threadsafe(func(*args, **kwargs), self._loop)
 
             if self._mode == 'sync' or force_sync:
                 try:

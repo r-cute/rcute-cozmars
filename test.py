@@ -13,31 +13,39 @@ async def do_some_work(x):
     print('done wating', x)
 
 def start_loop(loop):
+    global done_ev
     asyncio.set_event_loop(loop)
+
+    done_ev=asyncio.Event()
     try:
         # loop.run_forever()
-        loop.run_until_complete(do_some_work(7))
+        loop.run_until_complete(done_ev.wait())
     except Exception as e:
-        print(type(e), e)
+        print('complete', type(e), e)
     finally:
-        # for t in asyncio.all_tasks():
-        #     t.cancle()
-        async def cancel_all():
-            asyncio.gather(*asyncio.all_tasks()).cancel()
-        asyncio.run_coroutine_threadsafe(cancel_all(),loop)
-        time.sleep(2)
+        tasks = asyncio.all_tasks(loop)
+        print('len',len(tasks))
+        for t in tasks:
+            t.cancel()
+        loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
         loop.stop()
         loop.close()
         print('cancelled')
         asyncio.set_event_loop(None)
 
-new_loop = asyncio.new_event_loop()
-t = Thread(target=start_loop, args=(new_loop,))
+
+loop = asyncio.new_event_loop()
+t = Thread(target=start_loop,args=(loop,))
 t.start()
 
 
 
 # new_loop.call_soon_threadsafe(more_work, 6)
 # new_loop.call_soon_threadsafe(more_work, 3)
-asyncio.run_coroutine_threadsafe(do_some_work(5), new_loop)
-asyncio.run_coroutine_threadsafe(do_some_work(2), new_loop)
+
+asyncio.run_coroutine_threadsafe(do_some_work(5), loop)
+asyncio.run_coroutine_threadsafe(do_some_work(2), loop)
+time.sleep(2)
+# loop.call_soon_threadsafe(done_ev.set)
+done_ev.set()
+t.join()
