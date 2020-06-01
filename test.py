@@ -1,40 +1,43 @@
-import client
+from threading import Thread
 import asyncio
-async def main():
-    async with client.robot.AioRobot(ip="192.168.1.100") as r:
-        await r.screen.set_backlight(0.5)
-        await r.screen.fill((0,0,100))
-
-        await asyncio.sleep(1)
-
-
-# e=asyncio.Event()
-# l=asyncio.new_event_loop()
-# asyncio.set_event_loop(l)
-# async def mm():
-#     asyncio.create_task(asyncio.sleep(10))
-#     await asyncio.sleep(3)
-# fut=asyncio.run_coroutine_threadsafe(main(), l)
-
-# async def c():
-#     b=[]
-#     for t in asyncio.all_tasks():
-#         if t is asyncio.current_task():
-#             continue
-#         # t.cancel()
-#         b.append(t)
-
-#     await asyncio.gather(*b, return_exceptions=True)
-# l.run_until_complete(c())
-# fut.result()
-# asyncio.set_event_loop(None)
-# l.close()
-
-
-
 import time
 
-with client.robot.Robot(ip='192.168.1.100') as r:
-    r.screen.set_backlight(.4)
-    r.screen.fill((0,100,0))
-    time.sleep(1)
+
+def more_work(x):
+    print("More work %s" % x)
+    time.sleep(x)
+    print("Finished more work %s" % x)
+async def do_some_work(x):
+    print("Waiting " + str(x))
+    await asyncio.sleep(x)
+    print('done wating', x)
+
+def start_loop(loop):
+    asyncio.set_event_loop(loop)
+    try:
+        # loop.run_forever()
+        loop.run_until_complete(do_some_work(7))
+    except Exception as e:
+        print(type(e), e)
+    finally:
+        # for t in asyncio.all_tasks():
+        #     t.cancle()
+        async def cancel_all():
+            asyncio.gather(*asyncio.all_tasks()).cancel()
+        asyncio.run_coroutine_threadsafe(cancel_all(),loop)
+        time.sleep(2)
+        loop.stop()
+        loop.close()
+        print('cancelled')
+        asyncio.set_event_loop(None)
+
+new_loop = asyncio.new_event_loop()
+t = Thread(target=start_loop, args=(new_loop,))
+t.start()
+
+
+
+# new_loop.call_soon_threadsafe(more_work, 6)
+# new_loop.call_soon_threadsafe(more_work, 3)
+asyncio.run_coroutine_threadsafe(do_some_work(5), new_loop)
+asyncio.run_coroutine_threadsafe(do_some_work(2), new_loop)

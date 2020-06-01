@@ -55,25 +55,9 @@ class Connection:
             await self._ws.close()
             self._connected = False
 
-    async def _get(sub_url):
+    async def _get(self, sub_url):
         import aiohttp
         async with aiohttp.ClientSession() as session:
             async with session.get('http://' + self.host + sub_url) as resp:
                 return await resp.text()
-
-    def _run_loop(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        self._done_ev = asyncio.Event()
-        loop.run_until_complete(self._done_ev.wait)
-        to_cancel = []
-        for t in asyncio.all_tasks():
-            if asyncio.current_task() is not t:
-                t.cancel()
-                to_cancel.append(t)
-        loop.run_until_complete(asyncio.gather(*to_cancel, return_exceptions=True))
-        asyncio.set_event_loop(None)
-        loop.close()
-
-
 
