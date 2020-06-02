@@ -5,7 +5,7 @@ from PIL import Image
 class Screen(Component):
 
     @property
-    def dimension(self):
+    def resolution(self):
         return (240, 135)
 
     @mode()
@@ -17,13 +17,18 @@ class Screen(Component):
         await self.rpc.pixel(pos, rgb)
 
     @mode()
-    async def set_backlight(self, level):
+    async def set_brightness(self, level):
         await self.rpc.backlight(level)
 
     @mode()
     async def display(self, image, resample):
         image = self.resize(image, resample)
         await self.rpc.image(image)
+
+    @mode(False)
+    async def animate(self, gif, loop=1):
+        # check resolution, then:
+        await self.rpc.gif(gif, loop)
 
     def resize(image, resample=Image.BICUBIC):
         width, height = self.dimension

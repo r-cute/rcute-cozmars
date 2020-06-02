@@ -6,6 +6,7 @@ from .wsmprpc import RPCClient
 from .util import mode
 from .screen import Screen
 from .camera import Camera
+from .microphone import Microphone
 
 class AioRobot:
     def __init__(self, serial=None, ip=None):
@@ -16,7 +17,8 @@ class AioRobot:
         self._mode = 'aio'
         self._connected = False
         self._screen = Screen(self)
-        self._camera = Camera(self, (320, 240), 10)
+        self._camera = Camera(self, resolution=(320, 240), framerate=10, q_size=5)
+        self._mic = Microphone(self, samplerate=16000, q_size=5)
 
     @property
     def screen(self):

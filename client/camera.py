@@ -2,15 +2,16 @@ from .util import Component
 from . import error
 
 class Camera(Component):
-    def __init__(self, robot, resolution, framerate):
+    def __init__(self, robot, resolution, framerate, q_size):
         Component.__init__(self, robot)
         self._resolution = resolution
         self._framerate = framerate
+        self._q_size = q_size
         self._stream_task = None
 
     @property
-    def on(self):
-        return self._stream_task and not self._stream_task.done()
+    def closed(self):
+        return not self._stream_task or self._stream_task.done()
 
     @property
     def framerate(self):
@@ -18,8 +19,8 @@ class Camera(Component):
 
     @framerate.setter
     def framerate(self, framerate):
-        if self.on:
-            raise error.CozmarsError('Cannot set framerate when camera is on')
+        if not self.closed:
+            raise error.CozmarsError('Cannot change framerate when camera is running')
         self._framerate = framerate
 
     @property
@@ -28,25 +29,37 @@ class Camera(Component):
 
     @resolution.setter
     def resolution(self, resolution):
-        if self.on:
-            raise error.CozmarsError('Cannot set resolution when camera is on')
+        if not self.closed:
+            raise error.CozmarsError('Cannot change resolution when camera is running')
         self._resolution = resolution
 
-    async def start(self):
-        if not self.on:
-            self._stream_task = self.rpc.cam(self.resolution[0], self.resolution[1], self.framerate)
-        await self._stream_task
+    @mode()
+    async def open(self, resolution=None, framerate=None):
+        if resolution:
+            self.resolution = resolution
+        if framerate:
+            self.framerate = framerate
+        if self.closed:
+            self._stream_task = self.rpc.cam(self.resolution[0], self.resolution[1], self.framerate, q_size=self._q_size)
+            await self._stream_task.request()
 
-    async def frames(self):
-        if not self.on:
-            await self.start()
+    @mode()
+    async def close(self):
+        if not self.closed:
+            self._stream_task.cancel()
+
+    @mode()
+    async def capture(self):
+        if self.closed:
+            return await self.rpc.capture()
+        else:
+            # to do
+            pass
+
+    async def frames(self, resolution=None, framerate=None):
+        await self.open(resolution, framerate)
         return self._stream_task.response_stream
 
-    async def release(self):
-        if self.on:
-            self._stream_task.cancel()
-        await self._stream_task
-
-
+    # show/view
 
 

@@ -17,7 +17,7 @@ class Component:
     def rpc(self):
         return self._robot._stub
 
-def mode(force_sync=False):
+def mode(force_sync=True):
     def func_deco(func):
 
         @functools.wraps(func)
