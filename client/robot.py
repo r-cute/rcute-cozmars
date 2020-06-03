@@ -2,11 +2,12 @@ import asyncio
 import aiohttp
 import websockets
 import threading
-from .wsmprpc import RPCClient
+from .wsmprpc import RPCClient, RPCStream
 from .util import mode
 from .screen import Screen
 from .camera import Camera
 from .microphone import Microphone
+from .button import Button
 
 class AioRobot:
     def __init__(self, serial=None, ip=None):
@@ -14,11 +15,13 @@ class AioRobot:
             raise error.CozmarsError('Neither serial number nor IP is provided')
         self._ip = ip
         self._serial = serial
+        self._sensor_data = (1,)
         self._mode = 'aio'
         self._connected = False
         self._screen = Screen(self)
         self._camera = Camera(self, resolution=(320, 240), framerate=10, q_size=5)
         self._mic = Microphone(self, samplerate=16000, q_size=5)
+        self._button = Button(self)
 
     @property
     def screen(self):
@@ -36,12 +39,19 @@ class AioRobot:
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self.host}/rpc')
             self._stub = RPCClient(self._ws)
-            self._connected = True
+            self._sensor_req = RPCStream(q_size=1)
+            self._sensor_task = asyncio.create_task(self._get_sensor_data())
             self._ip = self._ip or await self._get('/ip')
             self._serial = self._serial or await self._get('/serial')
+            self._connected = True
+
+    async def _get_sensor_data(self):
+        async for d in self._stub.sensor_data(request_stream=self._sensor_req):
+            self._sensor_data = d
 
     async def disconnect(self):
         if self._connected:
+            self._sensor_task.cancel()
             await self._ws.close()
             self._connected = False
 
