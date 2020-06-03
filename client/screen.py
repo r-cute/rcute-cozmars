@@ -1,36 +1,36 @@
-from .util import mode, Component
-from . import error
+from . import error, util
 from PIL import Image
 
-class Screen(Component):
+class Screen(util.Component):
 
     @property
     def resolution(self):
         return (240, 135)
 
-    @mode()
+    @util.mode()
     async def fill(self, rgb):
         await self.rpc.fill(rgb)
 
-    @mode()
+    @util.mode()
     async def set_pixel(self, pos, rgb):
         await self.rpc.pixel(pos, rgb)
 
-    @mode()
-    async def set_brightness(self, level):
-        await self.rpc.backlight(level)
+    @util.get_set
+    @util.mode()
+    async def brightness(self, *args):
+        return await self.rpc.backlight(*args)
 
-    @mode()
+    @util.mode()
     async def display(self, image, resample):
-        image = self.resize(image, resample)
+        # check_dimention
         await self.rpc.image(image)
 
-    @mode(False)
+    @util.mode(False)
     async def animate(self, gif, loop=1):
         # check resolution, then:
         await self.rpc.gif(gif, loop)
 
-    def resize(image, resample=Image.BICUBIC):
+    def resize_to_screen(image, resample=Image.BICUBIC):
         width, height = self.dimension
         image_ratio = image.width / image.height
         screen_ratio = width / height

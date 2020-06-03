@@ -1,64 +1,51 @@
-from .util import mode, Component
-from . import error
+from . import error, util
 
-class Button(Component):
+class Button(util.Component):
     def __init__(self, robot):
-        Component.__init__(self, robot)
-        self._hold_repeat = False
-
-
-    async def set_held_time(self, time):
-        await self.rpc.held_time(time)
-        self._held_time = time
-
-    async def set_hold_repeat(self, repeat):
-        await self.rpc.hold_repeat(repeat)
-        self._hold_repeat = repeat
-
-    async def set_double_press_interval(self, interval):
-        self._robot._double_press_interval = interval
+        util.Component.__init__(self, robot)
+        self.when_held = None
+        self.when_released = None
+        self.when_pressed = None
+        self.when_double_pressed = None
+        self._pressed = False
+        self._double_pressed = False
+        self._held = False
 
     @property
     def pressed(self):
-        return self._robot._sensor_data['pressed']
-
-    @property
-    def when_pressed(self):
-        return self._robot._sensor_callback['pressed']
-
-    @when_pressed.setter
-    def when_pressed(self, cb):
-        self._robot._sensor_callback['pressed'] = cb
-
-    @property
-    def when_released(self):
-        return self._robot._sensor_callback['released']
-
-    @when_released.setter
-    def when_released(self, cb):
-        self._robot._sensor_callback['released'] = cb
+        return self._pressed
 
     @property
     def held(self):
-        return self._robot._sensor_data['held']
-
-    @property
-    def when_held(self):
-        return self._robot._sensor_callback['held']
-
-    @when_held.setter
-    def when_held(self, cb):
-        self._robot._sensor_callback['held'] = cb
+        return self._held
 
     @property
     def double_pressed(self):
-        return self._robot._sensor_data['double_pressed']
+        return self._double_pressed
 
     @property
-    def when_double_pressed(self):
-        return self._robot._sensor_callback['double_pressed']
+    def double_press_interval(self):
+        return self._double_press_interval
 
-    @when_double_pressed.setter
-    def when_double_pressed(self, cb):
-        self._robot._sensor_callback['double_pressed'] = cb
+    @property
+    def held_time(self):
+        return self._held_time
 
+    @property
+    def hold_repeat(self):
+        return self._hold_repeat
+
+    @util.get_set
+    @util.mode()
+    async def held_time(self, *args):
+        return await self.rpc.held_time(*args)
+
+    @util.get_set
+    @util.mode()
+    async def hold_repeat(self, *args):
+        return await self.rpc.hold_repeat(*args)
+
+    @util.get_set
+    @util.mode()
+    async def double_press_max_interval(self, *args):
+        return await self.rpc.double_press_max_interval(*args)

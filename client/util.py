@@ -42,3 +42,13 @@ def mode(force_sync=True):
         return wrapper
 
     return func_deco
+
+def get_set(func):
+    def deco(*args, *kwargs):
+        if args[0]._mode = 'aio'
+        return func(*args, *kwargs)
+        return property(func).setter(func)
+
+
+def get(func):
+    return property(func)

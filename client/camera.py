@@ -1,9 +1,8 @@
-from .util import Component
-from . import error
+from . import error, util
 
-class Camera(Component):
+class Camera(util.Component):
     def __init__(self, robot, resolution, framerate, q_size):
-        Component.__init__(self, robot)
+        util.Component.__init__(self, robot)
         self._resolution = resolution
         self._framerate = framerate
         self._q_size = q_size
@@ -33,7 +32,7 @@ class Camera(Component):
             raise error.CozmarsError('Cannot change resolution when camera is running')
         self._resolution = resolution
 
-    @mode()
+    @util.mode()
     async def open(self, resolution=None, framerate=None):
         if resolution:
             self.resolution = resolution
@@ -43,12 +42,12 @@ class Camera(Component):
             self._stream_task = self.rpc.cam(self.resolution[0], self.resolution[1], self.framerate, q_size=self._q_size)
             await self._stream_task.request()
 
-    @mode()
+    @util.mode()
     async def close(self):
         if not self.closed:
             self._stream_task.cancel()
 
-    @mode()
+    @util.mode()
     async def capture(self):
         if self.closed:
             return await self.rpc.capture()

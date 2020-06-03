@@ -1,6 +1,6 @@
-from .util import Component, mode
+from . import error, util
 
-class Head(Component):
+class Head(util.Component):
     MAX_ANGLE = 30
     MIN_ANGLE = -30
 

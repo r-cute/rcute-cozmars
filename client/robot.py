@@ -8,6 +8,8 @@ from .screen import Screen
 from .camera import Camera
 from .microphone import Microphone
 from .button import Button
+from .sonar import Sonar
+from .infrared import Infrared
 
 class AioRobot:
     def __init__(self, serial=None, ip=None):
@@ -20,8 +22,23 @@ class AioRobot:
         self._connected = False
         self._screen = Screen(self)
         self._camera = Camera(self, resolution=(320, 240), framerate=10, q_size=5)
-        self._mic = Microphone(self, samplerate=16000, q_size=5)
+        self._microphone = Microphone(self, samplerate=16000, q_size=5)
         self._button = Button(self)
+        self._sonar = Sonar(self)
+        self._left_ir = Infrared(self)
+        self._right_ir = Infrared(self)
+
+    @property
+    def infrared(self):
+        return self._infrared
+
+    @property
+    def button(self):
+        return self._button
+
+    @property
+    def sonar(self):
+        return self._sonar
 
     @property
     def screen(self):
@@ -32,6 +49,10 @@ class AioRobot:
         return self._camera
 
     @property
+    def microphone(self):
+        return self._microphone
+
+    @property
     def connected(self):
         return self._connected
 
@@ -39,15 +60,40 @@ class AioRobot:
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self.host}/rpc')
             self._stub = RPCClient(self._ws)
-            self._sensor_req = RPCStream(q_size=1)
             self._sensor_task = asyncio.create_task(self._get_sensor_data())
             self._ip = self._ip or await self._get('/ip')
             self._serial = self._serial or await self._get('/serial')
             self._connected = True
 
+    async def _call_callback(cb, *args):
+        if cb:
+            if asyncio.iscoroutinefunction(cb):
+                await cb(*args)
+            else:
+                cb(*args)
+
     async def _get_sensor_data(self):
-        async for d in self._stub.sensor_data(request_stream=self._sensor_req):
-            self._sensor_data = d
+        async for event, data in self._stub.sensor_data():
+            if event == 'pressed':
+                if not data:
+                    self.button._held = self.button._double_pressed = False
+                self.button._pressed = data
+                await self._call_callback(self.button.when_pressed if data else self.button.when_released)
+            elif event == 'held':
+                self.button._held = data
+                await self._call_callback(self.button.when_held)
+            elif event == 'double_pressed':
+                self.button._double_pressed = data
+                await self._call_callback(self.button.when_double_pressed)
+            elif event == 'out_of_range':
+                await self._call_callback(self.sonar.when_out_of_range, data)
+            elif event == 'in_range':
+                await self._call_callback(self.sonar.when_in_range, data)
+            elif event == 'left_ir':
+                await self._call_callback(self.left_ir.value_changed)
+            elif event == 'right_ir':
+                self.right_ir._value = data
+                await self._call_callback(self.right_ir.value_changed)
 
     async def disconnect(self):
         if self._connected:
@@ -119,7 +165,7 @@ class Robot(AioRobot):
         for t in tasks:
             t.cancel()
         loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
-        loop.stop()
+        loop.run_until_complete(loop.shutdown_asyncgens())
         loop.close()
         asyncio.set_event_loop(None)
 

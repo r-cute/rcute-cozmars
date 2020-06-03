@@ -4,7 +4,7 @@ import cv2, numpy as np
 import sounddevice as sd, soundfile as sf
 
 
-async def main():
+async def main2():
 
     ws = await websockets.connect('ws://192.168.1.100:80/rpc')
     stub = RPCClient(ws)
@@ -36,7 +36,4 @@ async def main():
     await ws.close()
 
 
-
-
-asyncio.run(main())
 
