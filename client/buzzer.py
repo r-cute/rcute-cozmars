@@ -2,7 +2,7 @@ from . import error, util
 
 class Buzzer(util.Component):
 
-    @util.mode(force_async=False)
+    @util.mode(force_sync=False)
     async def set_tone(self, note, duration=None):
         await self.rpc.tone(note, duration)
 

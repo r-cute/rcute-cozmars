@@ -2,6 +2,9 @@ from . import error, util
 from PIL import Image
 
 class Screen(util.Component):
+    def __init__(self, robot):
+        util.Component.__init__(self, robot)
+        self.default_fade_speed = None
 
     @property
     def resolution(self):
@@ -18,6 +21,10 @@ class Screen(util.Component):
     @util.mode(property_type='setter')
     async def brightness(self, *args):
         return await self.rpc.backlight(*args)
+
+    @util.mode(force_sync=False)
+    async def set_brightness(self, brightness, *, duration=None, fade_speed=None):
+        await self.rpc.backlight(brightness, duration, fade_speed or self.default_fade_speed)
 
     @util.mode()
     async def display(self, image, resample):

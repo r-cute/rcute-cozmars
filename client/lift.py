@@ -10,6 +10,8 @@ class Lift(util.Component):
 
     @util.mode(force_sync=False)
     async def set_height(self, height, *, duration=None, speed=None):
+        if duration and speed:
+            raise error.CozmarsError('Cannot set both duration and speed')
         await self.rpc.lift(height, duration, speed or self.default_speed)
 
     @util.mode(property_type='setter')

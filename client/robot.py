@@ -3,17 +3,7 @@ import aiohttp
 import websockets
 import threading
 from .wsmprpc import RPCClient, RPCStream
-from .util import mode
-from .screen import Screen
-from .camera import Camera
-from .microphone import Microphone
-from .button import Button
-from .sonar import Sonar
-from .infrared import Infrared
-from .lift import Lift
-from .head import Head
-from .buzzer import Buzzer
-from .motors import Motors
+from . import error, util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motors
 
 class AioRobot:
     def __init__(self, serial=None, ip=None):
@@ -21,20 +11,19 @@ class AioRobot:
             raise error.CozmarsError('Neither serial number nor IP is provided')
         self._ip = ip
         self._serial = serial
-        self._sensor_data = (1,)
         self._mode = 'aio'
         self._connected = False
-        self._screen = Screen(self)
-        self._camera = Camera(self, q_size=5)
-        self._microphone = Microphone(self, q_size=5)
-        self._button = Button(self)
-        self._sonar = Sonar(self)
-        self._left_ir = Infrared(self)
-        self._right_ir = Infrared(self)
-        self._lift = Lift(self)
-        self._head = Head(self)
-        self._buzzer = Buzzer(self)
-        self._motors = Motors(self)
+        self._screen = screen.Screen(self)
+        self._camera = camera.Camera(self, q_size=5)
+        self._microphone = microphone.Microphone(self, q_size=5)
+        self._button = button.Button(self)
+        self._sonar = sonar.Sonar(self)
+        self._left_ir = infrared.Infrared(self)
+        self._right_ir = infrared.Infrared(self)
+        self._lift = lift.Lift(self)
+        self._head = head.Head(self)
+        self._buzzer = buzzer.Buzzer(self)
+        self._motors = motors.Motors(self)
 
     @property
     def motors(self):
@@ -89,7 +78,7 @@ class AioRobot:
             self._serial = self._serial or await self._get('/serial')
             self._connected = True
 
-    async def _call_callback(cb, *args):
+    def _call_callback(cb, *args):
         if cb:
             if asyncio.iscoroutinefunction(cb):
                 await cb(*args)
@@ -98,6 +87,7 @@ class AioRobot:
 
     async def _get_sensor_data(self):
         async for event, data in self._stub.sensor_data():
+            print(event, data)
             if event == 'pressed':
                 if not data:
                     self.button._held = self.button._double_pressed = False
@@ -132,19 +122,19 @@ class AioRobot:
     async def __aexit__(self, exc_type, exc, tb):
         await self.disconnect()
 
-    @util.mode(force_async=False)
+    @util.mode(force_sync=False)
     async def forward(self, duration=None):
         self.motors.set_speed((1,1), duration)
 
-    @util.mode(force_async=False)
+    @util.mode(force_sync=False)
     async def backward(self, duration=None):
         self.motors.set_speed((-1,-1), duration)
 
-    @util.mode(force_async=False)
+    @util.mode(force_sync=False)
     async def turn_left(self, duration=None):
         self.motors.set_speed((-1,1), duration)
 
-    @util.mode(force_async=False)
+    @util.mode(force_sync=False)
     async def turn_right(self, duration=None):
         self.motors.set_speed((1,-1), duration)
 
@@ -160,11 +150,11 @@ class AioRobot:
     def serial(self):
         return self._serial
 
-    @mode()
+    @util.mode()
     async def poweroff(self):
         await self._get('/poweroff')
 
-    @mode()
+    @util.mode()
     async def reboot(self):
         await self._get('/reboot')
 

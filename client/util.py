@@ -1,5 +1,6 @@
 import functools
 import asyncio
+from concurrent import futures
 
 class Component:
     def __init__(self, robot):
@@ -27,7 +28,7 @@ def mode(force_sync=True, property_type=None):
 
             self = args[0]
             if self._mode == 'aio':
-                return func if property_type else func(*args, **kwargs)
+                return functools.partial(func, self) if property_type else func(*args, **kwargs)
 
             fut = asyncio.run_coroutine_threadsafe(func(*args, **kwargs), self._loop)
 
