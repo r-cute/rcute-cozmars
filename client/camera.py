@@ -1,45 +1,22 @@
 from . import error, util
 
 class Camera(util.Component):
-    def __init__(self, robot, resolution, framerate, q_size):
+    def __init__(self, robot, q_size):
         util.Component.__init__(self, robot)
-        self._resolution = resolution
-        self._framerate = framerate
         self._q_size = q_size
         self._stream_task = None
+        self.default_framerate = 10
+        self.default_resolution = (320, 240)
 
     @property
     def closed(self):
         return not self._stream_task or self._stream_task.done()
 
-    @property
-    def framerate(self):
-        return self._framerate
-
-    @framerate.setter
-    def framerate(self, framerate):
-        if not self.closed:
-            raise error.CozmarsError('Cannot change framerate when camera is running')
-        self._framerate = framerate
-
-    @property
-    def resolution(self):
-        return self._resolution
-
-    @resolution.setter
-    def resolution(self, resolution):
-        if not self.closed:
-            raise error.CozmarsError('Cannot change resolution when camera is running')
-        self._resolution = resolution
-
     @util.mode()
     async def open(self, resolution=None, framerate=None):
-        if resolution:
-            self.resolution = resolution
-        if framerate:
-            self.framerate = framerate
         if self.closed:
-            self._stream_task = self.rpc.cam(self.resolution[0], self.resolution[1], self.framerate, q_size=self._q_size)
+            w, h = resolution or self.default_resolution
+            self._stream_task = self.rpc.cam(w, h, framerate or self.default_framerate, q_size=self._q_size)
             await self._stream_task.request()
 
     @util.mode()

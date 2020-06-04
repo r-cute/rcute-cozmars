@@ -6,17 +6,14 @@ class Sonar(util.Component):
         self.when_in_range = None
         self.when_out_of_range = None
 
-    @util.get_set
-    @util.mode()
+    @util.mode(property_type='setter')
     async def threshold_distance(self, *args):
         return await self.rpc.threshod_distance(*args)
 
-    @util.get_set
-    @util.mode()
+    @util.mode(property_type='setter')
     async def max_distance(self, *args):
         return await self.rpc.max_distance(*args)
 
-    @util.get
-    @util.mode()
+    @util.mode(property_type='getter')
     async def distance(self):
         return await self.rpc.distance()

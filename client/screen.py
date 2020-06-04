@@ -15,8 +15,7 @@ class Screen(util.Component):
     async def set_pixel(self, pos, rgb):
         await self.rpc.pixel(pos, rgb)
 
-    @util.get_set
-    @util.mode()
+    @util.mode(property_type='setter')
     async def brightness(self, *args):
         return await self.rpc.backlight(*args)
 
@@ -25,7 +24,7 @@ class Screen(util.Component):
         # check_dimention
         await self.rpc.image(image)
 
-    @util.mode(False)
+    @util.mode(force_sync=False)
     async def animate(self, gif, loop=1):
         # check resolution, then:
         await self.rpc.gif(gif, loop)
@@ -41,6 +40,3 @@ class Screen(util.Component):
             scaled_width = width
             scaled_height = image.height * width // image.width
         return image.resize((scaled_width, scaled_height), resample)
-
-
-

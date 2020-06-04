@@ -35,17 +35,14 @@ class Button(util.Component):
     def hold_repeat(self):
         return self._hold_repeat
 
-    @util.get_set
-    @util.mode()
+    @util.mode(property_type='setter')
     async def held_time(self, *args):
         return await self.rpc.held_time(*args)
 
-    @util.get_set
-    @util.mode()
+    @util.mode(property_type='setter')
     async def hold_repeat(self, *args):
         return await self.rpc.hold_repeat(*args)
 
-    @util.get_set
-    @util.mode()
+    @util.mode(property_type='setter')
     async def double_press_max_interval(self, *args):
         return await self.rpc.double_press_max_interval(*args)

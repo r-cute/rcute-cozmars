@@ -10,6 +10,10 @@ from .microphone import Microphone
 from .button import Button
 from .sonar import Sonar
 from .infrared import Infrared
+from .lift import Lift
+from .head import Head
+from .buzzer import Buzzer
+from .motors import Motors
 
 class AioRobot:
     def __init__(self, serial=None, ip=None):
@@ -21,12 +25,32 @@ class AioRobot:
         self._mode = 'aio'
         self._connected = False
         self._screen = Screen(self)
-        self._camera = Camera(self, resolution=(320, 240), framerate=10, q_size=5)
-        self._microphone = Microphone(self, samplerate=16000, q_size=5)
+        self._camera = Camera(self, q_size=5)
+        self._microphone = Microphone(self, q_size=5)
         self._button = Button(self)
         self._sonar = Sonar(self)
         self._left_ir = Infrared(self)
         self._right_ir = Infrared(self)
+        self._lift = Lift(self)
+        self._head = Head(self)
+        self._buzzer = Buzzer(self)
+        self._motors = Motors(self)
+
+    @property
+    def motors(self):
+        return self._motors
+
+    @property
+    def head(self):
+        return self._head
+
+    @property
+    def buzzer(self):
+        return self._buzzer
+
+    @property
+    def lift(self):
+        return self._lift
 
     @property
     def infrared(self):
@@ -107,6 +131,22 @@ class AioRobot:
 
     async def __aexit__(self, exc_type, exc, tb):
         await self.disconnect()
+
+    @util.mode(force_async=False)
+    async def forward(self, duration=None):
+        self.motors.set_speed((1,1), duration)
+
+    @util.mode(force_async=False)
+    async def backward(self, duration=None):
+        self.motors.set_speed((-1,-1), duration)
+
+    @util.mode(force_async=False)
+    async def turn_left(self, duration=None):
+        self.motors.set_speed((-1,1), duration)
+
+    @util.mode(force_async=False)
+    async def turn_right(self, duration=None):
+        self.motors.set_speed((1,-1), duration)
 
     @property
     def host(self):
