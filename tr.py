@@ -1,19 +1,30 @@
 import client,asyncio,functools,time
+import asyncio
+
+async def run():
+    proc = await asyncio.create_subprocess_shell('sudo python3.8 -m pip install sanic -U', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+
+    async def write(stream, bb):
+        while True:
+            line = await stream.readline()
+            if line:
+                print(bb,line)
+            else:
+                break
+    await asyncio.wait([write(proc.stdout,'[out]'), write(proc.stderr,'[err]')])
+
+asyncio.run(run())
 # async def main():
 #     async with client.robot.AioRobot(ip='192.168.1.100') as r:
-#         await r.screen.fill((1,1,100))
-#         await r.screen.brightness(.3)
-#         print(await r.screen.brightness())
-#         await asyncio.sleep(1)
-# asyncio.run(main())
+#         await r.forward(3)
 
-with client.robot.Robot(ip='192.168.1.100') as r:
-    r.screen.set_brightness(1,duration=1)
-    r.screen.fill((100,0,0))
-    r.button.when_pressed = lambda: print('pressed')
-    r.button.when_released = lambda:print('relesase')
-    r.sonar.when_in_range=lambda x:print(x)
-    time.sleep(10)
+# asyncio.run(main())
+# async def f():
+#     print('fff')
+# with client.robot.AsyncRobot(ip='192.168.1.100') as r:
+
+#     time.sleep(5)
+#     r.forward(3).result()
 
 # def mode(sync=False,pro=False):
 #     def deco(func):

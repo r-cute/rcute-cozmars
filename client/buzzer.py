@@ -9,3 +9,7 @@ class Buzzer(util.Component):
     @util.mode()
     async def stop(self):
         await self.rpc.tone(None, None)
+
+    @util.mode(force_sync=False)
+    async def play(self):
+        pass

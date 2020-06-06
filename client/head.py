@@ -1,8 +1,13 @@
 from . import error, util
 
 class Head(util.Component):
-    MAX_ANGLE = 30
-    MIN_ANGLE = -30
+    @property
+    def max_angle(self):
+        return 30
+
+    @property
+    def min_angle(self):
+        return -30
 
     def __init__(self, robot):
         util.Component.__init__(self, robot)

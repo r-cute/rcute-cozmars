@@ -2,8 +2,11 @@ import asyncio
 import aiohttp
 import websockets
 import threading
+import logging
 from .wsmprpc import RPCClient, RPCStream
-from . import error, util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motors
+from . import error, util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor
+
+logger = logging.getLogger(__name__)
 
 class AioRobot:
     def __init__(self, serial=None, ip=None):
@@ -18,16 +21,15 @@ class AioRobot:
         self._microphone = microphone.Microphone(self, q_size=5)
         self._button = button.Button(self)
         self._sonar = sonar.Sonar(self)
-        self._left_ir = infrared.Infrared(self)
-        self._right_ir = infrared.Infrared(self)
+        self._infrared = infrared.Infrared(self)
         self._lift = lift.Lift(self)
         self._head = head.Head(self)
         self._buzzer = buzzer.Buzzer(self)
-        self._motors = motors.Motors(self)
+        self._motor = motor.Motor(self)
 
     @property
-    def motors(self):
-        return self._motors
+    def motor(self):
+        return self._motor
 
     @property
     def head(self):
@@ -73,12 +75,12 @@ class AioRobot:
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self.host}/rpc')
             self._stub = RPCClient(self._ws)
-            self._sensor_task = asyncio.create_task(self._get_sensor_data())
             self._ip = self._ip or await self._get('/ip')
             self._serial = self._serial or await self._get('/serial')
+            self._sensor_task = asyncio.create_task(self._get_sensor_data())
             self._connected = True
 
-    def _call_callback(cb, *args):
+    async def _call_callback(self, cb, *args):
         if cb:
             if asyncio.iscoroutinefunction(cb):
                 await cb(*args)
@@ -86,32 +88,37 @@ class AioRobot:
                 cb(*args)
 
     async def _get_sensor_data(self):
-        async for event, data in self._stub.sensor_data():
-            print(event, data)
-            if event == 'pressed':
-                if not data:
-                    self.button._held = self.button._double_pressed = False
-                self.button._pressed = data
-                await self._call_callback(self.button.when_pressed if data else self.button.when_released)
-            elif event == 'held':
-                self.button._held = data
-                await self._call_callback(self.button.when_held)
-            elif event == 'double_pressed':
-                self.button._double_pressed = data
-                await self._call_callback(self.button.when_double_pressed)
-            elif event == 'out_of_range':
-                await self._call_callback(self.sonar.when_out_of_range, data)
-            elif event == 'in_range':
-                await self._call_callback(self.sonar.when_in_range, data)
-            elif event == 'left_ir':
-                await self._call_callback(self.left_ir.value_changed)
-            elif event == 'right_ir':
-                self.right_ir._value = data
-                await self._call_callback(self.right_ir.value_changed)
+        self._sensor_data_rpc = self._stub.sensor_data()
+        async for event, data in self._sensor_data_rpc:
+            try:
+                if event == 'pressed':
+                    if not data:
+                        self.button._held = self.button._double_pressed = False
+                    self.button._pressed = data
+                    await self._call_callback(self.button.when_pressed if data else self.button.when_released)
+                elif event == 'held':
+                    self.button._held = data
+                    await self._call_callback(self.button.when_held)
+                elif event == 'double_pressed':
+                    self.button._double_pressed = data
+                    await self._call_callback(self.button.when_double_pressed)
+                elif event == 'out_of_range':
+                    await self._call_callback(self.sonar.when_out_of_range, data)
+                elif event == 'in_range':
+                    await self._call_callback(self.sonar.when_in_range, data)
+                elif event == 'lir':
+                    self.infrared._state = data ^ 1, self.infrared._state[1]
+                    await self._call_callback(self.infrared.when_changed)
+                elif event == 'rir':
+                    self.infrared._state = self.infrared._state[0], data ^ 1
+                    await self._call_callback(self.infrared.when_changed)
+            except Exception as e:
+                logger.exception(e)
 
     async def disconnect(self):
         if self._connected:
             self._sensor_task.cancel()
+            self._sensor_data_rpc.cancel()
             await self._ws.close()
             self._connected = False
 
@@ -124,19 +131,19 @@ class AioRobot:
 
     @util.mode(force_sync=False)
     async def forward(self, duration=None):
-        self.motors.set_speed((1,1), duration)
+        await self.motor.set_speed((1,1), duration)
 
     @util.mode(force_sync=False)
     async def backward(self, duration=None):
-        self.motors.set_speed((-1,-1), duration)
+        await self.motor.set_speed((-1,-1), duration)
 
     @util.mode(force_sync=False)
     async def turn_left(self, duration=None):
-        self.motors.set_speed((-1,1), duration)
+        await self.motor.set_speed((-1,1), duration)
 
     @util.mode(force_sync=False)
     async def turn_right(self, duration=None):
-        self.motors.set_speed((1,-1), duration)
+        await self.motor.set_speed((1,-1), duration)
 
     @property
     def host(self):

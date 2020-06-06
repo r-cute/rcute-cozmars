@@ -1,8 +1,14 @@
 from . import error, util
 
 class Lift(util.Component):
-    MAX_HEIGHT = 1
-    MIN_HEIGHT = 0
+
+    @property
+    def max_height(self):
+        return 1
+
+    @property
+    def min_height(self):
+        return 0
 
     def __init__(self, robot):
         util.Component.__init__(self, robot)
