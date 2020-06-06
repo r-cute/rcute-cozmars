@@ -3,7 +3,7 @@ import aiohttp
 import websockets
 import threading
 import logging
-from .wsmprpc import RPCClient, RPCStream
+from wsmprpc import RPCClient, RPCStream
 from . import error, util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor
 
 logger = logging.getLogger(__name__)
@@ -120,8 +120,8 @@ class AioRobot:
         if self._connected:
             self._sensor_task and self._sensor_task.cancel()
             self._sensor_data_rpc and self._sensor_data_rpc.cancel()
-            self.camera.close()
-            self.microphone.close()
+            # await self.camera._close()
+            # await self.microphone._close()
             self._ws and (await self._ws.close())
             self._connected = False
 

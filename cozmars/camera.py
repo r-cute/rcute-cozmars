@@ -1,8 +1,14 @@
 from . import error, util
+import numpy as np
+import cv2
 
-class Camera(util.OutputStreamComponent):
+class CameraOutputStream(util.SyncAsyncRPCStream):
+    def _decode(self, data):
+        return cv2.flip(cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR), -1)
+
+class Camera(util.StreamComponent):
     def __init__(self, robot, resolution, framerate, q_size):
-        util.OutputStreamComponent.__init__(self, robot)
+        util.StreamComponent.__init__(self, robot)
         self._q_size = q_size
         self._framerate = framerate
         self._resolution = resolution
@@ -30,7 +36,9 @@ class Camera(util.OutputStreamComponent):
 
     def _get_rpc(self):
         w, h = self.resolution
-        return self.rpc.camera(w, h, self.framerate, q_size=self._q_size)
+        rpc = self.rpc.camera(w, h, self.framerate, q_size=self._q_size)
+        self._output_stream = CameraOutputStream(rpc.response_stream, None if self._mode=='aio' else self._loop)
+        return rpc
 
     @util.mode()
     async def capture(self, options):
@@ -39,4 +47,8 @@ class Camera(util.OutputStreamComponent):
         else:
             raise error.CozmarsError('Cannot take a photo while camera is streaming video')
 
-
+    @property
+    def output_stream(self):
+        if self.closed:
+            raise error.CozmarsError('Camera is closed')
+        return self._output_stream

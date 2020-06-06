@@ -1,10 +1,11 @@
+import asyncio
 from . import error, util
-from .wsmprpc import RPCStream
+from wsmprpc import RPCStream
 
-class Buzzer(util.InputStreamComponent):
+class Buzzer(util.StreamComponent):
 
     def _get_rpc(self):
-        self._input_stream = RPCStream()
+        self._input_stream = util.SyncAsyncRPCStream(RPCStream(), None if self._mode=='aio' else self._loop)
         return self.rpc.play(request_stream=self._input_stream)
 
     @util.mode(force_sync=False)
@@ -22,5 +23,13 @@ class Buzzer(util.InputStreamComponent):
             for note, delay in song:
                 await self._input_stream.put(note)
                 await asyncio.sleep(delay/1000)
+            await self._input_stream.put(None)
+
+    @property
+    def input_stream(self):
+        if self.closed:
+            raise error.CozmarsError('Buzzer is closed')
+        return self._input_stream
+
 
 
