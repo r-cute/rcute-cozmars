@@ -1,19 +1,19 @@
-import client,asyncio,functools,time
+import asyncio,functools,time
 import asyncio
 
-async def run():
-    proc = await asyncio.create_subprocess_shell('sudo python3.8 -m pip install sanic -U', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
+# async def run():
+#     proc = await asyncio.create_subprocess_shell('sudo python3.8 -m pip install sanic -U', stderr=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
 
-    async def write(stream, bb):
-        while True:
-            line = await stream.readline()
-            if line:
-                print(bb,line)
-            else:
-                break
-    await asyncio.wait([write(proc.stdout,'[out]'), write(proc.stderr,'[err]')])
+#     async def write(stream, bb):
+#         while True:
+#             line = await stream.readline()
+#             if line:
+#                 print(bb,line)
+#             else:
+#                 break
+#     await asyncio.wait([write(proc.stdout,'[out]'), write(proc.stderr,'[err]')])
 
-asyncio.run(run())
+# asyncio.run(run())
 # async def main():
 #     async with client.robot.AioRobot(ip='192.168.1.100') as r:
 #         await r.forward(3)
@@ -54,3 +54,18 @@ asyncio.run(run())
 #     return await asyncio.sleep(3) if a else await asyncio.sleep(1)
 
 # asyncio.run(main(0))
+def mod(func):
+    def new_func(*args):
+        return func(*args)+1
+    return new_func
+
+class A:
+    @property
+    def a(self):
+        return f()
+
+def f():
+    return 3
+b=A()
+print(b.a)
+

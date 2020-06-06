@@ -117,9 +117,11 @@ class AioRobot:
 
     async def disconnect(self):
         if self._connected:
-            self._sensor_task.cancel()
-            self._sensor_data_rpc.cancel()
-            await self._ws.close()
+            self._sensor_task and self._sensor_task.cancel()
+            self._sensor_data_rpc and self._sensor_data_rpc.cancel()
+            self.camera.close()
+            self.microphone.close()
+            self._ws and (await self._ws.close())
             self._connected = False
 
     async def __aenter__(self):
