@@ -31,20 +31,33 @@ class StreamComponent(Component):
 
     @mode()
     async def close(self):
+        await self._close()
+
+    async def _close(self):
         if not self.closed:
             self._stream_rpc.cancel()
             try:
                 await self._stream_rpc
             except asyncio.CancelledError:
                 pass
-    def open(self):
+
+    @mode()
+    async def open(self):
+        await self._open()
+
+    async def _open(self):
+        if self.closed:
+            self._stream_rpc = self._get_rpc()
+            self._stream_rpc.request()
+
+    def _get_rpc(self):
         raise NotImplementedError
 
     async def __aenter__(self):
-        await self.open()
+        await self._open()
 
     async def __aexit__(self, exc_type, exc, tb):
-        await self.close()
+        await self._close()
 
     def __enter__(self):
         self.open()
@@ -54,13 +67,6 @@ class StreamComponent(Component):
 
 
 class InputStreamComponent(StreamComponent):
-
-    @mode()
-    async def open(self):
-        if self.closed:
-            self._input_stream = RPCStream()
-            self._stream_rpc = getattr(self.rpc, '')
-            self._stream_rpc.request()
 
     @property
     @sync_stream
@@ -72,12 +78,6 @@ class InputStreamComponent(StreamComponent):
 
 class OutputStreamComponent(StreamComponent):
 
-    @mode()
-    async def open(self):
-        if self.closed:
-            self._stream_rpc = None
-            self._stream_rpc.request()
-
     @property
     @sync_stream
     def output_stream(self):
@@ -87,21 +87,29 @@ class OutputStreamComponent(StreamComponent):
 
 
 
-class async_to_sync_stream:
-    def __init__(async_stream):
+class async_to_sync_rpc_stream:
+    def __init__(async_stream, loop):
         self.astream = async_stream
+        self.loop = loop
     def __iter__(self):
         return self
     def __next__(self):
-        return asyncio.run_coroutine_threadsafe(self.astream.__anext__()).result()
+        return asyncio.run_coroutine_threadsafe(self.astream.__anext__(), self.loop).result()
+    def put(self, obj):
+        return asyncio.run_coutine_threadsafe(self.astream.put(obj), self.loop).result()
+    def put_nowait(self, obj):
+        return self.loop.call_soon_threadsafe(self.astream.put_nowait, obj)
+    def get(self):
+        return asyncio.run_coutine_threadsafe(self.astream.get(), self.loop).result()
 
 def sync_stream(func):
     @functools.wraps(func)
     def new_func(*args, **kwargs):
         self = args[0]
         ret = func(*args, **kwargs)
-        return ret if self._mode is 'aio' else async_to_sync_stream(ret)
+        return ret if self._mode is 'aio' else async_to_sync_rpc_stream(ret, self._loop)
     return new_func
+
 
 def mode(force_sync=True, property_type=None):
     def func_deco(func):

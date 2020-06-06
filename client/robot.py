@@ -17,8 +17,8 @@ class AioRobot:
         self._mode = 'aio'
         self._connected = False
         self._screen = screen.Screen(self)
-        self._camera = camera.Camera(self, q_size=5)
-        self._microphone = microphone.Microphone(self, q_size=5)
+        self._camera = camera.Camera(self, resolution=(320,240), framerate=10, q_size=5)
+        self._microphone = microphone.Microphone(self, samplerate=16000, q_size=5)
         self._button = button.Button(self)
         self._sonar = sonar.Sonar(self)
         self._infrared = infrared.Infrared(self)
@@ -77,6 +77,7 @@ class AioRobot:
             self._stub = RPCClient(self._ws)
             self._ip = self._ip or await self._get('/ip')
             self._serial = self._serial or await self._get('/serial')
+            self._server_version = await self._get('/version')
             self._sensor_task = asyncio.create_task(self._get_sensor_data())
             self._connected = True
 
@@ -154,6 +155,10 @@ class AioRobot:
     @property
     def ip(self):
         return self._ip
+
+    @property
+    def server_version(self):
+        return self._server_version
 
     @property
     def serial(self):

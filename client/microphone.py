@@ -1,43 +1,21 @@
 from . import error, util
 
-class Microphone(util.Component):
-    def __init__(self, robot, q_size):
-        util.Component.__init__(self, robot)
+class Microphone(util.OutputStreamComponent):
+    def __init__(self, robot, samplerate, q_size):
+        util.OutputStreamComponent.__init__(self, robot)
         self._q_size = q_size
-        self.default_samplerate = 16000
-        self._closed = True
-        self._stream_rpc = None
+        self._samplerate = samplerate
+
+    def _get_rpc(self):
+        return self.rpc.microphone(self.samplerate, q_size=self._q_size)
 
     @property
-    def closed(self):
-        return not self._stream_rpc or self._stream_rpc.done()
+    def samplerate(self):
+        return self._samplerate
 
-    @util.mode()
-    async def open(self, samplerate=None):
-        if self.closed:
-            self._stream_rpc = self.rpc.microphone(samplerate or self.default_samplerate)
-            self._stream_rpc.request()
-
-    @util.mode()
-    async def close(self):
+    @samplerate.setter
+    def samplerate(self, sr):
         if not self.closed:
-            self._stream_rpc.cancel()
+            raise error.CozmarsError('Cannot set samplerate while microphone is recording')
+        self._samplerate = sr
 
-    @util.mode()
-    async def output_stream(self, samplerate=None):
-        if self.closed:
-            raise error.CozmarsError('Microphone is closed')
-        # await self.open(samplerate)
-        return self._stream_rpc.response_stream
-
-    async def __aenter__(self):
-        await self.open()
-
-    async def __aexit__(self, exc_type, exc, tb):
-        await self.close()
-
-    def __enter__(self):
-        self.open()
-
-    def __exit__(self, exc_type, exc, tb):
-        self.close()
