@@ -101,7 +101,9 @@ class AioRobot:
                     self.button._held = data
                     await self._call_callback(self.button.when_held)
                 elif event == 'double_pressed':
+                    self.button._pressed = data
                     self.button._double_pressed = data
+                    await self._call_callback(self.button.when_pressed)
                     await self._call_callback(self.button.when_double_pressed)
                 elif event == 'out_of_range':
                     await self._call_callback(self.sonar.when_out_of_range, data)

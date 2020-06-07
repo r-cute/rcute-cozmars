@@ -23,18 +23,6 @@ class Button(util.Component):
     def double_pressed(self):
         return self._double_pressed
 
-    @property
-    def double_press_interval(self):
-        return self._double_press_interval
-
-    @property
-    def held_time(self):
-        return self._held_time
-
-    @property
-    def hold_repeat(self):
-        return self._hold_repeat
-
     @util.mode(property_type='setter')
     async def held_time(self, *args):
         return await self.rpc.held_time(*args)
