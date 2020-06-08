@@ -20,54 +20,54 @@ class Screen(util.Component):
         await self.rpc.backlight(brightness, duration, fade_speed or self.default_fade_speed)
 
     @util.mode()
-    async def fill(self, rgb, x=0, y=0, w=240, h=135):
-        x, y = y, x
-        w, h = h, w
-        await self.rpc.fill(x, y, w, h, rgb_to_color565(rgb))
+    async def fill(self, bgr, x=0, y=0, w=240, h=135):
+        if not self._in_range((x, y), (w, h)):
+            raise error.CozmarsError(f'Fill area must not exceed dimensions of screen {self.resolution}')
+        x, y = y, 240-x-w
+        await self.rpc.fill(bgr_to_color565(bgr), x, y, h, w)
 
     @util.mode()
-    async def set_pixel(self, x, y, rgb):
-        await self.rpc.pixel(x, y, rgb_to_color565(rgb))
+    async def set_pixel(self, x, y, bgr):
+        if not self._in_range((x, y)):
+            raise error.CozmarsError(f'Pixel must not exceed dimensions of screen {self.resolution}')
+        x, y = y, 240-x-1
+        await self.rpc.pixel(x, y, bgr_to_color565(bgr))
 
     @util.mode()
-    def display(self, image, x=0, y=0):
-        if isinstance(image, Image):
-            image = np.array(image.convert("RGB"))
-        w, h = image.shape[:2]
+    async def display(self, image, x=0, y=0):
+        # if isinstance(image, Image):
+        #     image = np.array(image.convert("RGB"))
+        h, w, ch = image.shape
+        if not self._in_range((x, y), (x+w, y+h)):
+            raise error.CozmarsError(f'Image must not exceed dimensions of screen {self.resolution}')
         image = np.rot90(image)
-        x, y = y, x
-        await self.rpc.display(image_to_data(image.astype('uint16')), x, y, w, h)
+        x, y = y, 240-x-w
+        await self.rpc.display(image_to_data(image.astype('uint16')), x, y, x+h-1, y+w-1)
 
     @util.mode(force_sync=False)
-    async def animate(self, gif, loop=1):
-        # check resolution, then:
+    async def animate(self, gif, loop='auto'):
         await self.rpc.gif(gif, loop)
 
+    def _in_range(self, *points):
+        w, h = self.resolution
+        for p in points:
+            if 0>p[0]>w or 0>p[1]>h:
+                return False
+        return True
 
-def resize_to_screen(image, resample=Image.BICUBIC):
-    width, height = self.dimension
-    image_ratio = image.width / image.height
-    screen_ratio = width / height
-    if screen_ratio < image_ratio:
-        scaled_width = image.width * height // image.height
-        scaled_height = height
-    else:
-        scaled_width = width
-        scaled_height = image.height * width // image.width
-    return image.resize((scaled_width, scaled_height), resample)
 
-def rgb_to_color565(r, g=0, b=0):
+def bgr_to_color565(b, g=0, r=0):
     try:
-        r, g, b = r
+        b, g, r = b
     except TypeError:
         pass
     return (r & 0xF8) << 8 | (g & 0xFC) << 3 | b >> 3
 
-def image_to_data(image):
-    data = numpy.array(image.convert("RGB")).astype("uint16")
+def image_to_data(bgr_image):
+    # data = numpy.array(image.convert("RGB")).astype("uint16")
     color = (
-    ((data[:, :, 0] & 0xF8) << 8)
-    | ((data[:, :, 1] & 0xFC) << 3)
-    | (data[:, :, 2] >> 3)
+    ((bgr_image[:, :, 2] & 0xF8) << 8)
+    | ((bgr_image[:, :, 1] & 0xFC) << 3)
+    | (bgr_image[:, :, 0] >> 3)
     )
-    return numpy.dstack(((color >> 8) & 0xFF, color & 0xFF)).flatten().tolist()
+    return np.dstack(((color >> 8) & 0xFF, color & 0xFF)).flatten().tolist()

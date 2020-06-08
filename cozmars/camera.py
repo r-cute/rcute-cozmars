@@ -33,7 +33,6 @@ class Camera(util.StreamComponent):
             raise error.CozmarsError('Cannot set framerate while camera is running')
         self.framerate = fr
 
-
     def _get_rpc(self):
         w, h = self.resolution
         rpc = self.rpc.camera(w, h, self.framerate, q_size=self._q_size)
