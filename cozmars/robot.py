@@ -17,7 +17,7 @@ class AioRobot:
         self._mode = 'aio'
         self._connected = False
         self._screen = screen.Screen(self)
-        self._camera = camera.Camera(self, resolution=(320,240), framerate=10, q_size=5)
+        self._camera = camera.Camera(self, resolution=(480,360), framerate=5, q_size=5)
         self._microphone = microphone.Microphone(self, samplerate=16000, dtype='int16', q_size=5)
         self._button = button.Button(self)
         self._sonar = sonar.Sonar(self)

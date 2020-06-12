@@ -6,7 +6,7 @@ import soundfile as sf
 
 with cozmars.Robot(ip='192.168.1.102') as robot:
 
-    # set record volumn to 100%, volumn changes will be save even after reboot
+    # set record volumn to 100%, volumn changes will be saved even after reboot
     robot.microphone.volumn = 100
 
     with robot.microphone as mic, sf.SoundFile('sound.wav', mode='x', samplerate=mic.samplerate, channels=mic.channels, subtype='PCM_24') as file:

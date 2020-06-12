@@ -1,7 +1,7 @@
 import cozmars
 import cv2
 
-with cozmars.Robot(ip='192.168.1.102') as robot:
+with cozmars.Robot(ip='192.168.1.105') as robot:
     with robot.camera:
 
         print('Press ESC to stop')
