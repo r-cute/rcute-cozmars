@@ -1,4 +1,7 @@
 */wsmprpc/
 */__pycache__/
+build/
+dist/
+*.egg-info/
 *.py[cod]
 test.py

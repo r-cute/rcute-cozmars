@@ -1,7 +1,8 @@
-import cozmars
+from rcute_cozmars import Robot
 import cv2
 
-with cozmars.Robot(ip='192.168.1.105') as robot:
+# replace ip address with your cozmars' ip
+with Robot(ip='192.168.1.102') as robot:
     with robot.camera:
 
         print('Press ESC to stop')
