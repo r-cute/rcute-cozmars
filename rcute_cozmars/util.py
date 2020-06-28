@@ -3,26 +3,42 @@ import asyncio
 from concurrent import futures
 from wsmprpc import RPCStream
 
-class SyncAsyncRPCStream:
-    def _decode(self, data):
-        return data
-    def _encode(self, data):
-        return data
+class RawSyncAsyncRPCStream:
     def __init__(self, async_stream, loop):
         self._astream = async_stream
         self._loop = loop
     def __iter__(self):
         return self
     def __next__(self):
-        return self._decode(asyncio.run_coroutine_threadsafe(self._astream.__anext__(), self._loop).result())
+        return asyncio.run_coroutine_threadsafe(self._astream.__anext__(), self._loop).result()
     def __aiter__(self):
         return self
     async def __anext__(self):
-        return self._decode(await self._astream.__anext__())
+        return await self._astream.__anext__()
     def put(self, obj):
-        return asyncio.run_coroutine_threadsafe(self._astream.put(self._encode(obj)), self._loop).result()
+        return asyncio.run_coroutine_threadsafe(self._astream.put(obj), self._loop).result()
     def put_nowait(self, obj):
-        return self.loop.call_soon_threadsafe(self._astream.put_nowait, self._encode(obj))
+        return self.loop.call_soon_threadsafe(self._astream.put_nowait, obj)
+
+class SyncAsyncRPCStream:
+    def _decode(self, data):
+        return data
+    def _encode(self, data):
+        return data
+    def __init__(self, async_stream, loop):
+        self._raw_stream = RawSyncAsyncRPCStream(async_stream, loop)
+    def __iter__(self):
+        return self
+    def __next__(self):
+        return self._decode(self._raw_stream.__next__())
+    def __aiter__(self):
+        return self
+    async def __anext__(self):
+        return self._decode(await self._raw_stream.__anext__())
+    def put(self, obj):
+        return self._raw_stream.put(self._encode(obj))
+    def put_nowait(self, obj):
+        return self._raw_stream.put_nowait(self._encode(obj))
 
 
 def mode(force_sync=True, property_type=None):
@@ -104,6 +120,9 @@ class StreamComponent(Component):
             self._stream_rpc.request()
 
     def _get_rpc(self):
+        '''
+        this method is responsible for calling rpc and creating coresponding stream
+        '''
         raise NotImplementedError
 
     async def __aenter__(self):
@@ -119,6 +138,22 @@ class StreamComponent(Component):
 
     def __exit__(self, exc_type, exc, tb):
         self.close()
+
+
+class OutputStreamComponent(StreamComponent):
+    def __init__(self, robot):
+        StreamComponent.__init__(self, robot)
+
+    @property
+    def raw_output_stream(self):
+        return self.output_stream._raw_stream
+
+    @property
+    def output_stream(self):
+        if self.closed:
+            raise error.CozmarsError(f'{self.__class__.__name__} is closed')
+        return self._output_stream
+
 
 
 

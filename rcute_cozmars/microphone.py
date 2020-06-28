@@ -9,7 +9,7 @@ class MicrophoneOutputStream(util.SyncAsyncRPCStream):
     def _decode(self, data):
         return np.frombuffer(data, dtype=self._dtype)
 
-class Microphone(util.StreamComponent):
+class Microphone(util.OutputStreamComponent):
     def __init__(self, robot, samplerate, dtype, q_size):
         util.StreamComponent.__init__(self, robot)
         self._q_size = q_size
@@ -45,13 +45,16 @@ class Microphone(util.StreamComponent):
             raise error.CozmarsError('Cannot set samplerate while microphone is recording')
         self._samplerate = sr
 
+    @property
+    def frame_time(self):
+        '''
+        every piece of data is .1 sec long
+        this is currently hard codded in server side
+        '''
+        return .1
+
+
     @util.mode(property_type='setter')
     async def volumn(self, *args):
         return await self.rpc.microphone_volumn(*args)
-
-    @property
-    def output_stream(self):
-        if self.closed:
-            raise error.CozmarsError('Microphone is closed')
-        return self._output_stream
 

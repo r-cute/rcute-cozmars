@@ -6,7 +6,7 @@ class CameraOutputStream(util.SyncAsyncRPCStream):
     def _decode(self, data):
         return cv2.flip(cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR), -1)
 
-class Camera(util.StreamComponent):
+class Camera(util.OutputStreamComponent):
     def __init__(self, robot, resolution, framerate, q_size):
         util.StreamComponent.__init__(self, robot)
         self._q_size = q_size
@@ -46,8 +46,3 @@ class Camera(util.StreamComponent):
         else:
             raise error.CozmarsError('Cannot take a photo while camera is streaming video')
 
-    @property
-    def output_stream(self):
-        if self.closed:
-            raise error.CozmarsError('Camera is closed')
-        return self._output_stream
