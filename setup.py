@@ -28,7 +28,7 @@ setuptools.setup(
     packages=['rcute_cozmars'],
     install_requires=requirements,
     classifiers=(
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ),

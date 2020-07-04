@@ -1,3 +1,4 @@
+aiohttp
 opencv-python
 numpy
 soundfile
