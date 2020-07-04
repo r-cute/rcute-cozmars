@@ -6,16 +6,16 @@ class Buzzer(util.StreamComponent):
 
     def _get_rpc(self):
         self._input_stream = util.SyncAsyncRPCStream(RPCStream(), None if self._mode=='aio' else self._loop)
-        return self.rpc.play(request_stream=self._input_stream)
+        return self._rpc.play(request_stream=self._input_stream)
 
     @util.mode(force_sync=False)
     async def set_tone(self, note, duration=None):
-        await self.rpc.tone(str(note), duration)
+        await self._rpc.tone(str(note), duration)
 
     @util.mode()
     async def quiet(self):
         await self._close()
-        await self.rpc.tone(None, None)
+        await self._rpc.tone(None, None)
 
     @util.mode(force_sync=False)
     async def play(self, song):

@@ -85,7 +85,7 @@ class Component:
         return self._robot._loop
 
     @property
-    def rpc(self):
+    def _rpc(self):
         return self._robot._stub
 
 
@@ -96,10 +96,12 @@ class StreamComponent(Component):
 
     @property
     def closed(self):
+        """数据流是否关闭"""
         return not self._stream_rpc or self._stream_rpc.done()
 
     @mode()
     async def close(self):
+        """关闭数据流"""
         await self._close()
 
     async def _close(self):
@@ -112,6 +114,7 @@ class StreamComponent(Component):
 
     @mode()
     async def open(self):
+        """打开数据流"""
         await self._open()
 
     async def _open(self):
@@ -138,24 +141,4 @@ class StreamComponent(Component):
 
     def __exit__(self, exc_type, exc, tb):
         self.close()
-
-
-class OutputStreamComponent(StreamComponent):
-    def __init__(self, robot):
-        StreamComponent.__init__(self, robot)
-
-    @property
-    def raw_output_stream(self):
-        return self.output_stream._raw_stream
-
-    @property
-    def output_stream(self):
-        if self.closed:
-            raise error.CozmarsError(f'{self.__class__.__name__} is closed')
-        return self._output_stream
-
-
-
-
-
 

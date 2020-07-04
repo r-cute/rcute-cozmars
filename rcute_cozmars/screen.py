@@ -13,25 +13,25 @@ class Screen(util.Component):
 
     @util.mode(property_type='setter')
     async def brightness(self, *args):
-        return await self.rpc.backlight(*args)
+        return await self._rpc.backlight(*args)
 
     @util.mode(force_sync=False)
     async def set_brightness(self, brightness, *, duration=None, fade_speed=None):
-        await self.rpc.backlight(brightness, duration, fade_speed or self.default_fade_speed)
+        await self._rpc.backlight(brightness, duration, fade_speed or self.default_fade_speed)
 
     @util.mode()
     async def fill(self, bgr, x=0, y=0, w=240, h=135):
         if not self._in_range((x, y), (w, h)):
             raise error.CozmarsError(f'Fill area must not exceed dimensions of screen {self.resolution}')
         x, y = y, 240-x-w
-        await self.rpc.fill(bgr_to_color565(bgr), x, y, h, w)
+        await self._rpc.fill(bgr_to_color565(bgr), x, y, h, w)
 
     @util.mode()
     async def set_pixel(self, x, y, bgr):
         if not self._in_range((x, y)):
             raise error.CozmarsError(f'Pixel must not exceed dimensions of screen {self.resolution}')
         x, y = y, 240-x-1
-        await self.rpc.pixel(x, y, bgr_to_color565(bgr))
+        await self._rpc.pixel(x, y, bgr_to_color565(bgr))
 
     @util.mode()
     async def display(self, image, x=0, y=0):
@@ -42,11 +42,11 @@ class Screen(util.Component):
             raise error.CozmarsError(f'Image must not exceed dimensions of screen {self.resolution}')
         image = np.rot90(image)
         x, y = y, 240-x-w
-        await self.rpc.display(image_to_data(image.astype('uint16')), x, y, x+h-1, y+w-1)
+        await self._rpc.display(image_to_data(image.astype('uint16')), x, y, x+h-1, y+w-1)
 
     @util.mode(force_sync=False)
     async def animate(self, gif, loop='auto'):
-        await self.rpc.gif(gif, loop)
+        await self._rpc.gif(gif, loop)
 
     def _in_range(self, *points):
         w, h = self.resolution

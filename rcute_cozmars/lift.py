@@ -18,10 +18,10 @@ class Lift(util.Component):
     async def set_height(self, height, *, duration=None, speed=None):
         if duration and speed:
             raise error.CozmarsError('Cannot set both duration and speed')
-        await self.rpc.lift(height, duration, speed or self.default_speed)
+        await self._rpc.lift(height, duration, speed or self.default_speed)
 
     @util.mode(property_type='setter')
     async def height(self, *args):
         if len(args) >= 1:
             raise error.CozmarsError('Height accepts at most one parameter')
-        return await (self.rpc.lift(args[0]) if args else self.rpc.lift())
+        return await (self._rpc.lift(args[0]) if args else self._rpc.lift())
