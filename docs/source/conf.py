@@ -45,7 +45,7 @@ author = 'Huang Yan'
 
 # The full version, including alpha/beta/rc tags
 release = version
-
+master_doc = 'index'
 
 # -- General configuration ---------------------------------------------------
 
