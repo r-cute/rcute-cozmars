@@ -20,7 +20,7 @@ pkg_base_dir = os.path.join(here, '..', '..')
 
 # generate api
 
-# cozmars_modules = ['robot', 'button', 'infrared', 'sonar', 'motor', 'lift', 'head', 'screen', 'camera', 'microphone']
+# cozmars_modules = ['robot', 'button', 'infrared', 'sonar', 'motor', 'lift', 'head', 'buzzer', 'screen', 'camera', 'microphone']
 # with open(os.path.join(here, 'api', 'index.rst'), 'w') as f:
 #     f.write('API\n=================\n\n.. automodule:: rcute_cozmars\n\n.. toctree::\n\n')
 #     f.write('\n'.join([f'   {a}' for a in cozmars_modules]))

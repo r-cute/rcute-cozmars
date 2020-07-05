@@ -181,7 +181,7 @@ class AioRobot:
         :param duration: 持续时间（秒）
         :type duration: float
         """
-        await self.motor.set_speed((1,1), duration)
+        await self._stub.speed((1,1), duration)
 
     @util.mode(force_sync=False)
     async def backward(self, duration=None):
@@ -190,7 +190,7 @@ class AioRobot:
         :param duration: 持续时间（秒）
         :type duration: float
         """
-        await self.motor.set_speed((-1,-1), duration)
+        await self._stub.speed((-1,-1), duration)
 
     @util.mode(force_sync=False)
     async def turn_left(self, duration=None):
@@ -199,16 +199,16 @@ class AioRobot:
         :param duration: 持续时间（秒）
         :type duration: float
         """
-        await self.motor.set_speed((-1,1), duration)
+        await self._stub.speed((-1,1), duration)
 
     @util.mode(force_sync=False)
-    async def urn_right(self, duration=None):
+    async def turn_right(self, duration=None):
         """右转
 
         :param duration: 持续时间（秒）
         :type duration: float
         """
-        await self.motor.set_speed((1,-1), duration)
+        await self._stub.speed((1,-1), duration)
 
     @property
     def host(self):

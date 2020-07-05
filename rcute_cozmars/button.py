@@ -11,7 +11,8 @@ class Button(util.Component):
         """回调函数，当按钮被松开时调用，默认为 `None` """
         self.when_held = None
         """回调函数，当按钮被长按时调用，默认为 `None` """
-        self._when_double_pressed = None
+        self.when_double_pressed = None
+        """回调函数，当按钮被双击时调用，默认为 `None` """
         self._pressed = False
         self._double_pressed = False
         self._held = False

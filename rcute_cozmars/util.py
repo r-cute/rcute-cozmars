@@ -15,10 +15,12 @@ class RawSyncAsyncRPCStream:
         return self
     async def __anext__(self):
         return await self._astream.__anext__()
-    def put(self, obj):
+    async def put(self, obj):
+        await self._astream.put(obj)
+    def sync_put(self, obj):
         return asyncio.run_coroutine_threadsafe(self._astream.put(obj), self._loop).result()
     def put_nowait(self, obj):
-        return self.loop.call_soon_threadsafe(self._astream.put_nowait, obj)
+        return self._loop.call_soon_threadsafe(self._astream.put_nowait, obj)
 
 class SyncAsyncRPCStream:
     def _decode(self, data):
@@ -35,8 +37,10 @@ class SyncAsyncRPCStream:
         return self
     async def __anext__(self):
         return self._decode(await self._raw_stream.__anext__())
-    def put(self, obj):
-        return self._raw_stream.put(self._encode(obj))
+    async def put(self, obj):
+        await self._raw_stream.put(self._encode(obj))
+    def sync_put(self, obj):
+        return self._raw_stream.sync_put(self._encode(obj))
     def put_nowait(self, obj):
         return self._raw_stream.put_nowait(self._encode(obj))
 

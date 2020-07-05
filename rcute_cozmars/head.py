@@ -1,3 +1,4 @@
+import asyncio
 from . import error, util
 
 class Head(util.Component):
@@ -5,27 +6,50 @@ class Head(util.Component):
 
     def __init__(self, robot):
         util.Component.__init__(self, robot)
-        self.default_speed = None
-        """默认的头部转动角速度"""
+        self._relax_timeout = None
+        self.default_speed = 60
+        """设置 :data:`angle` 时的默认的头部转动角速度（度/秒），默认为 `60` ，若设为 `None` 则表示用最快转头"""
+        self.auto_relax_delay = 1
+        """多长时间内没有动作则自动放松（秒），默认为 `1`，若设为 `None` 则表示不会自动放松
+
+        舵机移动到目标位置后，使其放松能防止长期受力造成损坏，也能节约电池电量
+        """
+
+    def _cancel_relax_timeout(self):
+        self._relax_timeout and self._relax_timeout.cancel()
+
+    async def _relax_timeout_coro(self):
+        await asyncio.sleep(self.auto_relax_delay)
+        await self._rpc.relax_head()
+
+    def _reset_relax_timeout(self):
+        if self.auto_relax_delay:
+            self._relax_timeout = asyncio.create_task(self._relax_timeout_coro())
 
     @property
     def max_angle(self):
-        """最大角度，即最高的仰角，只读
+        """最大角度，即最高的仰角，只读 `30`
         """
         return 30
 
     @property
     def min_angle(self):
-        """最小角度，即最低的俯视角，只读
+        """最小角度，即最低的俯视角，只读 `-30`
         """
         return -30
 
     @util.mode(property_type='setter')
     async def angle(self, *args):
         """头部的角度"""
-        if len(args) >= 1:
+        if len(args) > 1:
             raise error.CozmarsError('Angle accepts at most one parameter')
-        return await (self._rpc.head(args[0]) if args else self._rpc.head())
+        if args:
+            self._cancel_relax_timeout()
+            await self._rpc.head(args[0], None, self.default_speed)
+            self._reset_relax_timeout()
+        else:
+            a = await self._rpc.head()
+            return round(a, 2) if a else a
 
     @util.mode(force_sync=False)
     async def set_angle(self, angle, *, duration=None, speed=None):
@@ -35,10 +59,12 @@ class Head(util.Component):
         :type angle: float
         :param duration: 转动头部的持续时间（秒），默认为 `None` ，表示用最快速度转动
         :type duration: float, optional
-        :param speed: 转动头部的角速度（rad/s），默认为 `None` ，表示用最快速度转动
+        :param speed: 转动头部的角速度（度/秒），默认为 `None` ，表示用最快速度转动
         :type speed: float, optional
         """
         if duration and speed:
             raise error.CozmarsError('Cannot set both duration and speed')
-        await self._rpc.head(angle, duration, speed or self.default_speed)
+        self._cancel_relax_timeout()
+        await self._rpc.head(angle, duration, speed)
+        self._reset_relax_timeout()
 

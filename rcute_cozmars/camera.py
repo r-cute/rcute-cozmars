@@ -11,7 +11,7 @@ class CameraOutputStream(util.SyncAsyncRPCStream):
 class Camera(util.StreamComponent):
     """摄像头
     """
-    def __init__(self, robot, resolution=(480,360), framerate=5, q_size=5):
+    def __init__(self, robot, resolution=(480,360), framerate=3, q_size=5):
         util.StreamComponent.__init__(self, robot)
         self._q_size = q_size
         self._framerate = framerate
@@ -27,7 +27,7 @@ class Camera(util.StreamComponent):
 
     @property
     def framerate(self):
-        """摄像头录像的帧率，即 FPS，默认是 `5`
+        """摄像头录像的帧率，即 FPS，默认是 `3`
 
         摄像头已经打开之后不能修改帧率，否则抛出异常
         """
@@ -37,13 +37,13 @@ class Camera(util.StreamComponent):
     def resolution(self, res):
         if not self.closed:
             raise error.CozmarsError('Cannot set resolution while camera is running')
-        self.resolution = res
+        self._resolution = res
 
     @framerate.setter
     def framerate(self, fr):
         if not self.closed:
             raise error.CozmarsError('Cannot set framerate while camera is running')
-        self.framerate = fr
+        self._framerate = fr
 
     def _get_rpc(self):
         w, h = self.resolution

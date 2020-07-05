@@ -81,7 +81,7 @@ class Microphone(util.StreamComponent):
 
     @util.mode(property_type='setter')
     async def volumn(self, *args):
-        """麦克风的音量大小，百分制，默认是 `100`
+        """麦克风的音量大小，0~100，百分制，设置以后会自动保存，重启后也不会重置
 
         麦克风已经打开之后不能进行设置，否则抛出异常
         """
