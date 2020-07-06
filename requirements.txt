@@ -1,3 +1,4 @@
+gpiozero
 aiohttp
 opencv-python
 numpy

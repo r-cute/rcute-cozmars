@@ -1,13 +1,18 @@
 import asyncio
 from . import error, util
+from gpiozero.tones import Tone
 from wsmprpc import RPCStream
 
 class Buzzer(util.StreamComponent):
     """蜂鸣器"""
 
     def _get_rpc(self):
-        self._input_stream = util.RawSyncAsyncRPCStream(RPCStream(), None if self._mode=='aio' else self._loop)
-        return self._rpc.play(request_stream=self._input_stream)
+        self._rpc_stream = RPCStream()
+        if self._mode == 'aio':
+            self._input_stream = util.AsyncStream(self._rpc_stream, encode_fn=self._encode)
+        else:
+            self._input_stream = util.SyncStream(util.SyncRawStream(self._rpc_stream, self._loop), encode_fn=self._encode)
+        return self._rpc.play(request_stream=self._rpc_stream)
 
     @util.mode(force_sync=False)
     async def set_tone(self, tone, duration=None):
@@ -23,7 +28,7 @@ class Buzzer(util.StreamComponent):
             <a href='https://gpiozero.readthedocs.io/en/stable/api_tones.html' target='blank'>gpiozero.tones.Tone</a>
 
         """
-        await self._rpc.tone(str(note), duration)
+        await self._rpc.tone(Tone(tone).frequency, duration)
 
     @util.mode()
     async def quiet(self):
@@ -33,11 +38,16 @@ class Buzzer(util.StreamComponent):
 
     @util.mode(force_sync=False)
     async def play(self, song):
+        """播放一段音乐
+
+        :param song: 要播放的音乐，
+        :type song: collections.Iterable
+        """
         async with self:
-            for note, delay in song:
-                await self._input_stream.put(str(note))
-                await asyncio.sleep(delay/1000)
-            await self._input_stream.put(None)
+            for tone, delay in song:
+                await self._rpc_stream.put(self._encode(tone))
+                await asyncio.sleep(delay)
+            await self._rpc_stream.put(None)
 
     @property
     def input_stream(self):
@@ -46,6 +56,9 @@ class Buzzer(util.StreamComponent):
         if self.closed:
             raise error.CozmarsError('Buzzer is closed')
         return self._input_stream
+
+    def _encode(self, obj):
+        return Tone(obj).frequency
 
 
 

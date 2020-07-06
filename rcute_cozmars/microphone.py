@@ -2,14 +2,6 @@ import asyncio
 import numpy as np
 from . import error, util
 
-class MicrophoneOutputStream(util.SyncAsyncRPCStream):
-    """麦克风数据流，流中每一帧数据都是一段 `numpy.ndarray` 类型声音数据"""
-    def __init__(self, async_stream, loop, dtype):
-        util.SyncAsyncRPCStream.__init__(self, async_stream, loop)
-        self._dtype = dtype
-    def _decode(self, data):
-        return np.frombuffer(data, dtype=self._dtype)
-
 class Microphone(util.StreamComponent):
     """麦克风"""
     def __init__(self, robot, samplerate=16000, dtype='int16', frame_time=.1, q_size=5):
@@ -19,9 +11,15 @@ class Microphone(util.StreamComponent):
         self._frame_time = frame_time
         self._dtype = dtype
 
+    def _decode(self, data):
+        return np.frombuffer(data, dtype=self._dtype)
+
     def _get_rpc(self):
         rpc = self._rpc.microphone(self.samplerate, self.dtype, self.frame_time, q_size=self._q_size)
-        self._output_stream = MicrophoneOutputStream(rpc.response_stream, None if self._mode=='aio' else self._loop, self.dtype)
+        if self._mode == 'aio':
+            self._output_stream = util.AsyncStream(rpc.response_stream, decode_fn=self._decode)
+        else:
+            self._output_stream = util.SyncStream(util.SyncRawStream(rpc.response_stream, self._loop), decode_fn=self._decode)
         return rpc
 
 
