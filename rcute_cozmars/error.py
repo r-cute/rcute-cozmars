@@ -1,2 +1,0 @@
-class CozmarsError(Exception):
-	pass

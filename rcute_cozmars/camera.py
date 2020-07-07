@@ -1,4 +1,4 @@
-from . import error, util
+from . import util
 import numpy as np
 import cv2
 
@@ -30,13 +30,13 @@ class Camera(util.StreamComponent):
     @resolution.setter
     def resolution(self, res):
         if not self.closed:
-            raise error.CozmarsError('Cannot set resolution while camera is running')
+            raise RuntimeError('Cannot set resolution while camera is running')
         self._resolution = res
 
     @framerate.setter
     def framerate(self, fr):
         if not self.closed:
-            raise error.CozmarsError('Cannot set framerate while camera is running')
+            raise RuntimeError('Cannot set framerate while camera is running')
         self._framerate = fr
 
     def _decode(self, data):
@@ -63,24 +63,28 @@ class Camera(util.StreamComponent):
         if self.closed:
             return await self._rpc.capture(options)
         else:
-            raise error.CozmarsError('Cannot take a photo while camera is streaming video')
+            raise RuntimeError('Cannot take a photo while camera is streaming video')
 
     @property
     def raw_output_stream(self):
-        """摄像头二进制数据流，与 :data:`output_stream` 相对
+        """摄像头的二进制数据流，与 :data:`output_stream` 相对
 
         流中的每一帧数据都是一张图片 jpeg 格式的二进制数据
+
+        读取数据流必须摄像头打开之后，否则抛出异常
         """
         return self.output_stream._raw_stream
 
     @property
     def output_stream(self):
-        """ 摄像头数据流，将 :data:`raw_output_stream` 中的每一帧二进制数据封装为 `numpy.ndarray` 类型
+        """ 摄像头的数据流，将 :data:`raw_output_stream` 中的每一帧二进制数据封装为 `numpy.ndarray` 类型
 
         数据流中的每一帧是一张图片
+
+        读取数据流必须摄像头打开之后，否则抛出异常
         """
         if self.closed:
-            raise error.CozmarsError(f'{self.__class__.__name__} is closed')
+            raise RuntimeError(f'{self.__class__.__name__} is closed')
         return self._output_stream
 
 

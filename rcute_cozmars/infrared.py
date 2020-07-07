@@ -1,4 +1,4 @@
-from . import error, util
+from . import util
 
 class Infrared(util.Component):
     """红外线传感器

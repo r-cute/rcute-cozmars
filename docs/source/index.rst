@@ -9,8 +9,12 @@
 .. toctree::
    :maxdepth: 2
 
-   installation
+   prepare
    examples/index
+
+.. toctree::
+   :maxdepth: 1
+
    api/index
 
 

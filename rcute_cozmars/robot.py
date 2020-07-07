@@ -5,15 +5,15 @@ rcute_cozmars.robot 模块包括 :class:`Robot`, :class:`AsyncRobot` 和 :class:
 
 :class:`AsyncRobot` 遇到耗时的指令时会以非阻塞的方式立即返回一个 :class:`concurrent.futures.Future` 后续可用于获得该指令最终的返回结果，并立即执行下一条指令；
 
-:class:`AioRobot` 则是以异步(async/await)的方式执行指令
+:class:`AioRobot` 则是以异步 (async/await) 的方式执行指令
 
 .. |pypi上的最新版本| raw:: html
 
    <a href='https://pypi.org/project/rcute-cozmars-server' target='blank'>pypi上的最新版本</a>
 
-.. note::
+.. warning::
 
-   Cozmars 机器人同时只能跟一个程序连接，如果正在用 Scratch 控制 Cozmars，Python 程序将不能连接，反之亦然
+   Cozmars 机器人只能同时被一个程序控制，如果正在用 Scratch 控制 Cozmars，Python 程序将不能连接，反之亦然
 
 """
 
@@ -23,12 +23,12 @@ import websockets
 import threading
 import logging
 from wsmprpc import RPCClient, RPCStream
-from . import error, util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor
+from . import util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor
 
 logger = logging.getLogger("rcute-cozmars")
 
 class AioRobot:
-    """Cozmars 机器人的asyncio模式
+    """Cozmars 机器人的异步 (async/await) 模式
 
     :param serial_or_ip: 要连接的 Cozmars 的 IP 地址或序列号
     :type serial_or_ip: str
@@ -122,10 +122,10 @@ class AioRobot:
 
     async def _call_callback(self, cb, *args):
         if cb:
-            if asyncio.iscoroutinefunction(cb):
-                await cb(*args)
+            if self._mode == 'aio':
+                (await cb(*args)) if asyncio.iscoroutinefunction(cb) else cb(*args)
             else:
-                cb(*args)
+                self._loop.run_in_executor(None, cb, *args)
 
     async def _get_sensor_data(self):
         self._sensor_data_rpc = self._stub.sensor_data()
@@ -162,8 +162,7 @@ class AioRobot:
         if self._connected:
             self._sensor_task.cancel()
             self._sensor_data_rpc.cancel()
-            # await self.camera._close()
-            # await self.microphone._close()
+            await asyncio.gather(self.camera._close(), self.microphone._close(), self.buzzer._close())
             await self._ws.close()
             self._connected = False
 
@@ -250,6 +249,11 @@ class AioRobot:
                 return await resp.text()
 
 class Robot(AioRobot):
+    """Cozmars 机器人的同步模式
+
+    :param serial_or_ip: 要连接的 Cozmars 的 IP 地址或序列号
+    :type serial_or_ip: str
+    """
     def __init__(self, serial_or_ip):
         AioRobot.__init__(self, serial_or_ip)
         self._mode = 'sync'
@@ -288,6 +292,11 @@ class Robot(AioRobot):
         asyncio.set_event_loop(None)
 
 class AsyncRobot(Robot):
+    """Cozmars 机器人的异步 (concurrent.futures.Future) 模式
+
+    :param serial_or_ip: 要连接的 Cozmars 的 IP 地址或序列号
+    :type serial_or_ip: str
+    """
     def __init__(self, serial_or_ip):
         Robot.__init__(self, serial_or_ip)
         self._mode = 'async'

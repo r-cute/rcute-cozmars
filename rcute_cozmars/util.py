@@ -51,7 +51,7 @@ def mode(force_sync=True, property_type=None):
         @functools.wraps(func)
         def new_func(*args, **kwargs):
             if not asyncio.iscoroutinefunction(func):
-                raise error.CozmarsError('Cannot decorate connection.mode on non-coroutine function')
+                raise ImportError('Cannot decorate connection.mode on non-coroutine function')
 
             self = args[0]
             if self._mode == 'aio':

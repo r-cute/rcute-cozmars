@@ -1,4 +1,4 @@
-from . import error, util
+from . import util
 
 class Button(util.Component):
     """按钮

@@ -1,5 +1,5 @@
 import asyncio
-from . import error, util
+from . import util
 
 class Lift(util.Component):
     """臂
@@ -29,13 +29,13 @@ class Lift(util.Component):
 
     @property
     def max_height(self):
-        """移臂最大高度，只读 `1.0`
+        """移臂最大高度，`1.0` ，只读
         """
         return 1.0
 
     @property
     def min_height(self):
-        """移臂最低高度，只读 `0.0`
+        """移臂最低高度， `0.0` ，只读
         """
         return 0.0
 
@@ -43,7 +43,7 @@ class Lift(util.Component):
     async def height(self, *args):
         """臂的高度，0.0~1.0"""
         if len(args) > 1:
-            raise error.CozmarsError('Height accepts at most one parameter')
+            raise TypeError('Height accepts at most one parameter')
         if args:
             self._cancel_relax_timeout()
             await self._rpc.lift(args[0], None, self.default_speed)
@@ -64,9 +64,10 @@ class Lift(util.Component):
         :type duration: float, optional
         :param speed: 移动臂的速度（/秒），默认为 `None` ，表示用最快速度移动
         :type speed: float, optional
+        :raises TypeError: 不能同时设置 `duration` 和 `speed` ，否则抛出异常
         """
         if duration and speed:
-            raise error.CozmarsError('Cannot set both duration and speed')
+            raise TypeError('Cannot set both duration and speed')
         self._cancel_relax_timeout()
         await self._rpc.lift(height, duration, speed)
         self._reset_relax_timeout()

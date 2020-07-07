@@ -1,4 +1,4 @@
-from . import error, util
+from . import util
 
 class Sonar(util.Component):
     """声纳，即超声波距离传感器

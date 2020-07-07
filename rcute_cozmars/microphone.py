@@ -1,6 +1,6 @@
 import asyncio
 import numpy as np
-from . import error, util
+from . import util
 
 class Microphone(util.StreamComponent):
     """麦克风"""
@@ -34,7 +34,7 @@ class Microphone(util.StreamComponent):
     @samplerate.setter
     def samplerate(self, sr):
         if not self.closed:
-            raise error.CozmarsError('Cannot set samplerate while microphone is recording')
+            raise RuntimeError('Cannot set samplerate while microphone is recording')
         self._samplerate = sr
 
     @property
@@ -50,7 +50,7 @@ class Microphone(util.StreamComponent):
     @dtype.setter
     def dtype(self, dt):
         if not self.closed:
-            raise error.CozmarsError('Cannot set dtype while microphone is recording')
+            raise RuntimeError('Cannot set dtype while microphone is recording')
         self._dtype = dt
 
     @property
@@ -72,7 +72,7 @@ class Microphone(util.StreamComponent):
     @frame_time.setter
     def frame_time(self, ft):
         if not self.closed:
-            raise error.CozmarsError('Cannot set frame_time while microphone is recording')
+            raise RuntimeError('Cannot set frame_time while microphone is recording')
         self._frame_time = ft
 
 
@@ -84,24 +84,28 @@ class Microphone(util.StreamComponent):
         麦克风已经打开之后不能进行设置，否则抛出异常
         """
         if args and not self.closed:
-            raise error.CozmarsError('Cannot set volumn while microphone is recording')
+            raise RuntimeError('Cannot set volumn while microphone is recording')
         return await self._rpc.microphone_volumn(*args)
 
     @property
     def raw_output_stream(self):
-        """二进制数据流，与 :data:`output_stream` 相对
+        """麦克风的二进制数据流，与 :data:`output_stream` 相对
 
         流中的每一帧数据都是一段声音的二进制数据
+
+        读取数据流必须麦克风打开之后，否则抛出异常
         """
         return self.output_stream._raw_stream
 
     @property
     def output_stream(self):
-        """ :class:`MicrophoneOutputStream` 数据流，将 :data:`raw_output_stream` 中的每一帧二进制数据封装为 `numpy.ndarray` 类型，
+        """麦克风的数据流，将 :data:`raw_output_stream` 中的每一帧二进制数据封装为 `numpy.ndarray` 类型，
 
         流中的每一帧数据都是一段声音数据
+
+        读取数据流必须麦克风打开之后，否则抛出异常
         """
         if self.closed:
-            raise error.CozmarsError(f'{self.__class__.__name__} is closed')
+            raise RuntimeError(f'{self.__class__.__name__} is closed')
         return self._output_stream
 

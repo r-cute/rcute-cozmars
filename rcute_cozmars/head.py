@@ -1,5 +1,5 @@
 import asyncio
-from . import error, util
+from . import util
 
 class Head(util.Component):
     """头部"""
@@ -28,13 +28,13 @@ class Head(util.Component):
 
     @property
     def max_angle(self):
-        """最大角度，即最高的仰角，只读 `30`
+        """最大角度，即最高的仰角， `30` 度，只读
         """
         return 30
 
     @property
     def min_angle(self):
-        """最小角度，即最低的俯视角，只读 `-30`
+        """最小角度，即最低的俯视角， `-30` 度，只读
         """
         return -30
 
@@ -42,7 +42,7 @@ class Head(util.Component):
     async def angle(self, *args):
         """头部的角度"""
         if len(args) > 1:
-            raise error.CozmarsError('Angle accepts at most one parameter')
+            raise TypeError('Angle accepts at most one parameter')
         if args:
             self._cancel_relax_timeout()
             await self._rpc.head(args[0], None, self.default_speed)
@@ -61,9 +61,10 @@ class Head(util.Component):
         :type duration: float, optional
         :param speed: 转动头部的角速度（度/秒），默认为 `None` ，表示用最快速度转动
         :type speed: float, optional
+        :raises TypeError: 不能同时设置 `duration` 和 `speed` ，否则抛出异常
         """
         if duration and speed:
-            raise error.CozmarsError('Cannot set both duration and speed')
+            raise TypeError('Cannot set both duration and speed')
         self._cancel_relax_timeout()
         await self._rpc.head(angle, duration, speed)
         self._reset_relax_timeout()
