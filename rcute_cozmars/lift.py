@@ -8,8 +8,8 @@ class Lift(util.Component):
     def __init__(self, robot):
         util.Component.__init__(self, robot)
         self._relax_timeout = None
-        self.default_speed = 3
-        """设置 :data:`height` 时的默认移臂速度（/秒），默认为 `3` ，若设为 `None` 则表示用最快速度移臂"""
+        self.default_speed = 2
+        """设置 :data:`height` 时的默认移臂速度（/秒），默认为 `2` ，若设为 `None` 则表示用最快速度移臂"""
         self.auto_relax_delay = 1
         """多长时间内没有动作则自动放松（秒），默认为 `1`，若设为 `None` 则表示不会自动放松
 

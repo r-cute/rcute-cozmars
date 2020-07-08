@@ -4,6 +4,8 @@
 .. toctree::
    :maxdepth: 2
 
-   video
-   audio
+   connect
+   move
+   bb
+   sensor
 
