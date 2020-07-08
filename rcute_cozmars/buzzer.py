@@ -5,11 +5,19 @@ from wsmprpc import RPCStream
 
 
 class Buzzer(util.StreamComponent):
-    """蜂鸣器
+    """蜂鸣器。蜂鸣器能以不同的频率振动，从而发出不同的 `音调`。
 
-    .. |gpiozero.tones.Tone| raw:: html
+    .. |Tone| raw:: html
 
         <a href='https://gpiozero.readthedocs.io/en/stable/api_tones.html' target='blank'>gpiozero.tones.Tone</a>
+
+    .. note::
+
+        这里所说的 `音调` ，在程序中可以用不同的数据类型表示。
+
+        比如 C 大调 do re me 中的 do 音，音乐记号是 `'C4'` ，频率是 440.0 Hz，MIDI 代码是 #69，那么，`'C4'` 、 `440.0` 和 `69` 都可以用来表示这个音调，也可以用 |Tone| 对象来表示
+
+        用 `None` 或 `0` 表示静音
 
     """
 
@@ -28,8 +36,6 @@ class Buzzer(util.StreamComponent):
     @util.mode(property_type='setter')
     async def tone(self, *args):
         """蜂鸣器当前的 `音调`
-
-        `音调` 在程序中可以用频率、MIDI音符代码、或者音高字符表示，也可以使用 |gpiozero.tones.Tone| （推荐），`None` 则表示静音
         """
         if args:
             await self._set_tone(args[0])
@@ -38,10 +44,10 @@ class Buzzer(util.StreamComponent):
 
     @util.mode(force_sync=False)
     async def set_tone(self, tone, duration=None):
-        """设置蜂鸣器的音调
+        """设置蜂鸣器的 `音调`
 
-        :param tone: 音调
-        :type tone: str / int / |gpiozero.tones.Tone|
+        :param tone: `音调`
+        :type tone: str / int / |Tone|
         :param duration: 持续时间（秒），默认为 `None` ，表示无限长，直到调用 :func:`quiet`
         :type duration: float
 
@@ -67,7 +73,7 @@ class Buzzer(util.StreamComponent):
     async def play(self, song):
         """播放一段音乐
 
-        :param song: 要播放的音乐，由声音组成的数组，每个元素是一个音调和时间组成的 `tuple`
+        :param song: 要播放的音乐，由声音组成的数组，每个元素是一个 `音调` 和时间组成的 `tuple`
         :type song: collections.Iterable
         """
         async with self:
@@ -88,6 +94,11 @@ class Buzzer(util.StreamComponent):
         if self.closed:
             raise RuntimeError('Buzzer is closed')
         return self._input_stream
+
+    @property
+    def raw_input_stream(self):
+        return self.input_stream._raw_stream
+
 
     def _encode(self, obj):
         return Tone(obj).frequency if obj else None

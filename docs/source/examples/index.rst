@@ -8,4 +8,7 @@
    move
    bb
    sensor
+   video
+   audio
+   screen
 

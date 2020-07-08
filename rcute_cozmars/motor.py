@@ -1,6 +1,7 @@
 from . import util
 
 class Motor(util.Component):
+    """马达"""
 
     @util.mode(property_type='setter')
     async def speed(self, value=None):
