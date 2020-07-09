@@ -23,13 +23,13 @@ class Sonar(util.Component):
 
     @util.mode(property_type='setter')
     async def max_distance(self, *args):
-        """最远能测量的距离（米），默认是 `1.0` """
+        """最远能测量的距离（米），默认是 `0.5` """
         return await self._rpc.max_distance(*args)
 
 
     @util.mode(property_type='setter')
     async def threshold_distance(self, *args):
-        """阈值距离（米），默认时 `0.3`
+        """阈值距离（米），默认时 `0.1`
 
         当探测到前方障碍物的距离小于阈值距离时触发 :data:`when_in_range` 时间，大于阈值距离时触发 :data:`when_out_of_range` 事件 """
         return await self._rpc.threshod_distance(*args)
