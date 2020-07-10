@@ -26,12 +26,8 @@ class Buzzer(util.StreamComponent):
         self._tone = None
 
     def _get_rpc(self):
-        self._rpc_stream = RPCStream()
-        if self._mode == 'aio':
-            self._input_stream = util.AsyncStream(self._rpc_stream, encode_fn=self._encode)
-        else:
-            self._input_stream = util.SyncStream(util.SyncRawStream(self._rpc_stream, self._loop), encode_fn=self._encode)
-        return self._rpc.play(request_stream=self._rpc_stream)
+        self._input_stream = RPCStream()
+        return self._rpc.play(request_stream=self._input_stream)
 
     @util.mode(property_type='setter')
     async def tone(self, *args):
@@ -79,12 +75,13 @@ class Buzzer(util.StreamComponent):
         async with self:
             for tone, delay in song:
                 t = self._encode(tone)
-                await self._rpc_stream.put(t)
+                await self._input_stream.put(t)
                 await asyncio.sleep(delay)
                 self._tone = t
-            await self._rpc_stream.put(None)
+            await self._input_stream.put(None)
             self._tone = None
 
+    '''
     @property
     def input_stream(self):
         """蜂鸣器输入流
@@ -98,7 +95,7 @@ class Buzzer(util.StreamComponent):
     @property
     def raw_input_stream(self):
         return self.input_stream._raw_stream
-
+    '''
 
     def _encode(self, obj):
         return Tone(obj).frequency if obj else None

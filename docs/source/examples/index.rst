@@ -8,7 +8,6 @@
    move
    bb
    sensor
-   video
-   audio
+   video_audio
    screen
 

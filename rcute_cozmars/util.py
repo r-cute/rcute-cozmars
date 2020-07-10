@@ -3,6 +3,7 @@ import asyncio
 from concurrent import futures
 from wsmprpc import RPCStream
 
+'''
 class SyncRawStream:
     """synchronous version of `wsmprpc.RPCStream` """
     def __init__(self, async_stream, loop):
@@ -44,6 +45,7 @@ class AsyncStream:
         return await self._raw_stream.put(self._encode_fn(obj))
     def put_nowait(self, obj):
         return self._raw_stream.put_nowait(self._encode_fn(obj))
+'''
 
 def mode(force_sync=True, property_type=None):
     def func_deco(func):
@@ -146,7 +148,57 @@ class StreamComponent(Component):
         return self
 
     def __exit__(self, exc_type, exc, tb):
-        if self._mode == 'aio':
-            raise AttributeError('__exit__')
         self.close()
+
+class OutputStreamComponent(StreamComponent):
+
+    def _decode(self, data):
+        return data
+
+    @mode()
+    async def raw_read(self):
+        if self.closed:
+            RuntimeError(f'{self.__class__.__name__} is closed')
+        else:
+            return await self._stream_rpc.response_stream.__anext__()
+
+    @mode()
+    async def read(self):
+        if self.closed:
+            RuntimeError(f'{self.__class__.__name__} is closed')
+        else:
+            return self._decode(await self._stream_rpc.response_stream.__anext__())
+
+    async def __anext__(self):
+        return await self.read()
+
+    def __next__(self):
+        return self.read()
+
+    def __iter__(self):
+        if self._mode == 'aio':
+            raise AttributeError('__iter__')
+        return self
+
+    def __aiter__(self):
+        return self
+
+class InputStreamComponent(StreamComponent):
+
+    def _encode(self, data):
+        return data
+
+    @mode()
+    def raw_write(self, data):
+        if self.closed:
+            raise RuntimeError(f'{self.__class__.__name__} is closed')
+        else:
+            await self._input_stream.put(data)
+
+    @mode()
+    def write(self, data):
+        if self.closed:
+            raise RuntimeError(f'{self.__class__.__name__} is closed')
+        else:
+            await self._input_stream.put(self._encode(data))
 

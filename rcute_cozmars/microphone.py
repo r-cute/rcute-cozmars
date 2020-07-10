@@ -2,10 +2,10 @@ import asyncio
 import numpy as np
 from . import util
 
-class Microphone(util.StreamComponent):
+class Microphone(util.OutputStreamComponent):
     """麦克风"""
     def __init__(self, robot, samplerate=16000, dtype='int16', frame_time=.1, q_size=5):
-        util.StreamComponent.__init__(self, robot)
+        util.OutputStreamComponent.__init__(self, robot)
         self._q_size = q_size
         self._samplerate = samplerate
         self._frame_time = frame_time
@@ -15,12 +15,7 @@ class Microphone(util.StreamComponent):
         return np.frombuffer(data, dtype=self._dtype)
 
     def _get_rpc(self):
-        rpc = self._rpc.microphone(self.samplerate, self.dtype, self.frame_time, q_size=self._q_size)
-        if self._mode == 'aio':
-            self._output_stream = util.AsyncStream(rpc.response_stream, decode_fn=self._decode)
-        else:
-            self._output_stream = util.SyncStream(util.SyncRawStream(rpc.response_stream, self._loop), decode_fn=self._decode)
-        return rpc
+        return self._rpc.microphone(self.samplerate, self.dtype, self.frame_time, q_size=self._q_size)
 
 
     @property
@@ -87,6 +82,7 @@ class Microphone(util.StreamComponent):
             raise RuntimeError('Cannot set volumn while microphone is recording')
         return await self._rpc.microphone_volumn(*args)
 
+    '''
     @property
     def raw_output_stream(self):
         """麦克风的二进制数据流，与 :data:`output_stream` 相对
@@ -109,3 +105,4 @@ class Microphone(util.StreamComponent):
             raise RuntimeError(f'{self.__class__.__name__} is closed')
         return self._output_stream
 
+    '''

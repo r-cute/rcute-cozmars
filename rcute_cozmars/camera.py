@@ -2,11 +2,11 @@ from . import util
 import numpy as np
 import cv2
 
-class Camera(util.StreamComponent):
+class Camera(util.OutputStreamComponent):
     """摄像头
     """
     def __init__(self, robot, resolution=(480,360), framerate=5, q_size=5):
-        util.StreamComponent.__init__(self, robot)
+        util.OutputStreamComponent.__init__(self, robot)
         self._q_size = q_size
         self._framerate = framerate
         self._resolution = resolution
@@ -44,12 +44,7 @@ class Camera(util.StreamComponent):
 
     def _get_rpc(self):
         w, h = self.resolution
-        rpc = self._rpc.camera(w, h, self.framerate, q_size=self._q_size)
-        if self._mode == 'aio':
-            self._output_stream = util.AsyncStream(rpc.response_stream, decode_fn=self._decode)
-        else:
-            self._output_stream = util.SyncStream(util.SyncRawStream(rpc.response_stream, self._loop), decode_fn=self._decode)
-        return rpc
+        return self._rpc.camera(w, h, self.framerate, q_size=self._q_size)
 
     @util.mode()
     async def capture(self, options):
@@ -65,6 +60,7 @@ class Camera(util.StreamComponent):
         else:
             raise RuntimeError('Cannot take a photo while camera is streaming video')
 
+    '''
     @property
     def raw_output_stream(self):
         """摄像头的二进制数据流，与 :data:`output_stream` 相对
@@ -86,6 +82,9 @@ class Camera(util.StreamComponent):
         if self.closed:
             raise RuntimeError(f'{self.__class__.__name__} is closed')
         return self._output_stream
+
+    '''
+
 
 
 
