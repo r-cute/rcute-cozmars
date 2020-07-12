@@ -1,7 +1,14 @@
 from . import util
 
 class Motor(util.Component):
-    """马达"""
+    """马达，控制机器人的移动
+
+
+    .. warning::
+
+        移动的时候请小心别让机器人从桌上掉下来！
+
+    """
 
     @util.mode(property_type='setter')
     async def speed(self, value=None):

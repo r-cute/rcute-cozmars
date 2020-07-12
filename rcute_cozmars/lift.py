@@ -2,7 +2,7 @@ import asyncio
 from . import util
 
 class Lift(util.Component):
-    """臂
+    """手臂
     """
 
     def __init__(self, robot):

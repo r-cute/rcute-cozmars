@@ -16,3 +16,4 @@ API
    screen
    camera
    microphone
+   animation

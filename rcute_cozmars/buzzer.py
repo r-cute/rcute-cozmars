@@ -5,7 +5,9 @@ from wsmprpc import RPCStream
 
 
 class Buzzer(util.StreamComponent):
-    """蜂鸣器。蜂鸣器能以不同的频率振动，从而发出不同的 `音调`。
+    """蜂鸣器
+
+    蜂鸣器能以不同的频率振动，从而发出不同的 `音调`。
 
     .. |Tone| raw:: html
 
@@ -65,21 +67,41 @@ class Buzzer(util.StreamComponent):
         await self._rpc.tone(None, None)
         self._tone = None
 
+    async def _play_one_tone(tone, delay, duty_cycle):
+        if isinstance(tone, tuple):
+            for t in tone:
+                self._play_one_tone(t, delay/2, duty_cycle)
+        else:
+            await self._input_stream.put(self._encode(tone))
+            await asyncio.sleep(delay* duty_cycle)
+            if duty_cycle != 1:
+                await self._input_stream.put(None)
+                await asyncio.sleep(delay* (1-duty_cycle))
+
     @util.mode(force_sync=False)
-    async def play(self, song):
+    async def play(self, song, tempo=60, duty_cycle=.9):
         """播放一段音乐
 
-        :param song: 要播放的音乐，由声音组成的数组，每个元素是一个 `音调` 和时间组成的 `tuple`
+        :param song: 要播放的音乐
         :type song: collections.Iterable
+        :param tempo: 播放速度，BPM，默认是 `60` 拍/分钟
+        :type tempo: int
+        :param duty_cycle: 占空比，即音节播放时间与整个音节的时间的比值，0~1，默认是 `0.9`
+        :type duty_cycle: float
+
+        .. warning::
+
+            这个 API 将来可能会改变，我们还在探索更方便播放音乐的 API
+
         """
+
+        if not 0< duty_cycle <=1:
+            raise ValueError('duty_cycle out of range (0, 1]')
+        delay = 60 / tempo
         async with self:
-            for tone, delay in song:
-                t = self._encode(tone)
-                await self._input_stream.put(t)
-                await asyncio.sleep(delay)
-                self._tone = t
+            for tone in song:
+                self._play_one_tone(tone, delay, duty_cycle)
             await self._input_stream.put(None)
-            self._tone = None
 
     '''
     @property
@@ -96,6 +118,8 @@ class Buzzer(util.StreamComponent):
     def raw_input_stream(self):
         return self.input_stream._raw_stream
     '''
+
+
 
     def _encode(self, obj):
         return Tone(obj).frequency if obj else None

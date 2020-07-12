@@ -34,21 +34,22 @@
 哼两句
 ---------------
 
-to be continuned ...
+可以用 :data:`buzzer` 的 :meth:`play` 方法来播放一段音乐。 :meth:`play` 的参数是 `音调` 构成的数组，默认每个 `音调` 为一拍，而被括号包围起来的 `音调` 每个为半拍，被两层括号包围起来的 `音符` 每个为 1/4 拍... 以此类推，每多一层括号拍数减半。
 
-可以用 :data:`buzzer` 的 :meth:`play` 方法来连续播放一段音乐。运行下面一段程序，猜猜是周杰伦《晴天》的中的哪一句
+运行下面一段程序，猜猜是周杰伦的哪首歌：
 
 .. code:: python
 
     from rute_cozmars import Robot
     import time
 
-    with Robot('192.168.1.102') as robot:
-        with robot.buzzer:
+    song = ['D4', 'G4', 'G4', 'B4', 'C5', 'B4', 'A4',
+            ('G4', 'A4'), 'B4', 'B4', 'B4', 'B4', ('A4', 'B4'), 'A4', 'G4']
 
-            for s in song:
-                robot.buzzer.input_stream.put(s)
-                time.sleep(.5)
-                robot.buzzer.input_stream.put(None)
-                time.sleep(.1)
+    with Robot('192.168.1.102') as robot:
+        robot.buzzer.play(song, tempo=65)
+
+.. seealso::
+
+    `rcute_cozmars.buzzer <../api/buzzer.html>`_
 

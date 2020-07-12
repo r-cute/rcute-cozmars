@@ -189,14 +189,14 @@ class InputStreamComponent(StreamComponent):
         return data
 
     @mode()
-    def raw_write(self, data):
+    async def raw_write(self, data):
         if self.closed:
             raise RuntimeError(f'{self.__class__.__name__} is closed')
         else:
             await self._input_stream.put(data)
 
     @mode()
-    def write(self, data):
+    async def write(self, data):
         if self.closed:
             raise RuntimeError(f'{self.__class__.__name__} is closed')
         else:

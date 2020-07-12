@@ -10,4 +10,4 @@
    sensor
    video_audio
    screen
-
+   animation
