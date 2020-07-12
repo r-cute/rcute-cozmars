@@ -20,7 +20,7 @@ class Microphone(util.OutputStreamComponent):
 
     @property
     def samplerate(self):
-        """麦克风的采样率，默认是 `16000`
+        """麦克风的采样率，默认是 `16000` ，不建议修改
 
         麦克风已经打开之后不能进行设置，否则抛出异常
         """
@@ -34,7 +34,7 @@ class Microphone(util.OutputStreamComponent):
 
     @property
     def dtype(self):
-        """麦克风采样的数据类型，默认是 `'int16'`
+        """麦克风采样的数据类型，默认是 `'int16'` ，不建议修改
 
         也可以设置为 `'int8'` 或 `'float32'`
 
@@ -58,7 +58,7 @@ class Microphone(util.OutputStreamComponent):
 
     @property
     def frame_time(self):
-        """流中每一帧声音片段持续的时间（秒），默认是 `0.1`
+        """流中每一帧声音片段持续的时间（秒），默认是 `0.1` ，不建议修改
 
         麦克风已经打开之后不能进行设置，否则抛出异常
         """
@@ -74,7 +74,7 @@ class Microphone(util.OutputStreamComponent):
 
     @util.mode(property_type='setter')
     async def volumn(self, *args):
-        """麦克风的音量大小，0~100，百分制，设置以后会自动保存，重启后也不会重置
+        """麦克风的音量大小，0~100，百分制，设置以后会自动保存，重启后依然有效
 
         麦克风已经打开之后不能进行设置，否则抛出异常
         """

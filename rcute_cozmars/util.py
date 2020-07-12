@@ -157,6 +157,7 @@ class OutputStreamComponent(StreamComponent):
 
     @mode()
     async def raw_read(self):
+        """读取一帧原始数据"""
         if self.closed:
             RuntimeError(f'{self.__class__.__name__} is closed')
         else:
@@ -164,6 +165,7 @@ class OutputStreamComponent(StreamComponent):
 
     @mode()
     async def read(self):
+        """读取一帧数据"""
         if self.closed:
             RuntimeError(f'{self.__class__.__name__} is closed')
         else:
@@ -190,6 +192,7 @@ class InputStreamComponent(StreamComponent):
 
     @mode()
     async def raw_write(self, data):
+        """写入一帧原始数据"""
         if self.closed:
             raise RuntimeError(f'{self.__class__.__name__} is closed')
         else:
@@ -197,6 +200,7 @@ class InputStreamComponent(StreamComponent):
 
     @mode()
     async def write(self, data):
+        """写入一帧原始数据"""
         if self.closed:
             raise RuntimeError(f'{self.__class__.__name__} is closed')
         else:

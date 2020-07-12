@@ -8,9 +8,9 @@
 
 这三个传感器各有一些属性用来查询其状态：
 
-    × 按钮 :data:`button` 有 :data:`pressed` ， :data:`held` ， :data:`double_pressed` 三个属性，分别表示按钮是否被按下、被长按和被双击
-    × 声纳 :data:`sonar` 通过超声波反射来判断前方障碍物的距离，其 :data:`distance` 属性用来查询前方障碍物的距离（米）
-    × 红外传感器 :data:`infrared` 自身能发出的红外光，并感应的红外反射的强弱。:data:`state` 属性是一个两元素组成的元组，分别表示左右两个传感器是否接收到红外反射，0 表示没有或反射很弱，1 表示有较强的反射
+- 按钮 :data:`button` 有 :data:`pressed` ， :data:`held` ， :data:`double_pressed` 三个属性，分别表示按钮是否被按下、被长按和被双击
+- 声纳 :data:`sonar` 通过超声波反射来判断前方障碍物的距离，其 :data:`distance` 属性用来查询前方障碍物的距离（米）
+- 红外传感器 :data:`infrared` 自身能发出的红外光，并感应的红外反射的强弱。:data:`state` 属性是一个两元素组成的元组，分别表示左右两个传感器是否接收到红外反射，0 表示没有或反射很弱，1 表示有较强的反射
 
 
 .. note::
@@ -47,7 +47,7 @@
         while True: # 不断循环，按 Ctrl + C 退出
 
             if robot.sonar.distance < 0.05:
-                robot.buzzer.play(...)
+                robot.buzzer.set_tone('C4', 1)
 
             time.sleep(.3)
 
@@ -66,7 +66,7 @@
     with Robot('192.168.1.102') as robot:
 
         def ring(dist):
-            robot.buzzer.play(...)
+            robot.buzzer.set_tone('C4', 1)
 
         robot.sonar.threshold_distance = 0.05
         robot.sonar.when_in_range = ring
@@ -74,9 +74,9 @@
         pause() # 让程序在此暂停，按 Ctrl + C 退出
 
 
-顾名思义，:data:`sonar.when_out_of_range` 是当前方有障碍物离开 :data:`threshold_distance` 范围时会被调用的函数，可以用来做经（无）典（聊）的寻迹小车实验：
+顾名思义，:data:`sonar.when_out_of_range` 是当前方有障碍物离开 :data:`threshold_distance` 范围时会被调用的函数
 
-而通过 :data:`infrared.when_state_changed` 属性可以设置当红外传感器状态变换时被调用的函数
+而通过 :data:`infrared.when_state_changed` 属性可以设置当红外传感器状态变换时被调用的函数，可以用来做经（无）典（聊）的寻迹小车实验：
 
 .. code:: python
 

@@ -23,7 +23,7 @@ import websockets
 import threading
 import logging
 from wsmprpc import RPCClient, RPCStream
-from . import util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor
+from . import util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, animation
 
 logger = logging.getLogger("rcute-cozmars")
 
@@ -52,6 +52,30 @@ class AioRobot:
         self._head = head.Head(self)
         self._buzzer = buzzer.Buzzer(self)
         self._motor = motor.Motor(self)
+        self._eye_anim = animation.EyeAnimation()
+
+    @util.mode()
+    async def animate(name, *args, ignored=(), **kwargs):
+        """执行动作
+
+        :param ignored: 不执行动作的元件
+        :type ignored: tuple / list
+        """
+        await self.animation.animations[name].animate(*args, self, ignored, **kwargs)
+
+    @property
+    def animation_list(self):
+        """动作列表"""
+        return list(self.animation.animations.keys())
+
+    @property
+    def eye_color(self):
+        """眼睛的颜色"""
+        return self._eye_anim.color
+
+    @eye_color.setter
+    def eye_color(self, color):
+        self._eye_anim.color = color
 
     @property
     def button(self):
@@ -113,6 +137,7 @@ class AioRobot:
             self._serial = self._serial or await self._get('/serial')
             self._server_version = await self._get('/version')
             self._sensor_task = asyncio.create_task(self._get_sensor_data())
+            self._eye_anim_task = asyncio.create_task(self._eye_anim.animate(self, ()))
             self._connected = True
 
     @property
@@ -161,6 +186,7 @@ class AioRobot:
         """断开 Cozmars 的连接"""
         if self._connected:
             self._sensor_task.cancel()
+            self._eye_anim_task.cancel()
             self._sensor_data_rpc.cancel()
             await asyncio.gather(self.camera._close(), self.microphone._close(), self.buzzer._close())
             await self._ws.close()

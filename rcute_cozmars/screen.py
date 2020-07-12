@@ -21,7 +21,7 @@ class Screen(util.Component):
 
     @property
     def min_brightness(self):
-        """最低亮度， `0.0` ，黑屏，只读"""
+        """最低亮度，即黑屏， `0.0` ，只读"""
         return .0
 
     @util.mode(property_type='setter')
@@ -48,6 +48,20 @@ class Screen(util.Component):
 
     @util.mode()
     async def fill(self, bgr, x=0, y=0, w=240, h=135):
+        """填充屏幕
+
+        :param bgr: 要填充的颜色（bgr 模式）
+        :type bgr: tuple
+        :param x: 填充方块的左上角 x 坐标，默认为 `0`
+        :type x: int
+        :param y: 填充方块的左上角 y 坐标，默认为 `0`
+        :type y: int
+        :param w: 填充方块的宽，默认为屏幕宽度 `240`
+        :type w: int
+        :param h: 填充方块的宽，默认为屏幕高度 `135`
+        :type h: int
+        :raises ValueError: 填充区域超出屏幕范围时抛出异常
+        """
         if not self._in_range((x, y), (w, h)):
             raise ValueError(f'Fill area must not exceed dimensions of screen {self.resolution}')
         x, y = y, 240-x-w
@@ -55,6 +69,16 @@ class Screen(util.Component):
 
     @util.mode()
     async def set_pixel(self, x, y, bgr):
+        """设置像素点的颜色
+
+        :param x: 要设置的像素点的 x 坐标
+        :type x: int
+        :param y: 要设置的像素点的 y 坐标
+        :type y: int
+        :param bgr: 颜色（bgr 模式）
+        :type bgr: tuple
+        :raises ValueError: 坐标超出屏幕范围时抛出异常
+        """
         if not self._in_range((x, y)):
             raise ValueError(f'Pixel must not exceed dimensions of screen {self.resolution}')
         x, y = y, 240-x-1
@@ -62,8 +86,16 @@ class Screen(util.Component):
 
     @util.mode()
     async def display(self, image, x=0, y=0):
-        # if isinstance(image, Image):
-        #     image = np.array(image.convert("RGB"))
+        """显示图像
+
+        :param image: 要显示的图像（bgr 模式）
+        :type image: numpy.ndarray
+        :param x: 图像左上角的 x 坐标
+        :type x: int
+        :param y: 图像左上角的 y 坐标
+        :type y: int
+        :raises ValueError: 图像超出屏幕范围时抛出异常
+        """
         h, w, ch = image.shape
         if not self._in_range((x, y), (x+w, y+h)):
             raise ValueError(f'Image must not exceed dimensions of screen {self.resolution}')

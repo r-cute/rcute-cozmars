@@ -106,3 +106,11 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 
         robot.motor.stop()
         robot.head.set_angle(0, duration=1)
+
+
+.. seealso::
+
+    `rcute_cozmars.lift <../api/lift.html>`_ ，`rcute_cozmars.head <../api/head.html>`_ ，`rcute_cozmars.motor <../api/motor.html>`_
+
+
+    `rcute_cozmars.Robot.forward <../api/robot.html#rcute_cozmars.robot.Robot.forward>`_ ，`rcute_cozmars.Robot.backward <../api/robot.html#rcute_cozmars.robot.Robot.backward>`_ ， `rcute_cozmars.Robot.turn_left <../api/robot.html#rcute_cozmars.robot.Robot.turn_left>`_ ， `rcute_cozmars.Robot.turn_right <../api/robot.html#rcute_cozmars.robot.Robot.turn_right>`_
