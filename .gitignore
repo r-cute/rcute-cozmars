@@ -4,4 +4,4 @@ build/
 dist/
 *.egg-info/
 *.py[cod]
-test.py
+test*.py

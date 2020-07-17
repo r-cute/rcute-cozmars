@@ -69,13 +69,9 @@ class AioRobot:
         return list(self.animation.animations.keys())
 
     @property
-    def eye_color(self):
-        """眼睛的颜色"""
-        return self._eye_anim.color
-
-    @eye_color.setter
-    def eye_color(self, color):
-        self._eye_anim.color = color
+    def eyes(self):
+        """眼睛"""
+        return self._eye_anim
 
     @property
     def button(self):

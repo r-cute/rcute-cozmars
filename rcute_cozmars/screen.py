@@ -103,9 +103,11 @@ class Screen(util.Component):
         x, y = y, 240-x-w
         await self._rpc.display(image_to_data(image.astype('uint16')), x, y, x+h-1, y+w-1)
 
+    '''
     @util.mode(force_sync=False)
     async def animate(self, gif, loop='auto'):
         await self._rpc.gif(gif, loop)
+    '''
 
     def _in_range(self, *points):
         w, h = self.resolution
