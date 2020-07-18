@@ -26,7 +26,7 @@ class Screen(util.Component):
 
     @util.mode(property_type='setter')
     async def brightness(self, *args):
-        """显示屏亮度，0~1，默认是 `0.1`
+        """显示屏亮度，0~1，默认是 `0.01`
         """
         return await self._rpc.backlight(*args)
 
@@ -101,7 +101,7 @@ class Screen(util.Component):
             raise ValueError(f'Image must not exceed dimensions of screen {self.resolution}')
         image = np.rot90(image)
         x, y = y, 240-x-w
-        await self._rpc.display(image_to_data(image.astype('uint16')), x, y, x+h-1, y+w-1)
+        await self._rpc.display(image_to_data(image), x, y, x+h-1, y+w-1)
 
     '''
     @util.mode(force_sync=False)
@@ -125,6 +125,7 @@ def bgr_to_color565(b, g=0, r=0):
     return (r & 0xF8) << 8 | (g & 0xFC) << 3 | b >> 3
 
 def image_to_data(bgr_image):
+    bgr_image = bgr_image.astype('uint16')
     # data = numpy.array(image.convert("RGB")).astype("uint16")
     color = (
     ((bgr_image[:, :, 2] & 0xF8) << 8)

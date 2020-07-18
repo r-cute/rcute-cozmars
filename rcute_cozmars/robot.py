@@ -52,7 +52,7 @@ class AioRobot:
         self._head = head.Head(self)
         self._buzzer = buzzer.Buzzer(self)
         self._motor = motor.Motor(self)
-        self._eye_anim = animation.EyeAnimation()
+        self._eye_anim = animation.EyeAnimation(self)
 
     @util.mode()
     async def animate(name, *args, ignored=(), **kwargs):
@@ -61,7 +61,9 @@ class AioRobot:
         :param ignored: 不执行动作的元件
         :type ignored: tuple / list
         """
-        await self.animation.animations[name].animate(*args, self, ignored, **kwargs)
+        anim = self.animation.animations[name]
+        anim = anim.get('animate', anim)
+        await anim(*args, self, ignored, **kwargs)
 
     @property
     def animation_list(self):
@@ -128,7 +130,7 @@ class AioRobot:
         """连接 Cozmars"""
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self.host}/rpc')
-            self._stub = RPCClient(self._ws)
+            self._rpc = RPCClient(self._ws)
             self._ip = self._ip or await self._get('/ip')
             self._serial = self._serial or await self._get('/serial')
             self._server_version = await self._get('/version')
@@ -149,7 +151,7 @@ class AioRobot:
                 self._loop.run_in_executor(None, cb, *args)
 
     async def _get_sensor_data(self):
-        self._sensor_data_rpc = self._stub.sensor_data()
+        self._sensor_data_rpc = self._rpc.sensor_data()
         async for event, data in self._sensor_data_rpc:
             try:
                 if event == 'pressed':
@@ -202,7 +204,7 @@ class AioRobot:
         :param duration: 持续时间（秒）
         :type duration: float
         """
-        await self._stub.speed((1,1), duration)
+        await self._rpc.speed((1,1), duration)
 
     @util.mode(force_sync=False)
     async def backward(self, duration=None):
@@ -211,7 +213,7 @@ class AioRobot:
         :param duration: 持续时间（秒）
         :type duration: float
         """
-        await self._stub.speed((-1,-1), duration)
+        await self._rpc.speed((-1,-1), duration)
 
     @util.mode(force_sync=False)
     async def turn_left(self, duration=None):
@@ -220,7 +222,7 @@ class AioRobot:
         :param duration: 持续时间（秒）
         :type duration: float
         """
-        await self._stub.speed((-1,1), duration)
+        await self._rpc.speed((-1,1), duration)
 
     @util.mode(force_sync=False)
     async def turn_right(self, duration=None):
@@ -229,7 +231,7 @@ class AioRobot:
         :param duration: 持续时间（秒）
         :type duration: float
         """
-        await self._stub.speed((1,-1), duration)
+        await self._rpc.speed((1,-1), duration)
 
     @property
     def host(self):

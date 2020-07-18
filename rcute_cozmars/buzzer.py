@@ -36,7 +36,7 @@ class Buzzer(util.StreamComponent):
         """蜂鸣器当前的 `音调`
         """
         if args:
-            await self._set_tone(args[0])
+            await self.set_tone(args[0], aio_mode=True)
         else:
             return self._tone
 
@@ -50,9 +50,6 @@ class Buzzer(util.StreamComponent):
         :type duration: float
 
         """
-        return await self._set_tone(tone, duration)
-
-    async def _set_tone(self, tone, duration=None):
         if self.closed:
             t = self._encode(tone)
             await self._rpc.tone(t.frequency, duration)

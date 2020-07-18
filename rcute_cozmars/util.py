@@ -2,6 +2,7 @@ import functools
 import asyncio
 from concurrent import futures
 from wsmprpc import RPCStream
+import numpy as np
 
 '''
 class SyncRawStream:
@@ -46,7 +47,6 @@ class AsyncStream:
     def put_nowait(self, obj):
         return self._raw_stream.put_nowait(self._encode_fn(obj))
 '''
-
 def mode(force_sync=True, property_type=None):
     def func_deco(func):
 
@@ -56,12 +56,15 @@ def mode(force_sync=True, property_type=None):
                 raise ImportError('Cannot decorate connection.mode on non-coroutine function')
 
             self = args[0]
-            if self._mode == 'aio':
+            aio_mode = kwargs.get('aio_mode')
+            if aio_mode:
+                del kwargs['aio_mode']
+            if aio_mode or self._mode == 'aio':
                 return functools.partial(func, self) if property_type else func(*args, **kwargs)
 
             fut = asyncio.run_coroutine_threadsafe(func(*args, **kwargs), self._loop)
 
-            if self._mode == 'sync' or force_sync or property_type:
+            if force_sync or property_type or self._mode == 'sync':
                 try:
                     return fut.result(kwargs.pop('timeout', None))
                 except futures.TimeoutError:
@@ -92,7 +95,7 @@ class Component:
 
     @property
     def _rpc(self):
-        return self._robot._stub
+        return self._robot._rpc
 
 
 class StreamComponent(Component):
