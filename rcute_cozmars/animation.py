@@ -8,7 +8,7 @@ class EyeAnimation(util.Component):
     """屏幕上的眼睛动画"""
     def __init__(self, robot):
         util.Component.__init__(self, robot)
-        self._exp_list = ['auto', 'happy', 'sad', 'surprised', 'angry', 'neutral']
+        self._exp_list = ['auto', 'happy', 'sad', 'surprised', 'angry', 'neutral', 'focused', 'sleepy']
         self._canvas = np.zeros((134, 240, 3), np.uint8)
         self._size = 80
         self._radius = self._size // 4
@@ -37,15 +37,14 @@ class EyeAnimation(util.Component):
         cv2.rectangle(self._eye, (self._radius, 0), (sr, self._size-1), color, -1)
         cv2.rectangle(self._eye, (0, self._radius), (self._size-1, sr), color, -1)
 
-
     @property
     def expression_list(self):
-        """支持的表情列表， `['auto', 'happy', 'sad', 'surprised', 'angry', 'neutral']` ，只读"""
+        """支持的表情列表， `['auto', 'happy', 'sad', 'surprised', 'angry', 'neutral', 'focused', 'sleepy']` ，只读"""
         return list(self._exp_list)
 
     @util.mode(property_type='setter')
     async def expression(self, *args):
-        """表情，默认为 `'auto'` """
+        """表情，默认为 `'auto'`，在所有的表情间随机切换"""
         if args:
             ex = args[0].split('.')
             assert ex[0] in self._exp_list and ex[-1] in self._exp_list, f'Expression must be one of {self.expression_list}'
@@ -57,14 +56,16 @@ class EyeAnimation(util.Component):
     @util.mode()
     async def hide(self):
         """隐藏"""
-        self._exp_q.full() and self._exp_q.get_nowait()
-        self._exp_q.put_nowait('hidden')
+        if self._expression != 'hidden':
+            self._exp_q.full() and self._exp_q.get_nowait()
+            self._exp_q.put_nowait('hidden')
 
     @util.mode()
     async def show(self, exp=None):
         """显示"""
-        self._exp_q.full() and self._exp_q.get_nowait()
-        self._exp_q.put_nowait(exp or 'auto')
+        if self._expression == 'hidden':
+            self._exp_q.full() and self._exp_q.get_nowait()
+            self._exp_q.put_nowait(exp or 'auto')
 
     # very urgly coded eye animation
     async def animate(self, robot, ignored):
@@ -110,7 +111,7 @@ class EyeAnimation(util.Component):
                     yt = self._size//4*(y//9)
                     self._canvas[y0+yt: y0+self._size, x0: x0+self._size] = self._eye[yt:]
                     self._canvas[y1-self._size+yt: y1, x1-self._size: x1] = self._eye[yt:]
-                    y0 = yt + y0
+                    y0 += yt
 
                 else:
                     self._canvas[y0: y0+self._size, x0: x0+self._size] = self._eye
@@ -121,6 +122,17 @@ class EyeAnimation(util.Component):
 
             elif self._expression == 'auto.auto':
                 self._expression = 'auto'
+
+            elif 'sleepy' in self._expression:
+                self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
+                x, y = random.randint(-1, 1)*10, random.randint(2, 3)*9
+                x0, y0, x1, y1 = X0+ x, Y0+ y, X1+ x, Y1+ y
+                yt = self._size//4*(y//9)
+                self._canvas[y0+yt: y0+self._size, x0: x0+self._size] = self._eye[yt:]
+                self._canvas[y1-self._size+yt: y1, x1-self._size: x1] = self._eye[yt:]
+                y0 += yt
+                if 'auto.' in self._expression and random.random() >.8:
+                        self._expression = 'auto'
 
             elif 'happy' in self._expression:
                 self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
@@ -161,6 +173,18 @@ class EyeAnimation(util.Component):
                 cv2.fillConvexPoly(self._canvas[y1-self._size+yt: y1, x1-self._size: x1], np.array([(0,0), (self._size,0), (0,self._size//4)]), (0,0,0))
                 y0 = y0 + yt
                 if 'auto.' in self._expression and random.random() >.75:
+                    self._expression = 'auto'
+
+            elif 'focused' in self._expression:
+                self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
+                x, y = random.randint(-3, 3)*10, random.randint(-2, 2)*9
+                x0, y0, x1, y1 = X0+ x, Y0+ y, X1+ x, Y1+ y
+                l_resize, r_resize = round(random.random()*.1+.4, 1), round(random.random()*.1+.4, 1)
+                self._canvas[round(y0+self._size*(1-l_resize)//2): round(y1-self._size*(1-l_resize)//2), x0: x0+self._size] = cv2.resize(self._eye, (self._size, round(self._size*l_resize)))
+                self._canvas[round(y0+self._size*(1-r_resize)//2): round(y1-self._size*(1-r_resize)//2), x1-self._size: x1] = cv2.resize(self._eye, (self._size, round(self._size*r_resize)))
+                y0 += round(self._size*(1-max(r_resize, l_resize))//2)
+                y1 -= round(self._size*(1-max(r_resize, l_resize))//2)
+                if 'auto.' in self._expression and random.random() >.65:
                     self._expression = 'auto'
 
             elif 'surprised' in self._expression:

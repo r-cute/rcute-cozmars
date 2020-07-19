@@ -64,10 +64,10 @@ class Buzzer(util.StreamComponent):
         await self._rpc.tone(None, None)
         self._tone = None
 
-    async def _play_one_tone(tone, delay, duty_cycle):
+    async def _play_one_tone(self, tone, delay, duty_cycle):
         if isinstance(tone, tuple):
             for t in tone:
-                self._play_one_tone(t, delay/2, duty_cycle)
+                await self._play_one_tone(t, delay/2, duty_cycle)
         else:
             await self._input_stream.put(self._encode(tone))
             await asyncio.sleep(delay* duty_cycle)
@@ -76,12 +76,12 @@ class Buzzer(util.StreamComponent):
                 await asyncio.sleep(delay* (1-duty_cycle))
 
     @util.mode(force_sync=False)
-    async def play(self, song, tempo=60, duty_cycle=.9):
+    async def play(self, song, tempo=120, duty_cycle=.9):
         """播放一段音乐
 
         :param song: 要播放的音乐
         :type song: collections.Iterable
-        :param tempo: 播放速度，BPM，默认是 `60` 拍/分钟
+        :param tempo: 播放速度，BPM，默认是 `120` 拍/分钟
         :type tempo: int
         :param duty_cycle: 占空比，即音节播放时间与整个音节的时间的比值，0~1，默认是 `0.9`
         :type duty_cycle: float
@@ -97,7 +97,7 @@ class Buzzer(util.StreamComponent):
         delay = 60 / tempo
         async with self:
             for tone in song:
-                self._play_one_tone(tone, delay, duty_cycle)
+                await self._play_one_tone(tone, delay, duty_cycle)
             await self._input_stream.put(None)
 
     '''
