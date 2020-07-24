@@ -26,9 +26,11 @@ class Screen(util.Component):
 
     @util.mode(property_type='setter')
     async def brightness(self, *args):
-        """显示屏亮度，0~1，默认是 `0.1`
+        """显示屏亮度，0~1，默认是 `0.05`
         """
-        return await self._rpc.backlight(*args)
+        b = await self._rpc.backlight(*args)
+        if not args:
+            return round(b, 2)
 
     @util.mode(force_sync=False)
     async def set_brightness(self, brightness, *, fade_duration=None, fade_speed=None):

@@ -19,7 +19,7 @@ class Sonar(util.Component):
         """探测到前方障碍物的距离（米）
 
         当距离超过 :data:`max_distance` 时只能也只显示 :data:`max_distance` """
-        return await self._rpc.distance()
+        return round(await self._rpc.distance(), 2)
 
     @util.mode(property_type='setter')
     async def max_distance(self, *args):

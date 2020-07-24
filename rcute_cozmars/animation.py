@@ -73,119 +73,85 @@ class EyeAnimation(util.Component):
         self._create_eye()
         self._expression = 'auto'
         self._exp_q = asyncio.Queue(1)
-        h, w = self._canvas.shape[:2]
-        ox, oy = 0, 0
-        ox0, oy0, ox1, oy1 = w//2 - self._gap//2 - self._size, (h-self._size)//2, w//2 + self._size + self._gap//2, (h+self._size)//2
-        X0, Y0, X1, Y1 = ox0, oy0, ox1, oy1
+        H, W = self._canvas.shape[:2]
+        LX, RX, Y = (W-self._gap-self._size)//2, (W+self._size+self._gap)//2, H//2
+        olpos, orpos = (LX, Y), (RX, Y)
+        ox0, oy0, ox1, oy1 = LX-self._size//2, Y-self._size//2, RX+self._size//2-1, Y+self._size//2-1
 
         while True:
-            duration = random.random() * 5
+            duration = random.random() *4 + 1
             blink = False
             lresize = rresize = (self._size, self._size)
             rlbrow = llbrow = 0
             ltbrow = rtbrow = (0, 0)
-
             if self._expression == 'auto' or 'neutral' in self._expression:
                 x, y = random.randint(-3, 3)*10, random.randint(-3, 3)*9
+                lpos, rpos = (LX+x, Y), (RX+x, Y)
 
                 # looking up -> may blink
-                if oy >= y and random.random() >.2:
-                    await blink()
+                blink = rpos[1] >= y and random.random() >.2
 
-                self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
-                x0, y0, x1, y1 = X0+ x, Y0+ y, X1+ x, Y1+ y
-
+                # looking aside -> different size
                 resize = round(random.random(), 1)
                 if resize > .65 and y < 10:
-                    resized_eye = cv2.resize(self._eye, (self._size, round(self._size*resize)))
+                    resize = round(self._size* resize)
                     if x > 0:
-                        self._canvas[round(y0+self._size*(.5-resize/2)): round(y0+self._size*(resize/2+.5)), x0: x0+self._size] = resized_eye
-                        self._canvas[y1-self._size: y1, x1-self._size: x1] = self._eye
+                        lresize = self._size, resize
                     elif x< 0:
-                        self._canvas[y0: y0+self._size, x0: x0+self._size] = self._eye
-                        self._canvas[round(y1-self._size*(.5+resize/2)): round(y1+self._size*(resize/2-.5)), x1-self._size: x1] = resized_eye
-                    else:
-                        self._canvas[y0: y0+self._size, x0: x0+self._size] = self._eye
-                        self._canvas[y1-self._size: y1, x1-self._size: x1] = self._eye
+                        rresize = self._size, resize
 
                 # looking down -> eyelids half closed
                 elif y > 10 or y > 0 and random.random()>.5:
-                    yt = self._size//4*(y//9)
-                    self._canvas[y0+yt: y0+self._size, x0: x0+self._size] = self._eye[yt:]
-                    self._canvas[y1-self._size+yt: y1, x1-self._size: x1] = self._eye[yt:]
-                    y0 += yt
-
-                else:
-                    self._canvas[y0: y0+self._size, x0: x0+self._size] = self._eye
-                    self._canvas[y1-self._size: y1, x1-self._size: x1] = self._eye
+                    ltbrow = rtbrow = self._size//4*(y//9), 0
 
                 if random.random() > .75:
                     self._expression = f'auto.{random.choice(self._exp_list)}'
 
             elif self._expression == 'auto.auto':
-                duration /= 2
                 self._expression = 'auto'
 
             elif 'sleepy' in self._expression:
-                self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
                 x, y = random.randint(-1, 1)*10, random.randint(2, 3)*9
-                x0, y0, x1, y1 = X0+ x, Y0+ y, X1+ x, Y1+ y
-                yt = self._size//4*(y//9)
-                self._canvas[y0+yt: y0+self._size, x0: x0+self._size] = self._eye[yt:]
-                self._canvas[y1-self._size+yt: y1, x1-self._size: x1] = self._eye[yt:]
-                y0 += yt
+                lpos, rpos = (LX+x, Y), (RX+x, Y)
+                ltbrow = rtbrow = (self._size//4*(y//9), 0)
+                duration = random.random() * 3 + 2
                 if 'auto.' in self._expression and random.random() >.8:
                         self._expression = 'auto'
 
             elif 'happy' in self._expression:
-                self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
                 x, y = random.randint(-3, 3)*5, random.randint(-3, -2)*9
-                yt = (self._size//4)*random.randint(1,2)
-                x0, y0, x1 = X0+ x, Y0+ y, X1+ x
-                y1 = y0 + yt
-                self._canvas[y0: y1, x0: x0+self._size] = self._eye[:yt]
-                self._canvas[y0: y1, x1-self._size: x1] = self._eye[:yt]
+                lpos, rpos = (LX+x, Y), (RX+x, Y)
+                llbrow = rlbrow = (self._size//4)*random.randint(1,2)
                 if 'auto.' in self._expression and random.random() >.6:
                     self._expression = 'auto'
 
             elif 'sad' in self._expression:
-                if random.random()>.5 and oy <= 9:
-                    await blink()
-                self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
+                blink = random.random()>.5 and orpos[1] <= 9
                 x, y = random.randint(-3, 3)*10, random.randint(0, 2)*9
-                x0, y0, x1, y1 = X0+ x, Y0+ y, X1+ x, Y1+ y
-                yt = self._size//4*(y//9)
-                self._canvas[y0+yt: y0+self._size, x0: x0+self._size] = self._eye[yt:]
-                self._canvas[y1-self._size+yt: y1, x1-self._size: x1] = self._eye[yt:]
-                cv2.fillConvexPoly(self._canvas[y0+yt: y0+self._size, x0: x0+self._size], np.array([(0,0), (self._size,0), (0,self._size//4)]), (0,0,0))
-                cv2.fillConvexPoly(self._canvas[y1-self._size+yt: y1, x1-self._size: x1], np.array([(0,0), (self._size,0), (self._size,self._size//4)]), (0,0,0))
-                y0 = y0 + yt
+                lpos, rpos = (LX+x, Y), (RX+x, Y)
+                ltbrow = rtbrow = (self._size//4*(y//9), -self._size//4)
                 if 'auto.' in self._expression and random.random() >.5:
                     self._expression = 'auto'
 
             elif 'angry' in self._expression:
-                blink = random.random()>.5 and oy <= -9
+                blink = random.random()>.5 and orpos[1] <= -9
                 x, y = random.randint(-3, 3)*10, random.randint(-2, 0)*9
-                yt =
+                lpos, rpos = (LX+x, Y), (RX+x, Y)
                 ltbrow = rtbrow = (self._size//4*(y//-9), self._size//4)
                 if 'auto.' in self._expression and random.random() >.75:
                     self._expression = 'auto'
 
             elif 'focused' in self._expression:
-                self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
                 x, y = random.randint(-3, 3)*10, random.randint(-2, 2)*9
-                x0, y0, x1, y1 = X0+ x, Y0+ y, X1+ x, Y1+ y
-                l_resize, r_resize = round(random.random()*.1+.4, 1), round(random.random()*.1+.4, 1)
-                self._canvas[round(y0+self._size*(1-l_resize)//2): round(y1-self._size*(1-l_resize)//2), x0: x0+self._size] = cv2.resize(self._eye, (self._size, round(self._size*l_resize)))
-                self._canvas[round(y0+self._size*(1-r_resize)//2): round(y1-self._size*(1-r_resize)//2), x1-self._size: x1] = cv2.resize(self._eye, (self._size, round(self._size*r_resize)))
-                y0 += round(self._size*(1-max(r_resize, l_resize))//2)
-                y1 -= round(self._size*(1-max(r_resize, l_resize))//2)
+                lpos, rpos = (LX+x, Y), (RX+x, Y)
+                lresize, rresize = (self._size, round(round(random.random()*.1+.4, 1)*self._size)), (self._size, round(round(random.random()*.1+.4, 1)*self._size))
                 if 'auto.' in self._expression and random.random() >.65:
                     self._expression = 'auto'
 
             elif 'surprised' in self._expression:
                 blink = random.random()>.5
                 x, y = random.randint(-2, 2)*10, random.randint(-2, 1)*8
+                lpos, rpos = (LX+x, Y), (RX+x, Y)
                 enlarged = round(self._size * 1.22)
                 lresize = rresize = (enlarged, enlarged)
                 if 'auto.' in self._expression and random.random() >.3:
@@ -199,25 +165,25 @@ class EyeAnimation(util.Component):
 
             self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
 
-            ly0, ly1 = lpos[1]-rh+ltbrow[0], lpos[1]+rh-llbrow
-            rw, rh = lresize[0]//2, lresize[1]//2
+            ly0, ly1, lx0, lx1 = lpos[1]-lresize[1]//2+ltbrow[0], lpos[1]+lresize[1]//2-llbrow, lpos[0]-lresize[0]//2, lpos[0]+lresize[0]//2
             e = self._eye if lresize==(self._size, self._size) else cv2.resize(self._eye, lresize)
-            self._canvas[ly0: ly1, x-rw: x+rw] = e[ltbrow[0]: llbrow]
+            self._canvas[ly0: ly1, lx0: lx1] = e[ltbrow[0]: lresize[1]-llbrow]
             if ltbrow[1] != 0:
-                cv2.fillConvexPoly(self._canvas[y-rh+ltbrow[0]: y+rh-llbrow, x-rw: x+rw], np.array([(0,0), (lresize[0], 0), (lresize[0] if ltbrow[1]>0 else 0, ltbrow[1])]), (0, 0, 0))
-            x, y = rpos
-            rw, rh = rresize[0]//2, rresize[1]//2
-            e = self._eye if rresize==(self._size, self._size) else cv2.resize(self._eye, rresize)
-            self._canvas[y-rh+rtbrow[0]: y+rh-rlbrow, x-rw: x+rw] = e[rtbrow[0]: rlbrow]
-            if ltbrow[1] != 0:
-                cv2.fillConvexPoly(self._canvas[y-rh+rtbrow[0]: y+rh-rlbrow, x-rw: x+rw], np.array([(0,0), (lresize[0], 0), (lresize[0] if ltbrow[1]<0 else 0, ltbrow[1])]), (0, 0, 0))
+                cv2.fillConvexPoly(self._canvas[ly0: ly1, lx0: lx1], np.array([(0,0), (lresize[0], 0), (lresize[0] if ltbrow[1]>0 else 0, ltbrow[1])]), (0, 0, 0))
 
-            x0, x1, y0, y1 = lpos[0], rpos[0], min(lpos[1], rpos[1]), max(lpos[1], rpos[1])
-            bx, by, bw, bh = cv2.boundingRect(np.array([(x0, y0), (x1, y1), (ox0, oy0), (ox1, oy1)]))
+            ry0, ry1, rx0, rx1 = rpos[1]-rresize[1]//2+rtbrow[0], rpos[1]+rresize[1]//2-rlbrow, rpos[0]-rresize[0]//2, rpos[0]+rresize[0]//2
+            e = self._eye if rresize==(self._size, self._size) else cv2.resize(self._eye, rresize)
+            self._canvas[ry0: ry1, rx0: rx1] = e[rtbrow[0]: rresize[1]-rlbrow]
+            if ltbrow[1] != 0:
+                cv2.fillConvexPoly(self._canvas[ry0: ry1, rx0: rx1], np.array([(0,0), (lresize[0], 0), (lresize[0] if ltbrow[1]<0 else 0, ltbrow[1])]), (0, 0, 0))
+
+            x0, y0, w, h = cv2.boundingRect(np.array([(lx0, ly0), (lx1, ly1), (rx0, ry0), (rx1, ry1)]))
+            x1, y1 = x0+w, y0+h
+            bx, by, bw, bh = cv2.boundingRect(np.array([(x0, y0), (x1-1, y1-1), (ox0, oy0), (ox1, oy1)]))
             await robot.screen.display(self._canvas[by:by+bh, bx:bx+bw], bx, by, aio_mode=True)
 
             ox0, oy0, ox1, oy1 = x0, y0, x1, y1
-            ox, oy = x, y
+            olpos, orpos = lpos, rpos
 
             try:
                 self._expression = await asyncio.wait_for(self._exp_q.get(), timeout=duration)
