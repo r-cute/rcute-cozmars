@@ -69,12 +69,7 @@ class EyeAnimation(util.Component):
 
     # very urgly coded eye animation
     async def animate(self, robot, ignored):
-        async def blink():
-            nonlocal oy1, oy0, ox0, ox1
-            yt = oy1-(oy1-oy0)//3
-            self._canvas[oy0: yt, ox0: ox1] = (0, 0, 0)
-            await robot.screen.display(self._canvas[oy0: yt, ox0: ox1], ox0, oy0, aio_mode=True)
-            oy0 = yt
+
         self._create_eye()
         self._expression = 'auto'
         self._exp_q = asyncio.Queue(1)
@@ -82,7 +77,14 @@ class EyeAnimation(util.Component):
         ox, oy = 0, 0
         ox0, oy0, ox1, oy1 = w//2 - self._gap//2 - self._size, (h-self._size)//2, w//2 + self._size + self._gap//2, (h+self._size)//2
         X0, Y0, X1, Y1 = ox0, oy0, ox1, oy1
+
         while True:
+            duration = random.random() * 5
+            blink = False
+            lresize = rresize = (self._size, self._size)
+            rlbrow = llbrow = 0
+            ltbrow = rtbrow = (0, 0)
+
             if self._expression == 'auto' or 'neutral' in self._expression:
                 x, y = random.randint(-3, 3)*10, random.randint(-3, 3)*9
 
@@ -121,6 +123,7 @@ class EyeAnimation(util.Component):
                     self._expression = f'auto.{random.choice(self._exp_list)}'
 
             elif self._expression == 'auto.auto':
+                duration /= 2
                 self._expression = 'auto'
 
             elif 'sleepy' in self._expression:
@@ -161,17 +164,10 @@ class EyeAnimation(util.Component):
                     self._expression = 'auto'
 
             elif 'angry' in self._expression:
-                if random.random()>.5 and oy <= -9:
-                    await blink()
-                self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
+                blink = random.random()>.5 and oy <= -9
                 x, y = random.randint(-3, 3)*10, random.randint(-2, 0)*9
-                x0, y0, x1, y1 = X0+ x, Y0+ y, X1+ x, Y1+ y
-                yt = self._size//4*(y//-9)
-                self._canvas[y0+yt: y0+self._size, x0: x0+self._size] = self._eye[yt:]
-                self._canvas[y1-self._size+yt: y1, x1-self._size: x1] = self._eye[yt:]
-                cv2.fillConvexPoly(self._canvas[y0+yt: y0+self._size, x0: x0+self._size], np.array([(0,0), (self._size,0), (self._size,self._size//4)]), (0,0,0))
-                cv2.fillConvexPoly(self._canvas[y1-self._size+yt: y1, x1-self._size: x1], np.array([(0,0), (self._size,0), (0,self._size//4)]), (0,0,0))
-                y0 = y0 + yt
+                yt =
+                ltbrow = rtbrow = (self._size//4*(y//-9), self._size//4)
                 if 'auto.' in self._expression and random.random() >.75:
                     self._expression = 'auto'
 
@@ -188,18 +184,35 @@ class EyeAnimation(util.Component):
                     self._expression = 'auto'
 
             elif 'surprised' in self._expression:
-                if random.random()> .5:
-                    await blink()
-                self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
+                blink = random.random()>.5
                 x, y = random.randint(-2, 2)*10, random.randint(-2, 1)*8
-                enlarged = round(self._size*.22)
-                large_eye = cv2.resize(self._eye, (enlarged+self._size, enlarged+self._size))
-                x0, y0, x1, y1 = X0-enlarged//2+ x, Y0-enlarged//2+ y, X1+enlarged//2+ x, Y1+enlarged//2+ y
-                self._canvas[y0: y1, x0: x0+self._size+enlarged] = large_eye
-                self._canvas[y0: y1, x1-self._size-enlarged: x1] = large_eye
+                enlarged = round(self._size * 1.22)
+                lresize = rresize = (enlarged, enlarged)
                 if 'auto.' in self._expression and random.random() >.3:
                     self._expression = 'auto'
 
+            if blink:
+                yt = oy1-(oy1-oy0)//3
+                self._canvas[oy0: yt, ox0: ox1] = (0, 0, 0)
+                await robot.screen.display(self._canvas[oy0: yt, ox0: ox1], ox0, oy0, aio_mode=True)
+                oy0 = yt
+
+            self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
+
+            ly0, ly1 = lpos[1]-rh+ltbrow[0], lpos[1]+rh-llbrow
+            rw, rh = lresize[0]//2, lresize[1]//2
+            e = self._eye if lresize==(self._size, self._size) else cv2.resize(self._eye, lresize)
+            self._canvas[ly0: ly1, x-rw: x+rw] = e[ltbrow[0]: llbrow]
+            if ltbrow[1] != 0:
+                cv2.fillConvexPoly(self._canvas[y-rh+ltbrow[0]: y+rh-llbrow, x-rw: x+rw], np.array([(0,0), (lresize[0], 0), (lresize[0] if ltbrow[1]>0 else 0, ltbrow[1])]), (0, 0, 0))
+            x, y = rpos
+            rw, rh = rresize[0]//2, rresize[1]//2
+            e = self._eye if rresize==(self._size, self._size) else cv2.resize(self._eye, rresize)
+            self._canvas[y-rh+rtbrow[0]: y+rh-rlbrow, x-rw: x+rw] = e[rtbrow[0]: rlbrow]
+            if ltbrow[1] != 0:
+                cv2.fillConvexPoly(self._canvas[y-rh+rtbrow[0]: y+rh-rlbrow, x-rw: x+rw], np.array([(0,0), (lresize[0], 0), (lresize[0] if ltbrow[1]<0 else 0, ltbrow[1])]), (0, 0, 0))
+
+            x0, x1, y0, y1 = lpos[0], rpos[0], min(lpos[1], rpos[1]), max(lpos[1], rpos[1])
             bx, by, bw, bh = cv2.boundingRect(np.array([(x0, y0), (x1, y1), (ox0, oy0), (ox1, oy1)]))
             await robot.screen.display(self._canvas[by:by+bh, bx:bx+bw], bx, by, aio_mode=True)
 
@@ -207,7 +220,7 @@ class EyeAnimation(util.Component):
             ox, oy = x, y
 
             try:
-                self._expression = await asyncio.wait_for(self._exp_q.get(), timeout=random.random()*5)
+                self._expression = await asyncio.wait_for(self._exp_q.get(), timeout=duration)
                 if self._expression == 'hidden':
                     await robot.screen.fill((0,0,0), aio_mode=True)
                     while True:
@@ -220,5 +233,3 @@ class EyeAnimation(util.Component):
 
 animations = {
 }
-
-
