@@ -86,7 +86,7 @@ class EyeAnimation(util.Component):
                 lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
 
                 # looking up -> may blink
-                blink = random.random() >.2 and (oy1-oy0) >=40:
+                blink = random.random() >.2 and (oy1-oy0) >=40
 
                 # looking aside -> different size
                 resize = round(random.random(), 1)
@@ -133,7 +133,7 @@ class EyeAnimation(util.Component):
                     self._expression = 'auto'
 
             elif 'angry' in self._expression:
-                blink = random.random()>.5 and (oy1-oy0) >=40:
+                blink = random.random()>.5 and (oy1-oy0) >=40
                 x, y = random.randint(-3, 3)*10, random.randint(-2, 0)*9
                 lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
                 ltbrow = rtbrow = (self._size//4*(y//-9), self._size//4)
@@ -148,7 +148,7 @@ class EyeAnimation(util.Component):
                     self._expression = 'auto'
 
             elif 'surprised' in self._expression:
-                blink = random.random()>.5 and (oy1-oy0) >=40:
+                blink = random.random()>.5 and (oy1-oy0) >=40
                 x, y = random.randint(-2, 2)*10, random.randint(-2, 1)*8
                 lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
                 enlarged = round(self._size * 1.22)
