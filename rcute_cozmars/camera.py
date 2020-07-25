@@ -46,6 +46,7 @@ class Camera(util.OutputStreamComponent):
         w, h = self.resolution
         return self._rpc.camera(w, h, self.framerate, q_size=self._q_size)
 
+    '''
     @util.mode()
     async def capture(self, options):
         """拍照
@@ -59,6 +60,7 @@ class Camera(util.OutputStreamComponent):
             return await self._rpc.capture(options)
         else:
             raise RuntimeError('Cannot take a photo while camera is streaming video')
+    '''
 
     '''
     @property

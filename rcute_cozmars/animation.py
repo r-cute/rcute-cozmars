@@ -63,9 +63,8 @@ class EyeAnimation(util.Component):
     @util.mode()
     async def show(self, exp=None):
         """显示"""
-        if self._expression == 'hidden':
-            self._exp_q.full() and self._exp_q.get_nowait()
-            self._exp_q.put_nowait(exp or 'auto')
+        self._exp_q.full() and self._exp_q.get_nowait()
+        self._exp_q.put_nowait(exp or 'auto')
 
     # very urgly coded eye animation
     async def animate(self, robot, ignored):
@@ -168,14 +167,14 @@ class EyeAnimation(util.Component):
             ly0, ly1, lx0, lx1 = lpos[1]-lresize[1]//2+ltbrow[0], lpos[1]+lresize[1]//2-llbrow, lpos[0]-lresize[0]//2, lpos[0]+lresize[0]//2
             e = self._eye if lresize==(self._size, self._size) else cv2.resize(self._eye, lresize)
             self._canvas[ly0: ly1, lx0: lx1] = e[ltbrow[0]: lresize[1]-llbrow]
-            if ltbrow[1] != 0:
-                cv2.fillConvexPoly(self._canvas[ly0: ly1, lx0: lx1], np.array([(0,0), (lresize[0], 0), (lresize[0] if ltbrow[1]>0 else 0, ltbrow[1])]), (0, 0, 0))
+            if ltbrow[1]:
+                cv2.fillConvexPoly(self._canvas[ly0: ly1, lx0: lx1], np.array([(0,0), (lresize[0], 0), (lresize[0], ltbrow[1]) if ltbrow[1]>0 else (0, -ltbrow[1])]), (0, 0, 0))
 
             ry0, ry1, rx0, rx1 = rpos[1]-rresize[1]//2+rtbrow[0], rpos[1]+rresize[1]//2-rlbrow, rpos[0]-rresize[0]//2, rpos[0]+rresize[0]//2
             e = self._eye if rresize==(self._size, self._size) else cv2.resize(self._eye, rresize)
             self._canvas[ry0: ry1, rx0: rx1] = e[rtbrow[0]: rresize[1]-rlbrow]
-            if ltbrow[1] != 0:
-                cv2.fillConvexPoly(self._canvas[ry0: ry1, rx0: rx1], np.array([(0,0), (lresize[0], 0), (lresize[0] if ltbrow[1]<0 else 0, ltbrow[1])]), (0, 0, 0))
+            if ltbrow[1]:
+                cv2.fillConvexPoly(self._canvas[ry0: ry1, rx0: rx1], np.array([(0,0), (rresize[0], 0), (0, rtbrow[1]) if ltbrow[1]>0 else (rresize[0], -ltbrow[1])]), (0, 0, 0))
 
             x0, y0, w, h = cv2.boundingRect(np.array([(lx0, ly0), (lx1, ly1), (rx0, ry0), (rx1, ry1)]))
             x1, y1 = x0+w, y0+h
@@ -192,6 +191,10 @@ class EyeAnimation(util.Component):
                     while True:
                         self._expression = await self._exp_q.get()
                         if self._expression != 'hidden':
+                            break
+                elif self._expression == 'stop':
+                    while True:
+                        if self._expression != 'stop':
                             break
             except asyncio.TimeoutError:
                 pass
