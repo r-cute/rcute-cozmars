@@ -46,8 +46,6 @@ class EyeAnimation(util.Component):
     async def expression(self, *args):
         """表情，默认为 `'auto'`，在所有的表情间随机切换"""
         if args:
-            ex = args[0].split('.')
-            assert ex[0] in self._exp_list and ex[-1] in self._exp_list, f'Expression must be one of {self.expression_list}'
             self._exp_q.full() and self._exp_q.get_nowait()
             self._exp_q.put_nowait(args[0])
         else:
@@ -85,10 +83,10 @@ class EyeAnimation(util.Component):
             ltbrow = rtbrow = (0, 0)
             if self._expression == 'auto' or 'neutral' in self._expression:
                 x, y = random.randint(-3, 3)*10, random.randint(-3, 3)*9
-                lpos, rpos = (LX+x, Y), (RX+x, Y)
+                lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
 
                 # looking up -> may blink
-                blink = rpos[1] >= y and random.random() >.2
+                blink = random.random() >.2 and (oy1-oy0) >=40:
 
                 # looking aside -> different size
                 resize = round(random.random(), 1)
@@ -103,15 +101,17 @@ class EyeAnimation(util.Component):
                 elif y > 10 or y > 0 and random.random()>.5:
                     ltbrow = rtbrow = self._size//4*(y//9), 0
 
-                if random.random() > .75:
+                if self._expression == 'auto' and random.random() > .75:
                     self._expression = f'auto.{random.choice(self._exp_list)}'
 
             elif self._expression == 'auto.auto':
+                await asyncio.sleep(duration/2)
                 self._expression = 'auto'
+                continue
 
             elif 'sleepy' in self._expression:
                 x, y = random.randint(-1, 1)*10, random.randint(2, 3)*9
-                lpos, rpos = (LX+x, Y), (RX+x, Y)
+                lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
                 ltbrow = rtbrow = (self._size//4*(y//9), 0)
                 duration = random.random() * 3 + 2
                 if 'auto.' in self._expression and random.random() >.8:
@@ -119,38 +119,38 @@ class EyeAnimation(util.Component):
 
             elif 'happy' in self._expression:
                 x, y = random.randint(-3, 3)*5, random.randint(-3, -2)*9
-                lpos, rpos = (LX+x, Y), (RX+x, Y)
+                lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
                 llbrow = rlbrow = (self._size//4)*random.randint(1,2)
                 if 'auto.' in self._expression and random.random() >.6:
                     self._expression = 'auto'
 
             elif 'sad' in self._expression:
-                blink = random.random()>.5 and orpos[1] <= 9
+                blink = random.random()>.5 and (oy1-oy0) >=40
                 x, y = random.randint(-3, 3)*10, random.randint(0, 2)*9
-                lpos, rpos = (LX+x, Y), (RX+x, Y)
+                lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
                 ltbrow = rtbrow = (self._size//4*(y//9), -self._size//4)
                 if 'auto.' in self._expression and random.random() >.5:
                     self._expression = 'auto'
 
             elif 'angry' in self._expression:
-                blink = random.random()>.5 and orpos[1] <= -9
+                blink = random.random()>.5 and (oy1-oy0) >=40:
                 x, y = random.randint(-3, 3)*10, random.randint(-2, 0)*9
-                lpos, rpos = (LX+x, Y), (RX+x, Y)
+                lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
                 ltbrow = rtbrow = (self._size//4*(y//-9), self._size//4)
                 if 'auto.' in self._expression and random.random() >.75:
                     self._expression = 'auto'
 
             elif 'focused' in self._expression:
                 x, y = random.randint(-3, 3)*10, random.randint(-2, 2)*9
-                lpos, rpos = (LX+x, Y), (RX+x, Y)
+                lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
                 lresize, rresize = (self._size, round(round(random.random()*.1+.4, 1)*self._size)), (self._size, round(round(random.random()*.1+.4, 1)*self._size))
                 if 'auto.' in self._expression and random.random() >.65:
                     self._expression = 'auto'
 
             elif 'surprised' in self._expression:
-                blink = random.random()>.5
+                blink = random.random()>.5 and (oy1-oy0) >=40:
                 x, y = random.randint(-2, 2)*10, random.randint(-2, 1)*8
-                lpos, rpos = (LX+x, Y), (RX+x, Y)
+                lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
                 enlarged = round(self._size * 1.22)
                 lresize = rresize = (enlarged, enlarged)
                 if 'auto.' in self._expression and random.random() >.3:
@@ -192,9 +192,9 @@ class EyeAnimation(util.Component):
                         self._expression = await self._exp_q.get()
                         if self._expression != 'hidden':
                             break
-                elif self._expression == 'stop':
+                elif self._expression == 'stopped':
                     while True:
-                        if self._expression != 'stop':
+                        if self._expression != 'stopped':
                             break
             except asyncio.TimeoutError:
                 pass
