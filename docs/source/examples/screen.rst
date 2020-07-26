@@ -1,7 +1,7 @@
 心灵之窗——显示屏
 =====================
 
-眼睛是心灵的窗户。Cozmars 大眼睛眨呀眨，把它的心情都写在 240x135 像素的显示屏上
+眼睛是心灵的窗户。Cozmars 用它的卡姿兰大眼睛把心情都写在了 240x135 像素的显示屏上
 
 眼睛和表情
 -------------
@@ -18,11 +18,11 @@
 
     with Robot('192.168.1.102') as robot:
 
-        time.sleep(3)
+        sleep(3)
         robot.eyes.expression = 'angry'
         robot.eyes.color = (0, 0, 255)
 
-        time.sleep(3)
+        sleep(3)
         robot.eyes.expression = 'happy'
         robot.eyes.color = (255, 0, 0)
 
@@ -33,7 +33,7 @@
 显示屏
 ---------
 
-:class:`Robot` 还有一个 :data:`screen` 属性用来直接控制显示屏
+:class:`Robot` 还有一个 :data:`screen` 属性用来直接控制显示屏，用它的 :meth:`display` 方法来显示图片
 
 :data:`screen` 的 :data:`brightness` 属性可以用来设置显示屏的亮度，`1` 表示最亮，`0` 表示全暗，默认是 `0.1` ；也可以通过 :meth:`set_brightness` 方法的 :data:`fade_duration` 或 :data:`fade_speed` 参数来控制亮度的渐变速度
 
@@ -49,8 +49,10 @@
         # 先让眼睛隐藏起来
         robot.eyes.hide()
 
-        # 在显示屏上展示一幅 ❤ 的图片
-        heart = cv2.imread('./heart.jpg')
+        # 读取一幅 ❤ 的图片
+        heart = cv2.imread('./heart.png')
+
+        # 在显示屏显示图片
         robot.screen.display(heart)
 
         # 然后让显示屏的亮度不断变化
@@ -61,9 +63,9 @@
         # 如果要让眼睛重新出现:
         # robot.eyes.show()
 
-以下图片是程序用到的 heart.jpg ，你可以右键把它另存到本地
+以下图片是程序中用到的 heart.png ，你可以右键把它另存到本地
 
-.. image:: ./h.gif
+.. image:: ./heart.png
 
 .. seealso::
 

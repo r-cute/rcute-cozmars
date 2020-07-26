@@ -260,12 +260,20 @@ class AioRobot:
     @util.mode()
     async def poweroff(self):
         """关闭 Cozmars"""
-        await self._get('/poweroff')
+        await AioRobot.disconnect(self)
+        try:
+            await self._get('/poweroff')
+        except Exception as e:
+            pass
 
     @util.mode()
     async def reboot(self):
         """重启 Cozmars"""
-        await self._get('/reboot')
+        await AioRobot.disconnect(self)
+        try:
+            await self._get('/reboot')
+        except Exception as e:
+            pass
 
     async def _get(self, sub_url):
         async with aiohttp.ClientSession() as session:
@@ -295,7 +303,6 @@ class Robot(AioRobot):
         self._event_thread = threading.Thread(target=self._run_loop, args=(self._loop,))
         self._event_thread.start()
         asyncio.run_coroutine_threadsafe(AioRobot.connect(self), self._loop).result()
-        return self
 
     def disconnect(self):
         """断开 Cozmars 的连接"""

@@ -1,6 +1,6 @@
 from . import util
-from PIL import Image
 import numpy as np
+import cv2
 
 class Screen(util.Component):
     """显示屏"""
@@ -8,6 +8,7 @@ class Screen(util.Component):
     def __init__(self, robot):
         util.Component.__init__(self, robot)
         self.default_fade_speed = None
+        """设置 :data:`brightness` 时的默认的渐变速度，默认为 `None` ，表示没有渐变"""
 
     @property
     def resolution(self):
@@ -28,9 +29,10 @@ class Screen(util.Component):
     async def brightness(self, *args):
         """显示屏亮度，0~1，默认是 `0.05`
         """
-        b = await self._rpc.backlight(*args)
-        if not args:
-            return round(b, 2)
+        if args:
+            await self._rpc.backlight(args[0], None, self.default_fade_speed)
+        else:
+            return round(await self._rpc.backlight(), 2)
 
     @util.mode(force_sync=False)
     async def set_brightness(self, brightness, *, fade_duration=None, fade_speed=None):
@@ -46,7 +48,7 @@ class Screen(util.Component):
         """
         if fade_duration and fade_speed:
             raise TypeError('Cannot set both fade_duration and fade_speed')
-        await self._rpc.backlight(brightness, duration, fade_speed or self.default_fade_speed)
+        await self._rpc.backlight(brightness, fade_duration, fade_speed)
 
     @util.mode()
     async def fill(self, bgr, x=0, y=0, w=240, h=135):
@@ -87,17 +89,19 @@ class Screen(util.Component):
         await self._rpc.pixel(x, y, bgr_to_color565(bgr))
 
     @util.mode()
-    async def display(self, image, x=0, y=0):
+    async def display(self, image, x=None, y=None):
         """显示图像
 
         :param image: 要显示的图像（bgr 模式）
         :type image: numpy.ndarray
-        :param x: 图像左上角的 x 坐标
+        :param x: 图像左上角的 x 坐标，默认为 `None`
         :type x: int
-        :param y: 图像左上角的 y 坐标
+        :param y: 图像左上角的 y 坐标，默认为 `None`
         :type y: int
-        :raises ValueError: 图像超出屏幕范围时抛出异常
+        :raises ValueError: 当设定了 `x` 、 `y` 坐标且图像超出屏幕范围时抛出异常
         """
+        if x==None and y==None:
+            x, y, image = self._resize_to_screen(image)
         h, w, ch = image.shape
         if not self._in_range((x, y), (x+w, y+h)):
             raise ValueError(f'Image must not exceed dimensions of screen {self.resolution}')
@@ -105,11 +109,15 @@ class Screen(util.Component):
         x, y = y, 240-x-w
         await self._rpc.display(image_to_data(image), x, y, x+h-1, y+w-1)
 
-    '''
-    @util.mode(force_sync=False)
-    async def animate(self, gif, loop='auto'):
-        await self._rpc.gif(gif, loop)
-    '''
+    def _resize_to_screen(self, img):
+        h, w = img.shape[:2]
+        W, H = self.resolution
+        if W/H > w/h:
+            f = int(w/h*H)
+            return (W-f)//2, 0, cv2.resize(img, (f, H))
+        else:
+            f = int(h/w*W)
+            return 0, (H-f)//2, cv2.resize(img, (W, f))
 
     def _in_range(self, *points):
         w, h = self.resolution

@@ -1,7 +1,7 @@
 传感器
 ============
 
-机器人还要能感知周围的环境，光会动只是机器。
+机器人还要能感知周围的环境，光会动的只是机器
 
 这一节先介绍 Cozmars 身上的三个简单的传感器：背上的按钮 :data:`button` 、前头的声纳 :data:`sonar` （超声波距离传感器），和底部的两个红外传感器 :data:`infrared`
 
@@ -29,9 +29,9 @@
 
     with Robot('192.168.1.102') as robot:
         while True:
-            print(f'按钮状态：','按下' if robot.button.pressed else '松开')
-            print(f'红外传感器状态：{robot.infrared.state}')
-            print(f'前方障碍物距离：{robot.sonar.distance}米')
+            print('按钮状态：','按下' if robot.button.pressed else '松开')
+            print('红外传感器状态：', robot.infrared.state)
+            print('前方障碍物距离：', robot.sonar.distance, '米')
             print('............................')
             time.sleep(.3)
 

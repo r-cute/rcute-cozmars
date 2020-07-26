@@ -13,10 +13,11 @@ class EyeAnimation(util.Component):
         self._size = 80
         self._radius = self._size // 4
         self._eye = np.zeros((self._size, self._size, 3), np.uint8)
-        self._expression = 'hidden'
+        self._expression = 'auto'
         self._gap = 20
         self._offset = (0, 0)
         self._color = (255, 255, 0) # cyan
+        self._ev = self._exp_q = None
 
     @util.mode(property_type='setter')
     async def color(self, color=None):
@@ -46,41 +47,68 @@ class EyeAnimation(util.Component):
     async def expression(self, *args):
         """表情，默认为 `'auto'`，在所有的表情间随机切换"""
         if args:
-            self._exp_q.full() and self._exp_q.get_nowait()
-            self._exp_q.put_nowait(args[0])
+            await self._set_exp(args[0])
         else:
             return self._expression.split('.')[0]
 
     @util.mode()
     async def hide(self):
         """隐藏"""
-        if self._expression != 'hidden':
-            self._exp_q.full() and self._exp_q.get_nowait()
-            self._exp_q.put_nowait('hidden')
+        await self._set_exp('hidden', True)
+
+    @util.mode()
+    async def stop(self):
+        """暂停动态效果"""
+        await self._set_exp('stopped', True)
+
+    async def _set_exp(self, exp, wait=False):
+        if self._expression != exp:
+            if self._exp_q:
+                self._exp_q.full() and self._exp_q.get_nowait()
+                self._exp_q.put_nowait(exp)
+            else:
+                self._expression = exp
+            wait and self._ev and (await self._ev.wait()) and self._ev.clear()
 
     @util.mode()
     async def show(self, exp=None):
         """显示"""
-        self._exp_q.full() and self._exp_q.get_nowait()
-        self._exp_q.put_nowait(exp or 'auto')
+        await self._set_exp(exp or 'auto')
 
     # very urgly coded eye animation
     async def animate(self, robot, ignored):
-
-        self._create_eye()
-        self._expression = 'auto'
+        self._ev = asyncio.Event()
         self._exp_q = asyncio.Queue(1)
+        self._create_eye()
         H, W = self._canvas.shape[:2]
         LX, RX, Y = (W-self._gap-self._size)//2, (W+self._size+self._gap)//2, H//2
         olpos, orpos = (LX, Y), (RX, Y)
         ox0, oy0, ox1, oy1 = LX-self._size//2, Y-self._size//2, RX+self._size//2-1, Y+self._size//2-1
 
         while True:
+
             duration = random.random() *4 + 1
             blink = False
             lresize = rresize = (self._size, self._size)
             rlbrow = llbrow = 0
             ltbrow = rtbrow = (0, 0)
+
+            try:
+                self._expression = await asyncio.wait_for(self._exp_q.get(), timeout=duration)
+                if self._expression == 'hidden':
+                    await robot.screen.fill((0,0,0), aio_mode=True)
+                    self._ev.set()
+                    while True:
+                        self._expression = await self._exp_q.get()
+                        if self._expression != 'hidden':
+                            break
+                elif self._expression == 'stopped':
+                    while True:
+                        if self._expression != 'stopped':
+                            break
+            except asyncio.TimeoutError:
+                pass
+
             if self._expression == 'auto' or 'neutral' in self._expression:
                 x, y = random.randint(-3, 3)*10, random.randint(-3, 3)*9
                 lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
@@ -183,21 +211,6 @@ class EyeAnimation(util.Component):
 
             ox0, oy0, ox1, oy1 = x0, y0, x1, y1
             olpos, orpos = lpos, rpos
-
-            try:
-                self._expression = await asyncio.wait_for(self._exp_q.get(), timeout=duration)
-                if self._expression == 'hidden':
-                    await robot.screen.fill((0,0,0), aio_mode=True)
-                    while True:
-                        self._expression = await self._exp_q.get()
-                        if self._expression != 'hidden':
-                            break
-                elif self._expression == 'stopped':
-                    while True:
-                        if self._expression != 'stopped':
-                            break
-            except asyncio.TimeoutError:
-                pass
 
 
 animations = {

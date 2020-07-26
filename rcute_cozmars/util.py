@@ -160,7 +160,7 @@ class OutputStreamComponent(StreamComponent):
 
     @mode()
     async def raw_read(self):
-        """读取一帧原始数据"""
+        """读取一帧二进制数据"""
         if self.closed:
             RuntimeError(f'{self.__class__.__name__} is closed')
         else:
