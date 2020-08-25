@@ -4,33 +4,32 @@ from . import util
 
 class Microphone(util.OutputStreamComponent):
     """麦克风"""
-    def __init__(self, robot, samplerate=16000, dtype='int16', frame_time=.1, q_size=5):
+    def __init__(self, robot, sample_rate=16000, dtype='int16', frame_duration=.1, q_size=5):
         util.OutputStreamComponent.__init__(self, robot)
         self._q_size = q_size
-        self._samplerate = samplerate
-        self._frame_time = frame_time
+        self._sample_rate = sample_rate
+        self._frame_duration = frame_duration
         self._dtype = dtype
 
     def _decode(self, data):
         return np.frombuffer(data, dtype=self._dtype)
 
     def _get_rpc(self):
-        return self._rpc.microphone(self.samplerate, self.dtype, self.frame_time, q_size=self._q_size)
-
+        return self._rpc.microphone(self.sample_rate, self.dtype, self.frame_duration, q_size=self._q_size)
 
     @property
-    def samplerate(self):
+    def sample_rate(self):
         """麦克风的采样率，默认是 `16000` ，不建议修改
 
         麦克风已经打开之后不能进行设置，否则抛出异常
         """
-        return self._samplerate
+        return self._sample_rate
 
-    @samplerate.setter
-    def samplerate(self, sr):
+    @sample_rate.setter
+    def sample_rate(self, sr):
         if not self.closed:
-            raise RuntimeError('Cannot set samplerate while microphone is recording')
-        self._samplerate = sr
+            raise RuntimeError('Cannot set sample_rate while microphone is recording')
+        self._sample_rate = sr
 
     @property
     def dtype(self):
@@ -54,23 +53,24 @@ class Microphone(util.OutputStreamComponent):
         """
         return 1
 
-
+    @property
+    def sample_width(self):
+        """一个采样包含几个字节，与 :data:`dtype` 对应，只读"""
+        return {'int16':2, 'float32':4, 'int8':1}[self.dtype]
 
     @property
-    def frame_time(self):
+    def frame_duration(self):
         """流中每一帧声音片段持续的时间（秒），默认是 `0.1` ，不建议修改
 
         麦克风已经打开之后不能进行设置，否则抛出异常
         """
-        return self._frame_time
+        return self._frame_duration
 
-    @frame_time.setter
-    def frame_time(self, ft):
+    @frame_duration.setter
+    def frame_duration(self, fd):
         if not self.closed:
-            raise RuntimeError('Cannot set frame_time while microphone is recording')
-        self._frame_time = ft
-
-
+            raise RuntimeError('Cannot set frame_duration while microphone is recording')
+        self._frame_duration = fd
 
     @util.mode(property_type='setter')
     async def volumn(self, *args):

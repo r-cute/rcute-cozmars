@@ -58,7 +58,7 @@
 
     cv2.destroyAllWindows()
 
-随便提一下，:data:`camera` 可以通过 :data:`framerate` 和 :data:`resolution` 属性来改变帧率和分辨率
+随便提一下，:data:`camera` 可以通过 :data:`frame_rate` 和 :data:`resolution` 属性来改变帧率和分辨率
 
 读取麦克风
 --------------
@@ -79,7 +79,7 @@
 
         print(f'麦克风输出流中每个数据块是 {robot.microphone.frame_time} 秒的音频')
 
-        with robot.microphone as mic, sf.SoundFile('sound.wav', mode='b', samplerate=mic.samplerate, channels=mic.channels, subtype='PCM_24') as file:
+        with robot.microphone as mic, sf.SoundFile('sound.wav', mode='b', samplerate=mic.sample_rate, channels=mic.channels, subtype='PCM_24') as file:
 
             duration = 0
             for buff in mic:
@@ -93,7 +93,7 @@
 
 这个程序需要 soundfile 模块用来操作声音文件，如果没有安装 soundfile ，可以在命令行输入 `pip install soundfile` 安装
 
-如果细心的话，你会注意到程序中用到了 :data:`microphone` 的几个属性： :data:`volumn` 用来调节麦克风的音量大小， :data:`samplerate` 、 :data:`channels` 和 :data:`frame_time` 分别是麦克风的采样率、声道数和每次从输出流中读取的数据块的时长。除了音量外，这些属性通常不需要修改。
+如果细心的话，你会注意到程序中用到了 :data:`microphone` 的几个属性： :data:`volumn` 用来调节麦克风的音量大小， :data:`sample_rate` 、 :data:`channels` 和 :data:`frame_time` 分别是麦克风的采样率、声道数和每次从输出流中读取的数据块的时长。除了音量外，这些属性通常不需要修改。
 
 .. seealso::
 

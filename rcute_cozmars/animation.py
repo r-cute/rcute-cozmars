@@ -14,8 +14,8 @@ class EyeAnimation(util.Component):
         self._radius = self._size // 4
         self._eye = np.zeros((self._size, self._size, 3), np.uint8)
         self._expression = 'auto'
+        self._exp_before = None
         self._gap = 20
-        self._offset = (0, 0)
         self._color = (255, 255, 0) # cyan
         self._ev = self._exp_q = None
 
@@ -54,26 +54,38 @@ class EyeAnimation(util.Component):
     @util.mode()
     async def hide(self):
         """隐藏"""
-        await self._set_exp('hidden', True)
+        if self._expression != 'hidden':
+            if self._expression != 'stopped':
+                self._exp_before = self._expression
+            await self._set_exp('hidden', True)
 
     @util.mode()
     async def stop(self):
         """暂停动态效果"""
-        await self._set_exp('stopped', True)
+        if self._expression not in ['stopped', 'hidden']:
+            self._exp_before = self._expression
+            await self._set_exp('stopped', True)
+
+    @util.mode()
+    async def resume(self):
+        """继续动态更新"""
+        if self._expression == 'stopped':
+            await self._set_exp(self._exp_before or 'auto')
+            self._exp_before = None
 
     async def _set_exp(self, exp, wait=False):
-        if self._expression != exp:
-            if self._exp_q:
-                self._exp_q.full() and self._exp_q.get_nowait()
-                self._exp_q.put_nowait(exp)
-            else:
-                self._expression = exp
-            wait and self._ev and (await self._ev.wait()) and self._ev.clear()
+        if self._exp_q:
+            self._exp_q.full() and self._exp_q.get_nowait()
+            self._exp_q.put_nowait(exp)
+        else:
+            self._expression = exp
+        wait and self._ev and (await self._ev.wait()) and self._ev.clear()
 
     @util.mode()
     async def show(self, exp=None):
         """显示"""
-        await self._set_exp(exp or 'auto')
+        await self._set_exp(exp or self._exp_before or 'auto')
+        self._exp_before = None
 
     # very urgly coded eye animation
     async def animate(self, robot, ignored):
@@ -95,19 +107,22 @@ class EyeAnimation(util.Component):
 
             try:
                 self._expression = await asyncio.wait_for(self._exp_q.get(), timeout=duration)
-                if self._expression == 'hidden':
-                    await robot.screen.fill((0,0,0), aio_mode=True)
-                    self._ev.set()
-                    while True:
-                        self._expression = await self._exp_q.get()
-                        if self._expression != 'hidden':
-                            break
-                elif self._expression == 'stopped':
-                    while True:
-                        if self._expression != 'stopped':
-                            break
             except asyncio.TimeoutError:
                 pass
+            if self._expression == 'hidden':
+                await robot.screen.fill((0,0,0), stop_eyes=False, aio_mode=True)
+                self._ev.set()
+                while True:
+                    self._expression = await self._exp_q.get()
+                    if self._expression != 'hidden':
+                        break
+            elif self._expression == 'stopped':
+                self._ev.set()
+                while True:
+                    self._expression = await self._exp_q.get()
+                    if self._expression != 'stopped':
+                        break
+
 
             if self._expression == 'auto' or 'neutral' in self._expression:
                 x, y = random.randint(-3, 3)*10, random.randint(-3, 3)*9
@@ -187,7 +202,7 @@ class EyeAnimation(util.Component):
             if blink:
                 yt = oy1-(oy1-oy0)//3
                 self._canvas[oy0: yt, ox0: ox1] = (0, 0, 0)
-                await robot.screen.display(self._canvas[oy0: yt, ox0: ox1], ox0, oy0, aio_mode=True)
+                await robot.screen.block_display(self._canvas[oy0: yt, ox0: ox1], ox0, oy0, aio_mode=True)
                 oy0 = yt
 
             self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
@@ -207,7 +222,7 @@ class EyeAnimation(util.Component):
             x0, y0, w, h = cv2.boundingRect(np.array([(lx0, ly0), (lx1, ly1), (rx0, ry0), (rx1, ry1)]))
             x1, y1 = x0+w, y0+h
             bx, by, bw, bh = cv2.boundingRect(np.array([(x0, y0), (x1-1, y1-1), (ox0, oy0), (ox1, oy1)]))
-            await robot.screen.display(self._canvas[by:by+bh, bx:bx+bw], bx, by, aio_mode=True)
+            await robot.screen.block_display(self._canvas[by:by+bh, bx:bx+bw], bx, by, aio_mode=True)
 
             ox0, oy0, ox1, oy1 = x0, y0, x1, y1
             olpos, orpos = lpos, rpos

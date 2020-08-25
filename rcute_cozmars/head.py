@@ -7,8 +7,8 @@ class Head(util.Component):
     def __init__(self, robot):
         util.Component.__init__(self, robot)
         self._relax_timeout = None
-        self.default_speed = 60
-        """设置 :data:`angle` 时的默认的头部转动角速度（度/秒），默认为 `60` ，若设为 `None` 则表示用最快转头"""
+        self.default_speed = 100
+        """设置 :data:`angle` 时的默认的头部转动角速度（度/秒），默认为 `100` ，若设为 `None` 则表示用最快转头"""
         self.auto_relax_delay = 1
         """多长时间内没有动作则自动放松（秒），默认为 `1`，若设为 `None` 则表示不会自动放松
 

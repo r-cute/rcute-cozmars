@@ -51,7 +51,7 @@ class Screen(util.Component):
         await self._rpc.backlight(brightness, fade_duration, fade_speed)
 
     @util.mode()
-    async def fill(self, bgr, x=0, y=0, w=240, h=135):
+    async def fill(self, bgr, x=0, y=0, w=240, h=135, stop_eyes=True):
         """填充屏幕
 
         :param bgr: 要填充的颜色（bgr 模式）
@@ -69,6 +69,7 @@ class Screen(util.Component):
         if not self._in_range((x, y), (w, h)):
             raise ValueError(f'Fill area must not exceed dimensions of screen {self.resolution}')
         x, y = y, 240-x-w
+        stop_eyes and (await self._robot.eyes._set_exp('stopped', True))
         await self._rpc.fill(bgr_to_color565(bgr), x, y, h, w)
 
     @util.mode()
@@ -89,25 +90,30 @@ class Screen(util.Component):
         await self._rpc.pixel(x, y, bgr_to_color565(bgr))
 
     @util.mode()
-    async def display(self, image, x=None, y=None):
+    async def block_display(self, image, x, y):
+        """display the image on a block area on the screen
+
+        raises AssertionError: raise error when the area to display exceeds screen
+        """
+        h, w = image.shape[:2]
+        assert self._in_range((x, y), (x+w-1, y+h-1)), 'Display area must not exceed dimensions of screen {self.resolution}'
+        x, y = y, 240-x-w
+        await self._rpc.display(image_to_data(np.rot90(image)), x, y, x+h-1, y+w-1)
+
+    @util.mode()
+    async def display(self, image, stop_eyes=True):
         """显示图像
 
         :param image: 要显示的图像（bgr 模式）
         :type image: numpy.ndarray
-        :param x: 图像左上角的 x 坐标，默认为 `None`
-        :type x: int
-        :param y: 图像左上角的 y 坐标，默认为 `None`
-        :type y: int
-        :raises ValueError: 当设定了 `x` 、 `y` 坐标且图像超出屏幕范围时抛出异常
         """
-        if x==None and y==None:
-            x, y, image = self._resize_to_screen(image)
-        h, w, ch = image.shape
-        if not self._in_range((x, y), (x+w, y+h)):
-            raise ValueError(f'Image must not exceed dimensions of screen {self.resolution}')
-        image = np.rot90(image)
-        x, y = y, 240-x-w
-        await self._rpc.display(image_to_data(image), x, y, x+h-1, y+w-1)
+        x, y, image = self._resize_to_screen(image)
+        W, H = self.resolution
+        filled_img = np.zeros((H, W, 3), np.uint8)
+        h, w = image.shape[:2]
+        filled_img[y: y+h, x: x+w] = image
+        stop_eyes and (await self._robot.eyes._set_exp('stopped', True))
+        await self._rpc.display(image_to_data(np.rot90(filled_img)), 0, 0, H-1, W-1)
 
     def _resize_to_screen(self, img):
         h, w = img.shape[:2]

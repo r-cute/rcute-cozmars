@@ -5,10 +5,10 @@ import cv2
 class Camera(util.OutputStreamComponent):
     """摄像头
     """
-    def __init__(self, robot, resolution=(480,360), framerate=5, q_size=5):
+    def __init__(self, robot, resolution=(480,360), frame_rate=3, q_size=1):
         util.OutputStreamComponent.__init__(self, robot)
         self._q_size = q_size
-        self._framerate = framerate
+        self._frame_rate = frame_rate
         self._resolution = resolution
 
     @property
@@ -20,12 +20,12 @@ class Camera(util.OutputStreamComponent):
         return self._resolution
 
     @property
-    def framerate(self):
-        """摄像头录像的帧率，即 FPS，默认是 `5`
+    def frame_rate(self):
+        """摄像头录像的帧率，即 FPS，默认是 `3`
 
         摄像头已经打开之后不能修改帧率，否则抛出异常
         """
-        return self._framerate
+        return self._frame_rate
 
     @resolution.setter
     def resolution(self, res):
@@ -33,18 +33,18 @@ class Camera(util.OutputStreamComponent):
             raise RuntimeError('Cannot set resolution while camera is running')
         self._resolution = res
 
-    @framerate.setter
-    def framerate(self, fr):
+    @frame_rate.setter
+    def frame_rate(self, fr):
         if not self.closed:
-            raise RuntimeError('Cannot set framerate while camera is running')
-        self._framerate = fr
+            raise RuntimeError('Cannot set frame_rate while camera is running')
+        self._frame_rate = fr
 
     def _decode(self, data):
         return cv2.flip(cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR), -1)
 
     def _get_rpc(self):
         w, h = self.resolution
-        return self._rpc.camera(w, h, self.framerate, q_size=self._q_size)
+        return self._rpc.camera(w, h, self.frame_rate, q_size=self._q_size)
 
     '''
     @util.mode()
@@ -86,8 +86,3 @@ class Camera(util.OutputStreamComponent):
         return self._output_stream
 
     '''
-
-
-
-
-
