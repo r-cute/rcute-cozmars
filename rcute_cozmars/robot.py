@@ -23,9 +23,12 @@ import websockets
 import threading
 import logging
 from wsmprpc import RPCClient, RPCStream
-from . import util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, animation
+from . import util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, eye_animation, cube_animation
 
 logger = logging.getLogger("rcute-cozmars")
+
+animations = {}
+animations.update(cube_animation.animations)
 
 class AioRobot:
     """Cozmars 机器人的异步 (async/await) 模式
@@ -52,23 +55,40 @@ class AioRobot:
         self._head = head.Head(self)
         self._buzzer = buzzer.Buzzer(self)
         self._motor = motor.Motor(self)
-        self._eye_anim = animation.EyeAnimation(self)
+        self._eye_anim = eye_animation.EyeAnimation(self)
+
+    def _in_event_loop(self):
+        return True
 
     @util.mode()
-    async def animate(name, *args, ignored=(), **kwargs):
+    async def animate(self, name, *args, **kwargs):
         """执行动作
 
-        :param ignored: 不执行动作的元件
-        :type ignored: tuple / list
+        :param name: 动作的名称
+        :type name: str
         """
-        anim = self.animation.animations[name]
-        anim = anim.get('animate', anim)
-        await anim(*args, self, ignored, **kwargs)
+        anim = animations[name]
+        anim = getattr(anim, 'animate', anim)
+        await anim(self, *args, **kwargs)
 
     @property
     def animation_list(self):
         """动作列表"""
-        return list(self.animation.animations.keys())
+        return list(animations.keys())
+
+    @util.mode()
+    async def pick_up_cube(self, height=1, debug=False):
+        """拾取魔方
+
+        :param debug: 默认为 `False`，设为 `True` 则会显示摄像头画面
+        :type debug: bool
+        """
+        return await animations['pick_up_cube'](self, height, debug=debug)
+
+    @util.mode()
+    async def put_down_cube(self, height=0):
+        """放下魔方"""
+        return await animations['put_down_cube'](self, height)
 
     @property
     def eyes(self):
@@ -125,17 +145,18 @@ class AioRobot:
         """麦克风"""
         return self._microphone
 
-
     async def connect(self):
         """连接 Cozmars"""
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self.host}/rpc')
+            if '-1' == await self._ws.recv():
+                raise RuntimeError('无法连接 Cozmars, 请先关闭其他已经连接 Cozmars 的程序')
             self._rpc = RPCClient(self._ws)
             self._ip = self._ip or await self._get('/ip')
             self._serial = self._serial or await self._get('/serial')
             self._server_version = await self._get('/version')
             self._sensor_task = asyncio.create_task(self._get_sensor_data())
-            self._eye_anim_task = asyncio.create_task(self._eye_anim.animate(self, ()))
+            self._eye_anim_task = asyncio.create_task(self._eye_anim.animate(self))
             self._connected = True
 
     @property
@@ -148,7 +169,7 @@ class AioRobot:
             if self._mode == 'aio':
                 (await cb(*args)) if asyncio.iscoroutinefunction(cb) else cb(*args)
             else:
-                self._loop.run_in_executor(None, cb, *args)
+                self._lo.run_in_executor(None, cb, *args)
 
     async def _get_sensor_data(self):
         self._sensor_data_rpc = self._rpc.sensor_data()
@@ -290,6 +311,9 @@ class Robot(AioRobot):
         AioRobot.__init__(self, serial_or_ip)
         self._mode = 'sync'
 
+    def _in_event_loop(self):
+        return self._event_thread == threading.current_thread()
+
     def __enter__(self):
         self.connect()
         return self
@@ -299,15 +323,15 @@ class Robot(AioRobot):
 
     def connect(self):
         """连接 Cozmars"""
-        self._loop = asyncio.new_event_loop()
-        self._event_thread = threading.Thread(target=self._run_loop, args=(self._loop,))
+        self._lo = asyncio.new_event_loop()
+        self._event_thread = threading.Thread(target=self._run_loop, args=(self._lo,), daemon=True)
         self._event_thread.start()
-        asyncio.run_coroutine_threadsafe(AioRobot.connect(self), self._loop).result()
+        asyncio.run_coroutine_threadsafe(AioRobot.connect(self), self._lo).result()
 
     def disconnect(self):
         """断开 Cozmars 的连接"""
-        asyncio.run_coroutine_threadsafe(AioRobot.disconnect(self), self._loop).result()
-        self._loop.call_soon_threadsafe(self._done_ev.set)
+        asyncio.run_coroutine_threadsafe(AioRobot.disconnect(self), self._lo).result()
+        self._lo.call_soon_threadsafe(self._done_ev.set)
         self._event_thread.join(timeout=5)
 
     def _run_loop(self, loop):

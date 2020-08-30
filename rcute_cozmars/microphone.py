@@ -2,20 +2,25 @@ import asyncio
 import numpy as np
 from . import util
 
-class Microphone(util.OutputStreamComponent):
+'''
+class MicrophoneMultiplexOutputStream(util.MultiplexOutputStream):
+    def force_put_nowait(self, o):
+        if not isinstance(o, Exception):
+            o = np.frombuffer(o, dtype=self._dtype)
+        util.MultiplexOutputStream.force_put_nowait(self, o)
+'''
+
+class Microphone(util.MultiplexOutputStreamComponent):
     """麦克风"""
     def __init__(self, robot, sample_rate=16000, dtype='int16', frame_duration=.1, q_size=5):
-        util.OutputStreamComponent.__init__(self, robot)
-        self._q_size = q_size
+        util.MultiplexOutputStreamComponent.__init__(self, robot, q_size, util.MultiplexOutputStream(self))
         self._sample_rate = sample_rate
         self._frame_duration = frame_duration
         self._dtype = dtype
 
-    def _decode(self, data):
-        return np.frombuffer(data, dtype=self._dtype)
-
     def _get_rpc(self):
-        return self._rpc.microphone(self.sample_rate, self.dtype, self.frame_duration, q_size=self._q_size)
+        self._multiplex_output_stream._dtype = self._dtype
+        return self._rpc.microphone(self.sample_rate, self.dtype, self.frame_duration, response_stream=self._multiplex_output_stream)
 
     @property
     def sample_rate(self):
@@ -82,27 +87,3 @@ class Microphone(util.OutputStreamComponent):
             raise RuntimeError('Cannot set volumn while microphone is recording')
         return await self._rpc.microphone_volumn(*args)
 
-    '''
-    @property
-    def raw_output_stream(self):
-        """麦克风的二进制数据流，与 :data:`output_stream` 相对
-
-        流中的每一帧数据都是一段声音的二进制数据
-
-        读取数据流必须麦克风打开之后，否则抛出异常
-        """
-        return self.output_stream._raw_stream
-
-    @property
-    def output_stream(self):
-        """麦克风的数据流，将 :data:`raw_output_stream` 中的每一帧二进制数据封装为 `numpy.ndarray` 类型，
-
-        流中的每一帧数据都是一段声音数据
-
-        读取数据流必须麦克风打开之后，否则抛出异常
-        """
-        if self.closed:
-            raise RuntimeError(f'{self.__class__.__name__} is closed')
-        return self._output_stream
-
-    '''

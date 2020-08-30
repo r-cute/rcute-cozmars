@@ -88,7 +88,7 @@ class EyeAnimation(util.Component):
         self._exp_before = None
 
     # very urgly coded eye animation
-    async def animate(self, robot, ignored):
+    async def animate(self, robot):
         self._ev = asyncio.Event()
         self._exp_q = asyncio.Queue(1)
         self._create_eye()
@@ -110,7 +110,7 @@ class EyeAnimation(util.Component):
             except asyncio.TimeoutError:
                 pass
             if self._expression == 'hidden':
-                await robot.screen.fill((0,0,0), stop_eyes=False, aio_mode=True)
+                await robot.screen.fill((0,0,0), stop_eyes=False, mode='aio')
                 self._ev.set()
                 while True:
                     self._expression = await self._exp_q.get()
@@ -202,7 +202,7 @@ class EyeAnimation(util.Component):
             if blink:
                 yt = oy1-(oy1-oy0)//3
                 self._canvas[oy0: yt, ox0: ox1] = (0, 0, 0)
-                await robot.screen.block_display(self._canvas[oy0: yt, ox0: ox1], ox0, oy0, aio_mode=True)
+                await robot.screen.block_display(self._canvas[oy0: yt, ox0: ox1], ox0, oy0, mode='aio')
                 oy0 = yt
 
             self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
@@ -222,11 +222,10 @@ class EyeAnimation(util.Component):
             x0, y0, w, h = cv2.boundingRect(np.array([(lx0, ly0), (lx1, ly1), (rx0, ry0), (rx1, ry1)]))
             x1, y1 = x0+w, y0+h
             bx, by, bw, bh = cv2.boundingRect(np.array([(x0, y0), (x1-1, y1-1), (ox0, oy0), (ox1, oy1)]))
-            await robot.screen.block_display(self._canvas[by:by+bh, bx:bx+bw], bx, by, aio_mode=True)
+            await robot.screen.block_display(self._canvas[by:by+bh, bx:bx+bw], bx, by, mode='aio')
 
             ox0, oy0, ox1, oy1 = x0, y0, x1, y1
             olpos, orpos = lpos, rpos
 
 
-animations = {
-}
+

@@ -4,49 +4,7 @@ from concurrent import futures
 from wsmprpc import RPCStream
 import numpy as np
 
-'''
-class SyncRawStream:
-    """synchronous version of `wsmprpc.RPCStream` """
-    def __init__(self, async_stream, loop):
-        self._astream = async_stream
-        self._loop = loop
-    def __iter__(self):
-        return self
-    def __next__(self):
-        return asyncio.run_coroutine_threadsafe(self._astream.__anext__(), self._loop).result()
-    def put(self, obj):
-        return asyncio.run_coroutine_threadsafe(self._astream.put(obj), self._loop).result()
-    def put_nowait(self, obj):
-        return self._loop.call_soon_threadsafe(self._astream.put_nowait, obj)
 
-class SyncStream:
-    def __init__(self, sync_raw_stream, *, decode_fn=lambda x:x, encode_fn=lambda x:x):
-        self._raw_stream = sync_raw_stream
-        self._decode_fn = decode_fn
-        self._encode_fn = encode_fn
-    def __iter__(self):
-        return self
-    def __next__(self):
-        return self._decode_fn(self._raw_stream.__next__())
-    def put(self, obj):
-        return self._raw_stream.put(self._encode_fn(obj))
-    def put_nowait(self, obj):
-        return self._raw_stream.put_nowait(self._encode_fn(obj))
-
-class AsyncStream:
-    def __init__(self, rpc_stream, *, decode_fn=lambda x:x, encode_fn=lambda x:x):
-        self._raw_stream = rpc_stream
-        self._decode_fn = decode_fn
-        self._encode_fn = encode_fn
-    def __aiter__(self):
-        return self
-    async def __anext__(self):
-        return self._decode_fn(await self._raw_stream.__anext__())
-    async def put(self, obj):
-        return await self._raw_stream.put(self._encode_fn(obj))
-    def put_nowait(self, obj):
-        return self._raw_stream.put_nowait(self._encode_fn(obj))
-'''
 def mode(force_sync=True, property_type=None):
     def func_deco(func):
 
@@ -56,20 +14,17 @@ def mode(force_sync=True, property_type=None):
                 raise ImportError('Cannot decorate connection.mode on non-coroutine function')
 
             self = args[0]
-            aio_mode = kwargs.get('aio_mode')
-            if aio_mode:
-                del kwargs['aio_mode']
-            if aio_mode or self._mode == 'aio':
+            if self._in_event_loop():
                 return functools.partial(func, self) if property_type else func(*args, **kwargs)
 
-            fut = asyncio.run_coroutine_threadsafe(func(*args, **kwargs), self._loop)
+            fut = asyncio.run_coroutine_threadsafe(func(*args, **kwargs), self._lo)
 
             if force_sync or property_type or self._mode == 'sync':
                 try:
                     return fut.result(kwargs.pop('timeout', None))
                 except futures.TimeoutError:
                     return None
-            else: # _mode == 'async'
+            else: # mode == 'async'
                 return fut
 
         if property_type == 'getter':
@@ -90,13 +45,15 @@ class Component:
         return self._robot._mode
 
     @property
-    def _loop(self):
-        return self._robot._loop
+    def _lo(self):
+        return self._robot._lo
 
     @property
     def _rpc(self):
         return self._robot._rpc
 
+    def _in_event_loop(self):
+        return self._robot._in_event_loop()
 
 class StreamComponent(Component):
     def __init__(self, robot):
@@ -116,20 +73,10 @@ class StreamComponent(Component):
             except asyncio.CancelledError:
                 pass
 
-    @mode()
-    async def close(self):
-        """关闭数据流"""
-        await self._close()
-
     async def _open(self):
         if self.closed:
             self._stream_rpc = self._get_rpc()
             self._stream_rpc.request()
-
-    @mode()
-    async def open(self):
-        """打开数据流"""
-        await self._open()
 
     def _get_rpc(self):
         '''
@@ -137,12 +84,45 @@ class StreamComponent(Component):
         '''
         raise NotImplementedError
 
+
+class OutputStream(RPCStream):
+    """输出数据流"""
+    def __init__(self, parent, maxsize=0):
+        RPCStream.__init__(self, maxsize)
+        self._parent = parent
+
+    @property
+    def _lo(self):
+        return self._parent._component._lo
+
+    @property
+    def _mode(self):
+        return self._parent._component._mode
+
+    def _in_event_loop(self):
+        return self._parent._component._in_event_loop()
+
+    @mode()
+    async def open(self):
+        """打开数据流"""
+        await self._parent.add_stream(self)
+
+    @mode()
+    async def close(self):
+        """关闭数据流"""
+        await self._parent.remove_stream(self)
+
+    @mode()
+    async def read(self):
+        """从数据流中读取一帧数据"""
+        return await self.__anext__()
+
     async def __aenter__(self):
-        await self._open()
+        await self.open()
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
-        await self._close()
+        await self.close()
 
     def __enter__(self):
         if self._mode == 'aio':
@@ -153,59 +133,52 @@ class StreamComponent(Component):
     def __exit__(self, exc_type, exc, tb):
         self.close()
 
-class OutputStreamComponent(StreamComponent):
-
-    def _decode(self, data):
-        return data
-
-    @mode()
-    async def raw_read(self):
-        """读取一帧二进制数据"""
-        if self.closed:
-            RuntimeError(f'{self.__class__.__name__} is closed')
-        else:
-            return await self._stream_rpc.response_stream.__anext__()
-
-    @mode()
-    async def read(self):
-        """读取一帧数据"""
-        if self.closed:
-            RuntimeError(f'{self.__class__.__name__} is closed')
-        else:
-            return self._decode(await self._stream_rpc.response_stream.__anext__())
-
-    async def __anext__(self):
-        return await self.read()
-
-    def __next__(self):
-        return self.read()
-
     def __iter__(self):
         if self._mode == 'aio':
             raise AttributeError('__iter__')
         return self
 
-    def __aiter__(self):
-        return self
+    def __next__(self):
+        return self.read()
 
-class InputStreamComponent(StreamComponent):
 
-    def _encode(self, data):
-        return data
+class MultiplexOutputStream:
+    def __init__(self, component):
+        self._output_streams = set()
+        self._component = component
 
-    @mode()
-    async def raw_write(self, data):
-        """写入一帧原始数据"""
-        if self.closed:
-            raise RuntimeError(f'{self.__class__.__name__} is closed')
+    async def add_stream(self, stream):
+        self._output_streams.add(stream)
+        if len(self._output_streams) == 1:
+            await self._component._open()
+
+    async def remove_stream(self, stream):
+        try:
+            self._output_streams.remove(stream)
+            if len(self._output_streams) == 0:
+                await self._component._close()
+        except KeyError:
+            pass
+
+    def force_put_nowait(self, o):
+        # see `wsmprpc.RPCStream`
+        for s in self._output_streams:
+            s.force_put_nowait(o)
+
+
+class MultiplexOutputStreamComponent(StreamComponent):
+    def __init__(self, robot, q_size, multiplex_output_stream):
+        StreamComponent.__init__(self, robot)
+        self._q_size = q_size
+        self._multiplex_output_stream = multiplex_output_stream
+
+    async def _async_get_buffer(self):
+        return OutputStream(self._multiplex_output_stream, maxsize=self._q_size)
+
+    def get_buffer(self):
+        """获取输出数据流
+        """
+        if self._in_event_loop():
+            return OutputStream(self._multiplex_output_stream, maxsize=self._q_size)
         else:
-            await self._input_stream.put(data)
-
-    @mode()
-    async def write(self, data):
-        """写入一帧原始数据"""
-        if self.closed:
-            raise RuntimeError(f'{self.__class__.__name__} is closed')
-        else:
-            await self._input_stream.put(self._encode(data))
-
+            return self.run_coroutine_threadsafe(self._async_get_buffer, self._lo).result()

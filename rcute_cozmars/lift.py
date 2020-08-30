@@ -52,8 +52,6 @@ class Lift(util.Component):
             h = await self._rpc.lift()
             return round(h, 2) if h else h
 
-
-
     @util.mode(force_sync=False)
     async def set_height(self, height, *, duration=None, speed=None):
         """设置臂的高度
