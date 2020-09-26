@@ -22,6 +22,7 @@ import aiohttp
 import websockets
 import threading
 import logging
+import json
 from wsmprpc import RPCClient, RPCStream
 from . import util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, eye_animation, cube_animation
 
@@ -37,12 +38,7 @@ class AioRobot:
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
-        if len(serial_or_ip) == 4:
-            self._serial = serial_or_ip
-            self._ip = None
-        else:
-            self._serial = None
-            self._ip = serial_or_ip
+        self._host = 'rcute-cozmars-' serial_or_ip + '.local' if len(serial_or_ip) == 4 else serial_or_ip
         self._mode = 'aio'
         self._connected = False
         self._screen = screen.Screen(self)
@@ -148,13 +144,15 @@ class AioRobot:
     async def connect(self):
         """连接 Cozmars"""
         if not self._connected:
-            self._ws = await websockets.connect(f'ws://{self.host}/rpc')
+            self._ws = await websockets.connect(f'ws://{self._host}/rpc')
             if '-1' == await self._ws.recv():
                 raise RuntimeError('无法连接 Cozmars, 请先关闭其他已经连接 Cozmars 的程序')
             self._rpc = RPCClient(self._ws)
-            self._ip = self._ip or await self._get('/ip')
-            self._serial = self._serial or await self._get('/serial')
-            self._server_version = await self._get('/version')
+            about = json.loads(await self._get('/about'))
+            self._ip = about['ip']
+            self._serial = about['serial']
+            self._server_version = about['version']
+            self._hostname = about['hostname']
             self._sensor_task = asyncio.create_task(self._get_sensor_data())
             self._eye_anim_task = asyncio.create_task(self._eye_anim.animate(self))
             self._connected = True
@@ -255,9 +253,9 @@ class AioRobot:
         await self._rpc.speed((1,-1), duration)
 
     @property
-    def host(self):
+    def hostname(self):
         """Cozmars 的网址"""
-        return self._ip or f'rcute-{self._serial}.local'
+        return self._hostname
 
     @property
     def ip(self):
@@ -298,7 +296,7 @@ class AioRobot:
 
     async def _get(self, sub_url):
         async with aiohttp.ClientSession() as session:
-            async with session.get('http://' + self.host + sub_url) as resp:
+            async with session.get('http://' + self._host + sub_url) as resp:
                 return await resp.text()
 
 class Robot(AioRobot):
