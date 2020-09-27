@@ -151,7 +151,7 @@ class AioRobot:
             about = json.loads(await self._get('/about'))
             self._ip = about['ip']
             self._serial = about['serial']
-            self._server_version = about['version']
+            self._firmware_version = about['version']
             self._hostname = about['hostname']
             self._sensor_task = asyncio.create_task(self._get_sensor_data())
             self._eye_anim_task = asyncio.create_task(self._eye_anim.animate(self))
@@ -205,7 +205,7 @@ class AioRobot:
             self._sensor_task.cancel()
             self._eye_anim_task.cancel()
             self._sensor_data_rpc.cancel()
-            await asyncio.gather(self.camera._close(), self.microphone._close(), self.buzzer._close())
+            await asyncio.gather(self.camera._close(), self.microphone._close(), self.buzzer._close(), return_exceptions=True)
             await self._ws.close()
             self._connected = False
 
@@ -263,13 +263,13 @@ class AioRobot:
         return self._ip
 
     @property
-    def server_version(self):
+    def firmware_version(self):
         """Cozmars 的固件版本
 
         如果低于 |pypi上的最新版本| ，可以登陆机器人的页面进行更新
 
         """
-        return self._server_version
+        return self._firmware_version
 
     @property
     def serial(self):

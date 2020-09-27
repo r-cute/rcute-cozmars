@@ -17,3 +17,4 @@ API
    camera
    microphone
    animation
+   cube

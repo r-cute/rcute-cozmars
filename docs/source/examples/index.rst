@@ -12,3 +12,4 @@
    screen
    animation
    poweroff
+   cube
