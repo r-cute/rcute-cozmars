@@ -1,13 +1,13 @@
-连接 / 关机
+连接
 ==============
 
-`rcute_cozmars` 是用来控制 Cozmars 机器人的 Python 模块，要使用该模块，只要在程序的开头引用它：
+`rcute_cozmars` 是用来控制 Cozmars 机器人和 Cube 魔方的 Python 模块，要使用该模块，只要在程序的开头导入它：
 
 .. code:: python
 
-    import rcute_comzars
+    import rcute_cozmars
 
-但，通常我们只需要引用 :class:`rcute_cozmars.Robot` 就行了：
+但，通常我们只需要导入 :class:`rcute_cozmars.Robot` 就行了：
 
 .. code:: python
 
@@ -39,7 +39,7 @@
             robot.forward(2)    # 让机器人前进 2 秒
 
 
-2. 显示地调用 :meth:`connect` 和 :meth:`disconnect` 方法来建立和断开连接，这种方法适合在命令行里用交互的方式控制机器人：
+2. 显示地调用 :meth:`connect` 和 :meth:`disconnect` 方法来建立和断开连接，这种方法适合在终端窗口里用交互的方式控制机器人：
 
     >>> from rcute_cozmars import Robot
     >>> robot = Robot('192.168.1.102')
@@ -49,7 +49,7 @@
 
 .. note::
 
-    注意到以上代码开头的 :shell:`>>>`  符号了吗？它表示这些代码是在命令行终端窗口中输入的代码；
+    注意到以上代码开头的 :shell:`>>>`  符号了吗？它表示这些代码是在终端窗口里输入的命令；
 
     而没有 :shell:`>>>` 符号的代码块则表示文件中的整段代码
 

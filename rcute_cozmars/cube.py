@@ -8,26 +8,30 @@ import json
 from wsmprpc import RPCClient, RPCStream
 from . import util
 
-logger = logging.getLogger("rcute-魔方")
+logger = logging.getLogger("rcute-cube")
 
-class Aio魔方:
+class AioCube:
     """魔方的异步 (async/await) 模式
 
     :param serial_or_ip: 要连接的 魔方的 IP 地址或序列号
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
-        self._host = 'rcute-魔方-' serial_or_ip + '.local' if len(serial_or_ip) == 4 else serial_or_ip
+        self._host = 'rcute-cube-' + serial_or_ip + '.local' if len(serial_or_ip) == 4 else serial_or_ip
         self._mode = 'aio'
         self._connected = False
+        """魔方的上一个动作"""
+        self.last_action = None
         """回调函数，当魔方被翻转90度时调用，默认为 `None` """
         self.when_flipped_90 = None
         """回调函数，当魔方被翻转180度时调用，默认为 `None` """
         self.when_flipped_180 = None
         """回调函数，当魔方被晃动时调用，默认为 `None` """
         self.when_shaked = None
-        """回调函数，当魔方被水平旋转时调用，默认为 `None` """
-        self.when_rotated = None
+        """回调函数，当魔方被顺时针水平旋转时调用，默认为 `None` """
+        self.when_rotated_clockwise = None
+        """回调函数，当魔方被逆时针水平旋转时调用，默认为 `None` """
+        self.when_rotated_counter_clockwise = None
         """回调函数，当魔方被水平挪动时调用，默认为 `None` """
         self.when_moved = None
 
@@ -58,16 +62,18 @@ class Aio魔方:
 
     async def _get_event(self):
         self._event_rpc = self._rpc.mpu_stream()
-        async for event, data in self._event_rpc:
+        async for event in self._event_rpc:
             try:
-                if event == 'flipped90':
+                if event == 'flipped_90':
                     await self._call_callback(self.when_flipped_90)
-                elif event == 'flipped180':
+                elif event == 'flipped_180':
                     await self._call_callback(self.when_flipped_180)
-                elif event == 'rotated':
-                    await self._call_callback(self.when_rotated, data)
+                elif event == 'rotated_clockwise':
+                    await self._call_callback(self.when_rotated_clockwise)
+                elif event == 'rotated_counter_clockwise':
+                    await self._call_callback(self.when_rotated_counter_clockwise)
                 elif event == 'moved':
-                    await self._call_callback(self.when_moved, data)
+                    await self._call_callback(self.when_moved)
                 elif event == 'shaked':
                     await self._call_callback(self.when_shaked)
             except Excpetion as e:
@@ -83,6 +89,7 @@ class Aio魔方:
         if self._connected:
             self._event_rpc.cancel()
             await asyncio.gather(self._event_task, return_exceptions=True)
+            await self.color(0, 0, 0)
             await self._ws.close()
             self._connected = False
 
@@ -133,14 +140,14 @@ class Aio魔方:
         return await self._rpc.static()
 
 
-class 魔方(Aio魔方):
+class Cube(AioCube):
     """魔方的同步模式
 
     :param serial_or_ip: 要连接的 魔方的 IP 地址或序列号
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
-        super(魔方, self).__init__(serial_or_ip)
+        super(Cube, self).__init__(serial_or_ip)
         self._mode = 'sync'
 
     def _in_event_loop(self):
@@ -179,14 +186,14 @@ class 魔方(Aio魔方):
         asyncio.set_event_loop(None)
 
 
-class Async魔方(魔方):
+class AsyncCube(Cube):
     """魔方的异步 (concurrent.futures.Future) 模式
 
     :param serial_or_ip: 要连接的 魔方的 IP 地址或序列号
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
-        super(Async魔方, self).__init__(serial_or_ip)
+        super(AsyncCube, self).__init__(serial_or_ip)
         self._mode = 'async'
 
 
