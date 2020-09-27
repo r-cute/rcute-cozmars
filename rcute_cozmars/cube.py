@@ -128,6 +128,11 @@ class Aio魔方:
     """加速度失量"""
         return await self._rpc.accel()
 
+    @util.mode(property_type='getter')
+    async def static(self):
+        return await self._rpc.static()
+
+
 class 魔方(Aio魔方):
     """魔方的同步模式
 
