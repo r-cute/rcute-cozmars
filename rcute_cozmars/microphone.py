@@ -1,8 +1,8 @@
 import asyncio
-import numpy as np
 from . import util
 
 '''
+import numpy as np
 class MicrophoneMultiplexOutputStream(util.MultiplexOutputStream):
     def force_put_nowait(self, o):
         if not isinstance(o, Exception):

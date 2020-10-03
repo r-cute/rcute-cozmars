@@ -51,11 +51,11 @@ class Screen(util.Component):
         await self._rpc.backlight(brightness, fade_duration, fade_speed)
 
     @util.mode()
-    async def fill(self, bgr, x=0, y=0, w=240, h=135, stop_eyes=True):
+    async def fill(self, color, x=0, y=0, w=240, h=135, stop_eyes=True):
         """填充屏幕
 
-        :param bgr: 要填充的颜色（bgr 模式）
-        :type bgr: tuple
+        :param color: 要填充的颜色（bgr 模式）
+        :type color: str/tuple
         :param x: 填充方块的左上角 x 坐标，默认为 `0`
         :type x: int
         :param y: 填充方块的左上角 y 坐标，默认为 `0`
@@ -69,25 +69,25 @@ class Screen(util.Component):
         if not self._in_range((x, y), (w, h)):
             raise ValueError(f'Fill area must not exceed dimensions of screen {self.resolution}')
         x, y = y, 240-x-w
-        stop_eyes and (await self._robot.eyes._set_exp('stopped', True))
-        await self._rpc.fill(bgr_to_color565(bgr), x, y, h, w)
+        stop_eyes and (await self._robot.eyes.stop())
+        await self._rpc.fill(bgr_to_color565(util.bgr(color)), x, y, h, w)
 
     @util.mode()
-    async def set_pixel(self, x, y, bgr):
+    async def set_pixel(self, x, y, color):
         """设置像素点的颜色
 
         :param x: 要设置的像素点的 x 坐标
         :type x: int
         :param y: 要设置的像素点的 y 坐标
         :type y: int
-        :param bgr: 颜色（bgr 模式）
-        :type bgr: tuple
+        :param color: 颜色（bgr 模式）
+        :type color: str/tuple
         :raises ValueError: 坐标超出屏幕范围时抛出异常
         """
         if not self._in_range((x, y)):
             raise ValueError(f'Pixel must not exceed dimensions of screen {self.resolution}')
         x, y = y, 240-x-1
-        await self._rpc.pixel(x, y, bgr_to_color565(bgr))
+        await self._rpc.pixel(x, y, bgr_to_color565(util.bgr(color)))
 
     @util.mode()
     async def block_display(self, image, x, y):

@@ -3,7 +3,13 @@ import asyncio
 from concurrent import futures
 from wsmprpc import RPCStream
 import numpy as np
+import colorzero
 
+def bgr(color):
+    if isinstance(color, str):
+        return tuple(reversed(colorzero.Color(color).rgb_bytes))
+    else:
+        return color
 
 def mode(force_sync=True, property_type=None):
     def func_deco(func):
@@ -161,7 +167,7 @@ class MultiplexOutputStream:
             pass
 
     def force_put_nowait(self, o):
-        # see `wsmprpc.RPCStream`
+        # see `wsmprpc.RPCStream
         for s in self._output_streams:
             s.force_put_nowait(o)
 
@@ -181,4 +187,4 @@ class MultiplexOutputStreamComponent(StreamComponent):
         if self._in_event_loop():
             return OutputStream(self._multiplex_output_stream, maxsize=self._q_size)
         else:
-            return self.run_coroutine_threadsafe(self._async_get_buffer, self._lo).result()
+            return asyncio.run_coroutine_threadsafe(self._async_get_buffer(), self._lo).result()

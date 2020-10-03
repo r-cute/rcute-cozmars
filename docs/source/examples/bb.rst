@@ -46,7 +46,7 @@
     song = ['D4', 'G4', 'G4', 'B4', 'C5', 'B4', 'A4',
             ('G4', 'A4'), 'B4', 'B4', 'B4', 'B4', ('A4', 'B4'), 'A4', 'G4']
 
-    with Robot('192.168.1.102') as robot:
+    with Robot('0a3c') as robot:
         robot.buzzer.play(song, tempo=120)
 
 .. seealso::

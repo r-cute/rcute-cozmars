@@ -38,7 +38,7 @@ class AioRobot:
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
-        self._host = 'rcute-cozmars-' serial_or_ip + '.local' if len(serial_or_ip) == 4 else serial_or_ip
+        self._host = 'rcute-cozmars-' + serial_or_ip + '.local' if len(serial_or_ip) == 4 else serial_or_ip
         self._mode = 'aio'
         self._connected = False
         self._screen = screen.Screen(self)
@@ -153,6 +153,7 @@ class AioRobot:
             self._serial = about['serial']
             self._firmware_version = about['version']
             self._hostname = about['hostname']
+            self._mac = about['mac']
             self._sensor_task = asyncio.create_task(self._get_sensor_data())
             self._eye_anim_task = asyncio.create_task(self._eye_anim.animate(self))
             self._connected = True
@@ -191,10 +192,10 @@ class AioRobot:
                 elif event == 'in_range':
                     await self._call_callback(self.sonar.when_in_range, data)
                 elif event == 'lir':
-                    self.infrared._state = data ^ 1, self.infrared._state[1]
+                    self.infrared._state = data, self.infrared._state[1]
                     await self._call_callback(self.infrared.when_state_changed, self.infrared._state)
                 elif event == 'rir':
-                    self.infrared._state = self.infrared._state[0], data ^ 1
+                    self.infrared._state = self.infrared._state[0], data
                     await self._call_callback(self.infrared.when_state_changed, self.infrared._state)
             except Exception as e:
                 logger.exception(e)
@@ -252,6 +253,11 @@ class AioRobot:
         """
         await self._rpc.speed((1,-1), duration)
 
+    @util.mode()
+    async def stop(self):
+        """停止"""
+        await self._rpc.speed((0, 0))
+
     @property
     def hostname(self):
         """Cozmars 的网址"""
@@ -270,6 +276,12 @@ class AioRobot:
 
         """
         return self._firmware_version
+
+    @property
+    def mac(self):
+        """Cozmars 的 MAC 地址"""
+        return self._mac
+
 
     @property
     def serial(self):

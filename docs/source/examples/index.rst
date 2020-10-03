@@ -11,5 +11,4 @@
    video_audio
    screen
    animation
-   poweroff
    cube

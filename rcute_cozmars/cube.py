@@ -1,4 +1,3 @@
-
 import asyncio
 import aiohttp
 import websockets
@@ -50,6 +49,7 @@ class AioCube:
             self._serial = about['serial']
             self._firmware_version = about['version']
             self._hostname = about['hostname']
+            self._mac = about['mac']
             self._event_task = asyncio.create_task(self._get_event)
             self._connected = True
 
@@ -116,6 +116,11 @@ class AioCube:
         return self._firmware_version
 
     @property
+    def mac(self):
+        """魔方的 MAC 地址"""
+        return self._mac
+
+    @property
     def serial(self):
         """魔方的序列号"""
         return self._serial
@@ -127,12 +132,15 @@ class AioCube:
 
     @util.mode(property_type='setter')
     async def color(self, *args):
-    """LED 灯的 RGB 颜色"""
-        return await self._rpc.rgb(*args)
+        """LED 灯的 BGR 颜色"""
+        if args:
+            await self._rpc.bgr(*util.bgr(args[0]))
+        else:
+            return await self._rpc.bgr()
 
     @util.mode(property_type='getter')
     async def acceleration(self):
-    """加速度失量"""
+        """加速度失量"""
         return await self._rpc.accel()
 
     @util.mode(property_type='getter')

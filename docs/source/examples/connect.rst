@@ -35,14 +35,15 @@
 
         from rcute_cozmars import Robot
 
-        with Robot('192.168.1.102') as robot:
+        # 以下均假设机器人的序列号是 '0a3c', 你需要把它换成你的 Cozmars 的序列号！
+        with Robot('0a3c') as robot:
             robot.forward(2)    # 让机器人前进 2 秒
 
 
 2. 显示地调用 :meth:`connect` 和 :meth:`disconnect` 方法来建立和断开连接，这种方法适合在终端窗口里用交互的方式控制机器人：
 
     >>> from rcute_cozmars import Robot
-    >>> robot = Robot('192.168.1.102')
+    >>> robot = Robot('0a3c')
     >>> robot.connet()
     >>> robot.forward(2)
     >>> robot.disconnect()  # 最后记得断开连接

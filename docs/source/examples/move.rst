@@ -6,7 +6,7 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 首先连接机器人：
 
     >>> from rute_cozmars import Robot
-    >>> robot = Robot('192.168.1.102')
+    >>> robot = Robot('10a3c')
     >>> robot.connect()
 
 举举手
@@ -92,7 +92,7 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 
     from rcute_cozmars import Robot
 
-    with Robot('192.168.1.102') as robot:
+    with Robot('0a3c') as robot:
 
         robot.head.default_speed = None # defaul_speed 设为 None，表示最快速度
 

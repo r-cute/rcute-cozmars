@@ -16,19 +16,25 @@
     from time import sleep
     from signal import pause
 
-    with Robot('192.168.1.102') as robot:
+    with Robot('0a3c') as robot:
 
         sleep(3)
         robot.eyes.expression = 'angry'
-        robot.eyes.color = (0, 0, 255)
+        robot.eyes.color = 'red'
 
         sleep(3)
         robot.eyes.expression = 'happy'
-        robot.eyes.color = (255, 0, 0)
+        robot.eyes.color = 'green'
 
         pause()
 
 如果要隐藏眼睛，只需调用 :data:`eyes` 的 :meth:`hide` 方法； 而 :meth:`show` 方法让眼睛重新出现
+
+..note ::
+
+    设置颜色时可以用表示颜色的字符串，例如 ` robot.eyes.color = 'yellow'`，也可以用 BGR 色彩模式 `robot.eyes.color = (255, 255, 0)`
+
+    注意：为了与 opencv 一致，我们使用 BGR 而不是 RGB 色彩模式！
 
 显示屏
 ---------
@@ -44,7 +50,7 @@
     from rcute_cozmars import Robot
     import cv2
 
-    with Robot('192.168.1.102') as robot:
+    with Robot('0a3c') as robot:
 
         # 读取一幅 ❤ 的图片
         heart = cv2.imread('./heart.png')

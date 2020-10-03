@@ -1,9 +1,8 @@
+colorzero
 gpiozero
 aiohttp
 opencv-python
 numpy
-soundfile
 sounddevice
 websockets
 wsmprpc
-Pillow

@@ -21,9 +21,9 @@ class EyeAnimation(util.Component):
 
     @util.mode(property_type='setter')
     async def color(self, color=None):
-        """眼睛的颜色，默认是青色"""
+        """眼睛的颜色(BGR 模式)，默认是青色"""
         if color:
-            self._color = color
+            self._color = util.bgr(color)
             self._create_eye()
         else:
             return self._color
@@ -45,8 +45,10 @@ class EyeAnimation(util.Component):
 
     @util.mode(property_type='setter')
     async def expression(self, *args):
-        """表情，默认为 `'auto'`，在所有的表情间随机切换"""
+        """表情，默认为 `'auto'`，即在所有的表情间随机切换"""
         if args:
+            if args[0] not in self.expression_list:
+                raise TypeError(f'Unknown expression not in {self.expression_list}')
             await self._set_exp(args[0])
         else:
             return self._expression.split('.')[0]
@@ -98,7 +100,6 @@ class EyeAnimation(util.Component):
         ox0, oy0, ox1, oy1 = LX-self._size//2, Y-self._size//2, RX+self._size//2-1, Y+self._size//2-1
 
         while True:
-
             duration = random.random() *4 + 1
             blink = False
             lresize = rresize = (self._size, self._size)
@@ -202,7 +203,7 @@ class EyeAnimation(util.Component):
             if blink:
                 yt = oy1-(oy1-oy0)//3
                 self._canvas[oy0: yt, ox0: ox1] = (0, 0, 0)
-                await robot.screen.block_display(self._canvas[oy0: yt, ox0: ox1], ox0, oy0, mode='aio')
+                await robot.screen.block_display(self._canvas[oy0: yt, ox0: ox1], ox0, oy0)
                 oy0 = yt
 
             self._canvas[oy0: oy1, ox0: ox1] = (0, 0, 0)
@@ -222,7 +223,7 @@ class EyeAnimation(util.Component):
             x0, y0, w, h = cv2.boundingRect(np.array([(lx0, ly0), (lx1, ly1), (rx0, ry0), (rx1, ry1)]))
             x1, y1 = x0+w, y0+h
             bx, by, bw, bh = cv2.boundingRect(np.array([(x0, y0), (x1-1, y1-1), (ox0, oy0), (ox1, oy1)]))
-            await robot.screen.block_display(self._canvas[by:by+bh, bx:bx+bw], bx, by, mode='aio')
+            await robot.screen.block_display(self._canvas[by:by+bh, bx:bx+bw], bx, by)
 
             ox0, oy0, ox1, oy1 = x0, y0, x1, y1
             olpos, orpos = lpos, rpos

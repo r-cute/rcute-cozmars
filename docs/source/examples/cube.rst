@@ -25,18 +25,20 @@
         from rcute_cozmars import Cube
         import time
 
-        with Cube('192.168.1.103') as cube:
-            cube.color = (255, 0, 0) # 亮红灯3秒钟
+        # 假设魔方的序列号是 556a，你需要把它换成你的魔方的序列号！
+        with Cube('556a') as cube:
+            cube.color = 'red' # 亮红灯3秒钟
             time.sleep(3)
 
 也可以显示地调用 :meth:`connect` 和 :meth:`disconnect` 方法来建立和断开连接：
 
 
     >>> from rcute_cozmars import Cube
-    >>> cube = Cube('192.168.1.103')
+    >>> cube = Cube('556a')
     >>> cube.connet()
-    >>> cube.color = (255, 0, 0)
+    >>> cube.color = 'red'
     >>> cube.disconnect()  # 最后记得断开连接
+
 
 .. note::
 
@@ -70,14 +72,16 @@
 
     from rcute_cozmars import Cube, Cozmars
 
-    with Cube('192.168.1.103') as cube, Cozmars('192.168.1.102') as robot:
+    with Cube('556a') as cube, Cozmars('0a3c') as robot:
         cube.when_rotated_counter_clockwise = lambda: robot.turn_left(3)
         cube.when_rotated_clockwise = lambda: robot.turn_right(3)
         input('回车结束程序')
 
-关机
------------
-魔方的关机就比较随意了，直接按下电源开关让它弹起就是了
+.. note::
+
+    看到了吧，魔方和 Cozmars 的序列号并不是同一个!
+
+    以上程序分别与 Cozmars 和 魔方 Cube 都建立了连接
 
 
 .. seealso::

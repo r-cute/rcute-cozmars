@@ -1,7 +1,7 @@
-传感器
+第六感
 ============
 
-机器人还要能感知周围的环境，光会动的只是机器
+机器人需要能感知周围的环境，光会动的只是机器
 
 这一节先介绍 Cozmars 身上的三个简单的传感器：背上的按钮 :data:`button` 、前头的声纳 :data:`sonar` （超声波距离传感器），和底部的两个红外传感器 :data:`infrared`
 
@@ -27,7 +27,7 @@
     from rcute_cozmars import Robot
     import time
 
-    with Robot('192.168.1.102') as robot:
+    with Robot('0a3c') as robot:
         while True:
             print('按钮状态：','按下' if robot.button.pressed else '松开')
             print('红外传感器状态：', robot.infrared.state)
@@ -42,7 +42,7 @@
     from rcute_cozmars import Robot
     import time
 
-    with Robot('192.168.1.102') as robot:
+    with Robot('0a3c') as robot:
 
         while True: # 不断循环，按 Ctrl + C 退出
 
@@ -63,7 +63,7 @@
     from rcute_cozmars import Robot
     from signal import pause
 
-    with Robot('192.168.1.102') as robot:
+    with Robot('0a3c') as robot:
 
         def ring(dist):
             robot.buzzer.set_tone('C4', 1)
@@ -83,7 +83,7 @@
     from rcute_cozmars import Robot
     from signal import pause
 
-    with Robot('192.168.1.102') as robot:
+    with Robot('0a3c') as robot:
 
         def steer(state):
             print('红外传感器读数:', state)
@@ -95,7 +95,7 @@
 
 
 
-:data:`button` 的回调函数就更丰富了，有 :data:`when_pressed` 、:data:`when_released`、 :data:`when_held` 和 :data:`when_double_pressed` ，分别是当按钮被按下、被释放、被按住、被双击时的回调函数，这里就不一一演示了，请试着阅读以下相关的 API，自己测试一下！
+:data:`button` 的回调函数就更丰富了，有 :data:`when_pressed` 、:data:`when_released`、 :data:`when_held` 和 :data:`when_double_pressed` ，分别是当按钮被按下、被释放、被长按、被双击时的回调函数，这里就不一一演示了，请试着阅读以下相关的 API，自己测试一下！
 
 .. seealso::
 

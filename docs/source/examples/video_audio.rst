@@ -22,8 +22,8 @@
     from rcute_cozmars import Robot
     import cv2
 
-    # 把以下 IP 地址换成你的 Cozmars 的 IP 地址
-    with Robot('192.168.1.102') as robot:
+    # 把以下序列号换成你的 Cozmars 的序列号
+    with Robot('0a3c') as robot:
 
         with robot.camera.get_buffer() as cam_buf:
 
@@ -49,29 +49,30 @@
     import soundfile as sf
     import numpy as np
 
-    # 把以下 IP 地址换成你的 Cozmars 的 IP 地址
-    with Robot('192.168.1.102') as robot:
+    # 把以下序列号换成你的 Cozmars 的序列号
+    with Robot('0a3c') as robot:
         mic = robot.microphone
 
         # 把麦克风的音量调到 100%
         mic.volumn = 100
 
-        print(f'麦克风输出流中每个数据块是 {mic.frame_time} 秒的音频')
+        print(f'麦克风输出流中每个数据块是 {mic.frame_duration} 秒的音频')
 
-        with mic.get_buffer() as mic_buf, sf.SoundFile('sound.wav', mode='b', samplerate=mic.sample_rate, channels=mic.channels, subtype='PCM_24') as file:
+        with mic.get_buffer() as mic_buf, sf.SoundFile('sound.wav', mode='w', samplerate=mic.sample_rate, channels=mic.channels, subtype='PCM_24') as file:
 
             duration = 0
             for data in mic_buf:
                 data = np.frombuffer(data, dtype=mic.dtype)
                 file.write(data)
 
-                duration += mic.frame_time
+                duration += mic.frame_
                 # 麦克风输出流中每个数据块默认是 0.1 秒的音频，录制 5 秒后结束
                 if duration >= 5:
                     break
 
 
 这个程序需要 soundfile 模块用来操作声音文件，如果没有安装 soundfile ，可以在命令行输入 `pip install soundfile` 安装
+
 
 如果细心的话，你会注意到程序中用到了 :data:`microphone` 的几个属性： :data:`volumn` 用来调节麦克风的音量大小， :data:`sample_rate` 、 :data:`channels` 和 :data:`frame_duration` 分别是麦克风的采样率、声道数和每次从输出流中读取的数据块的时长。除了音量外，这些属性通常不需要修改。
 
