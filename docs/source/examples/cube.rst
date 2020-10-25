@@ -4,7 +4,7 @@
 连接魔方
 ----------
 
-魔方 Cube 是独立于 Cozmars 机器人的，要控制魔方或者获取魔方的传感器数据，需要与魔方建立连接。方法和 :class:`Robot <./examples/connect.html>`_ 十分类似。
+魔方是独立于 Cozmars 机器人的，要控制魔方或者获取魔方的传感器数据，需要与魔方建立连接。方法和 :class:`Robot <./examples/connect.html>`_ 十分类似。
 
 按下电源开关后，首先导入 :class:`rcute_cozmars.Cube`:
 
@@ -52,19 +52,19 @@
 - :data:`color` 属性能查询或改变魔方 LED 的 RGB 颜色
 - :data:`static` 属性用来指示魔方是否在静止
 - :data:`last_action` 属性可以查询魔方的上一个动作
-- :data:`acceleration` 属性用来查询魔方的加速度/重力的矢量，可以此推断魔方哪个面朝上
+- :data:`acc` 属性用来查询魔方的加速度/重力的矢量，可以此推断魔方哪个面朝上
 
 回调函数
 -----------
 
 魔方有以下几个回调函数，当特定动作发生时会被调用（这些动作的灵感来源于小米魔方控制器）：
 
-- :data:`when_flipped_90` 在魔方被翻转90度时调用
-- :data:`when_flipped_180` 在魔方被翻转180度时调用
-- :data:`when_moved` 在魔方被水平推动时调用
-- :data:`when_rotated_clockwise` 在魔方被顺时针旋转时调用
-- :data:`when_rotated_counter_clockwise` 在魔方被逆时针旋转时调用
+- :data:`when_flipped` 在魔方被翻转90度或180度时调用
+- :data:`when_pushed` 在魔方被水平推动时调用
+- :data:`when_rotated` 在魔方被顺/逆时针旋转时调用
 - :data:`when_shaked` 在魔方被摇晃时调用
+- :data:`when_tilted` 在魔方倾斜时调用
+- :data:`when_fall` 在魔方失重/自由落体时调用
 
 下面的程序分别连接魔方和 Cozmars 机器人，当魔方顺时针转动时让机器人右转，当魔方逆时针转动时让机器人左转：
 
@@ -73,15 +73,21 @@
     from rcute_cozmars import Cube, Cozmars
 
     with Cube('556a') as cube, Cozmars('0a3c') as robot:
-        cube.when_rotated_counter_clockwise = lambda: robot.turn_left(3)
-        cube.when_rotated_clockwise = lambda: robot.turn_right(3)
+
+        def turn(direction):
+            if direction == 'CW': # clockwise
+                robot.turn_right(3)
+            elif direction == 'CCW': # counter-clockwise
+                robot.turn_left(3)
+
+        cube.when_rotated = turn
         input('回车结束程序')
 
 .. note::
 
     看到了吧，魔方和 Cozmars 的序列号并不是同一个!
 
-    以上程序分别与 Cozmars 和 魔方 Cube 都建立了连接
+    以上程序分别与 Cozmars 和 魔方都建立了连接
 
 
 .. seealso::

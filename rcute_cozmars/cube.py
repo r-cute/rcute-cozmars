@@ -21,18 +21,24 @@ class AioCube:
         self._connected = False
         """魔方的上一个动作"""
         self.last_action = None
-        """回调函数，当魔方被翻转90度时调用，默认为 `None` """
-        self.when_flipped_90 = None
-        """回调函数，当魔方被翻转180度时调用，默认为 `None` """
-        self.when_flipped_180 = None
-        """回调函数，当魔方被晃动时调用，默认为 `None` """
+        """回调函数，当魔方被翻转时调用（带一个方向参数表示90度翻转或180度），默认为 `None` """
+        self.when_flipped = None
+        """回调函数，当魔方被甩动时调用，默认为 `None` """
         self.when_shaked = None
-        """回调函数，当魔方被顺时针水平旋转时调用，默认为 `None` """
-        self.when_rotated_clockwise = None
-        """回调函数，当魔方被逆时针水平旋转时调用，默认为 `None` """
-        self.when_rotated_counter_clockwise = None
-        """回调函数，当魔方被水平挪动时调用，默认为 `None` """
+        """回调函数，当魔方被水平旋转时调用（带一个方向参数表示顺时针或逆时针），默认为 `None` """
+        self.when_rotated = None
+        """回调函数，当魔方被水平挪动时调用（带一个方向参数表示移动方向），默认为 `None` """
+        self.when_pushed = None
+        """回调函数，当魔方被倾斜时调用（带一个方向参数表示移动方向），默认为 `None` """
+        self.when_tilted = None
+        """回调函数，当魔方失重/自由落体时调用，默认为 `None` """
+        self.when_fall = None
+        '''
+        """回调函数，当魔方静止时被调用，默认为 `None` """
+        self.when_static = None
+        """回调函数，当魔方被移动时调用，默认为 `None` """
         self.when_moved = None
+        '''
 
     def _in_event_loop(self):
         return True
@@ -42,7 +48,7 @@ class AioCube:
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self._host}:81')
             if '-1' == await self._ws.recv():
-                raise RuntimeError('无法连接 魔方, 请先关闭其他已经连接 魔方的程序')
+                raise RuntimeError('无法连接魔方, 请先关闭其他正在连接魔方的程序')
             self._rpc = RPCClient(self._ws)
             about = json.loads(await self._get('/about'))
             self._ip = about['ip']
@@ -50,7 +56,7 @@ class AioCube:
             self._firmware_version = about['version']
             self._hostname = about['hostname']
             self._mac = about['mac']
-            self._event_task = asyncio.create_task(self._get_event)
+            self._event_task = asyncio.create_task(self._get_event())
             self._connected = True
 
     async def _call_callback(self, cb, *args):
@@ -61,21 +67,11 @@ class AioCube:
                 self._lo.run_in_executor(None, cb, *args)
 
     async def _get_event(self):
-        self._event_rpc = self._rpc.mpu_stream()
+        self._event_rpc = self._rpc.mpu_event()
         async for event in self._event_rpc:
             try:
-                if event == 'flipped_90':
-                    await self._call_callback(self.when_flipped_90)
-                elif event == 'flipped_180':
-                    await self._call_callback(self.when_flipped_180)
-                elif event == 'rotated_clockwise':
-                    await self._call_callback(self.when_rotated_clockwise)
-                elif event == 'rotated_counter_clockwise':
-                    await self._call_callback(self.when_rotated_counter_clockwise)
-                elif event == 'moved':
-                    await self._call_callback(self.when_moved)
-                elif event == 'shaked':
-                    await self._call_callback(self.when_shaked)
+                self.last_action = event
+                await self._call_callback(getattr(self, 'when_'+event[0], None), *event[1:])
             except Excpetion as e:
                 logger.exception(e)
 
@@ -139,13 +135,13 @@ class AioCube:
             return await self._rpc.bgr()
 
     @util.mode(property_type='getter')
-    async def acceleration(self):
-        """加速度失量"""
-        return await self._rpc.accel()
+    async def acc(self):
+        """加速度失量，当魔方静止或慢速运动时，加速度约等于重力加速度"""
+        return await self._rpc.mpu_acc()
 
     @util.mode(property_type='getter')
     async def static(self):
-        return await self._rpc.static()
+        return await self._rpc.mpu_static()
 
 
 class Cube(AioCube):
@@ -173,11 +169,11 @@ class Cube(AioCube):
         self._lo = asyncio.new_event_loop()
         self._event_thread = threading.Thread(target=self._run_loop, args=(self._lo,), daemon=True)
         self._event_thread.start()
-        asyncio.run_coroutine_threadsafe(AioRobot.connect(self), self._lo).result()
+        asyncio.run_coroutine_threadsafe(AioCube.connect(self), self._lo).result()
 
     def disconnect(self):
         """断开 魔方的连接"""
-        asyncio.run_coroutine_threadsafe(AioRobot.disconnect(self), self._lo).result()
+        asyncio.run_coroutine_threadsafe(AioCube.disconnect(self), self._lo).result()
         self._lo.call_soon_threadsafe(self._done_ev.set)
         self._event_thread.join(timeout=5)
 
