@@ -4,11 +4,11 @@
 连接魔方
 ----------
 
-魔方是独立于 Cozmars 机器人的，要控制魔方或者获取魔方的传感器数据，需要与魔方建立连接。方法和 :class:`Robot <./examples/connect.html>`_ 十分类似。
+魔方是独立于 Cozmars 机器人的，要控制魔方或者获取魔方的传感器数据，需要与魔方建立连接。方法和 :class:`Robot` 十分类似。
 
 按下电源开关后，首先导入 :class:`rcute_cozmars.Cube`:
 
-..code:: python
+.. code:: python
 
     from cozmars import Cube
 
@@ -68,7 +68,7 @@
 
 下面的程序分别连接魔方和 Cozmars 机器人，当魔方顺时针转动时让机器人右转，当魔方逆时针转动时让机器人左转：
 
-..code:: python
+.. code:: python
 
     from rcute_cozmars import Cube, Cozmars
 
