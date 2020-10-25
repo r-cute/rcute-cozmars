@@ -31,6 +31,8 @@ class AioCube:
         self.when_pushed = None
         """回调函数，当魔方被倾斜时调用（带一个方向参数表示移动方向），默认为 `None` """
         self.when_tilted = None
+        """回调函数，轻敲魔方时被调用，默认为 `None` """
+        self.when_tapped = None
         """回调函数，当魔方失重/自由落体时调用，默认为 `None` """
         self.when_fall = None
         '''

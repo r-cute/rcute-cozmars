@@ -57,13 +57,14 @@
 回调函数
 -----------
 
-魔方有以下几个回调函数，当特定动作发生时会被调用（这些动作的灵感来源于小米魔方控制器）：
+魔方支持丰富的手势，当特定动作发生时会被调用（这些动作的灵感来源于小米魔方控制器）：
 
 - :data:`when_flipped` 在魔方被翻转90度或180度时调用
 - :data:`when_pushed` 在魔方被水平推动时调用
 - :data:`when_rotated` 在魔方被顺/逆时针旋转时调用
 - :data:`when_shaked` 在魔方被摇晃时调用
 - :data:`when_tilted` 在魔方倾斜时调用
+- :data:`when_tapped` 在轻敲魔方时调用
 - :data:`when_fall` 在魔方失重/自由落体时调用
 
 下面的程序分别连接魔方和 Cozmars 机器人，当魔方顺时针转动时让机器人右转，当魔方逆时针转动时让机器人左转：
@@ -75,12 +76,33 @@
     with Cube('556a') as cube, Cozmars('0a3c') as robot:
 
         def turn(direction):
-            if direction == 'CW': # clockwise
+            if direction == 'CW': # 顺时针旋转
                 robot.turn_right(3)
-            elif direction == 'CCW': # counter-clockwise
+            elif direction == 'CCW': # 逆时针旋转
                 robot.turn_left(3)
 
         cube.when_rotated = turn
+        input('回车结束程序')
+
+另一个例子，使用倾斜 tilted 手势：
+
+.. code:: python
+
+    from rcute_cozmars import Cube, Cozmars
+
+    with Cube('556a') as cube, Cozmars('0a3c') as robot:
+
+        def move_robot(dir):
+            if dir == '+Y':
+                robot.head.angle = 20
+            elif dir == '-Y':
+                robot.head.angle = -20
+            elif dir == '+X':
+                robot.lift.height = 1
+            elif dir == '-X':
+                robot.lift.height = 0
+
+        cube.when_tilted = move_robot
         input('回车结束程序')
 
 .. note::
