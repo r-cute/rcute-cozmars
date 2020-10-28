@@ -24,12 +24,12 @@ import threading
 import logging
 import json
 from wsmprpc import RPCClient, RPCStream
-from . import util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, eye_animation, cube_animation
+from . import util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, animation
+from .animation import animations
 
 logger = logging.getLogger("rcute-cozmars")
 
-animations = {}
-animations.update(cube_animation.animations)
+
 
 class AioRobot:
     """Cozmars 机器人的异步 (async/await) 模式
