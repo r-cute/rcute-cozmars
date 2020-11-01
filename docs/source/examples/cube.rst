@@ -52,7 +52,8 @@ Cozmars的玩伴——魔方
 - :data:`color` 属性能查询或改变魔方 LED 的 RGB 颜色
 - :data:`static` 属性用来指示魔方是否在静止
 - :data:`last_action` 属性可以查询魔方的上一个动作
-- :data:`acc` 属性用来查询魔方的加速度/重力的矢量，可以此推断魔方哪个面朝上
+- :data:`acc` 属性用来查询魔方的加速度/重力的矢量
+- :data:` top_face` 当魔方静止时，该属性用来查询魔方哪个面朝上
 
 回调函数
 -----------
@@ -66,6 +67,8 @@ Cozmars的玩伴——魔方
 - :data:`when_tilted` 在魔方倾斜时调用
 - :data:`when_tapped` 在轻敲魔方时调用
 - :data:`when_fall` 在魔方失重/自由落体时调用
+- :data:`when_moved` 在魔方被移动时调用（包括以上动作）
+- :data:`when_static` 在魔方恢复静止时调用
 
 下面的程序分别连接魔方和 Cozmars 机器人，当魔方顺时针转动时让机器人右转，当魔方逆时针转动时让机器人左转：
 

@@ -1,5 +1,7 @@
-animation
+Animation
 ==============
+
+一个 Animation 其实是一组动作
 
 .. seealso::
 

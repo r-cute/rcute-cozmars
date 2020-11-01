@@ -18,6 +18,7 @@ class AioCube:
     def __init__(self, serial_or_ip):
         self._host = 'rcute-cube-' + serial_or_ip + '.local' if len(serial_or_ip) == 4 else serial_or_ip
         self._mode = 'aio'
+        self._state = 'moved'
         self._connected = False
         """魔方的上一个动作"""
         self.last_action = None
@@ -35,6 +36,10 @@ class AioCube:
         self.when_tapped = None
         """回调函数，当魔方失重/自由落体时调用，默认为 `None` """
         self.when_fall = None
+        """回调函数，当魔方被移动时调用（包括以上动作），默认为 `None` """
+        self.when_moved = None
+        """回调函数，当魔方恢复静止时调用，默认为 `None` """
+        self.when_static = None
         '''
         """回调函数，当魔方静止时被调用，默认为 `None` """
         self.when_static = None
@@ -72,7 +77,10 @@ class AioCube:
         self._event_rpc = self._rpc.mpu_event()
         async for event in self._event_rpc:
             try:
-                self.last_action = event
+                if event[0] in ('static', 'moved'):
+                    self._state = event[0]
+                else:
+                    self.last_action = event
                 await self._call_callback(getattr(self, 'when_'+event[0], None), *event[1:])
             except Excpetion as e:
                 logger.exception(e)
@@ -138,12 +146,26 @@ class AioCube:
 
     @util.mode(property_type='getter')
     async def acc(self):
-        """加速度失量，当魔方静止或慢速运动时，加速度约等于重力加速度"""
+        """加速度失量，当魔方静止时，加速度约等于重力加速度"""
         return await self._rpc.mpu_acc()
 
     @util.mode(property_type='getter')
     async def static(self):
-        return await self._rpc.mpu_static()
+        """是否静止"""
+        #return await self._rpc.mpu_static()
+        return self._state == 'static'
+
+    @util.mode(property_type='getter')
+    async def top_face(self):
+        """哪一面朝上，在静止时返回`'+X'` 、 `'-X'` 、 `'+Y'` 等，非静止时返回 `None` """
+        if self._state != 'static':
+            return None
+        acc = await self._rpc.mpu_acc()
+        comp, j = abs(acc[i]), 0
+        for i in range(1, 3):
+            if comp < abs(acc[i]):
+                comp, j = abs(acc[i]), i
+        return ('+' if comp>=0 else '-') + chr(88+j)
 
 
 class Cube(AioCube):
