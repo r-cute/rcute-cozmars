@@ -20,32 +20,27 @@ class AioCube:
         self._mode = 'aio'
         self._state = 'moved'
         self._connected = False
-        """魔方的上一个动作"""
         self.last_action = None
-        """回调函数，当魔方被翻转时调用（带一个方向参数表示90度翻转或180度），默认为 `None` """
+        """魔方的上一个动作"""
         self.when_flipped = None
-        """回调函数，当魔方被甩动时调用，默认为 `None` """
+        """回调函数，当魔方被翻转时调用（带一个方向参数表示90度翻转或180度），默认为 `None` """
         self.when_shaked = None
-        """回调函数，当魔方被水平旋转时调用（带一个方向参数表示顺时针或逆时针），默认为 `None` """
+        """回调函数，当魔方被甩动时调用，默认为 `None` """
         self.when_rotated = None
-        """回调函数，当魔方被水平挪动时调用（带一个方向参数表示移动方向），默认为 `None` """
+        """回调函数，当魔方被水平旋转时调用（带一个方向参数表示顺时针或逆时针），默认为 `None` """
         self.when_pushed = None
-        """回调函数，当魔方被倾斜时调用（带一个方向参数表示移动方向），默认为 `None` """
+        """回调函数，当魔方被水平挪动时调用（带一个方向参数表示移动方向），默认为 `None` """
         self.when_tilted = None
-        """回调函数，轻敲魔方时被调用，默认为 `None` """
+        """回调函数，当魔方被倾斜时调用（带一个方向参数表示移动方向），默认为 `None` """
         self.when_tapped = None
-        """回调函数，当魔方失重/自由落体时调用，默认为 `None` """
+        """回调函数，轻敲魔方时被调用，默认为 `None` """
         self.when_fall = None
+        """回调函数，当魔方失重/自由落体时调用，默认为 `None` """
+        self.when_moved = None
         """回调函数，当魔方被移动时调用（包括以上动作），默认为 `None` """
-        self.when_moved = None
+        self.when_static = None
         """回调函数，当魔方恢复静止时调用，默认为 `None` """
-        self.when_static = None
-        '''
-        """回调函数，当魔方静止时被调用，默认为 `None` """
-        self.when_static = None
-        """回调函数，当魔方被移动时调用，默认为 `None` """
-        self.when_moved = None
-        '''
+
 
     def _in_event_loop(self):
         return True
@@ -81,7 +76,10 @@ class AioCube:
                     self._state = event[0]
                 else:
                     self.last_action = event
-                await self._call_callback(getattr(self, 'when_'+event[0], None), *event[1:])
+                if event[0] in ('static', 'moved', 'fall', 'tapped', 'shaked'):
+                    await self._call_callback(getattr(self, 'when_'+event[0]))
+                else:
+                    await self._call_callback(getattr(self, 'when_'+event[0]), *event[1:])
             except Excpetion as e:
                 logger.exception(e)
 
@@ -95,7 +93,6 @@ class AioCube:
         if self._connected:
             self._event_rpc.cancel()
             await asyncio.gather(self._event_task, return_exceptions=True)
-            await self.color(0, 0, 0)
             await self._ws.close()
             self._connected = False
 
@@ -140,13 +137,13 @@ class AioCube:
     async def color(self, *args):
         """LED 灯的 BGR 颜色"""
         if args:
-            await self._rpc.bgr(*util.bgr(args[0]))
+            await self._rpc.rgb(*(util.bgr(args[0]) if args[0] is not None else (0,0,0))[::-1])
         else:
-            return await self._rpc.bgr()
+            return (await self._rpc.rgb())[::-1]
 
     @util.mode(property_type='getter')
     async def acc(self):
-        """加速度失量，当魔方静止时，加速度约等于重力加速度"""
+        """加速度失量，当魔方静止时，加速度等于重力加速度（但实际上是有误差的）"""
         return await self._rpc.mpu_acc()
 
     @util.mode(property_type='getter')
@@ -161,11 +158,11 @@ class AioCube:
         if self._state != 'static':
             return None
         acc = await self._rpc.mpu_acc()
-        comp, j = abs(acc[i]), 0
+        comp, j = abs(acc[0]), 0
         for i in range(1, 3):
             if comp < abs(acc[i]):
                 comp, j = abs(acc[i]), i
-        return ('+' if comp>=0 else '-') + chr(88+j)
+        return ('-' if acc[j]>0 else '+') + chr(88+j)
 
 
 class Cube(AioCube):

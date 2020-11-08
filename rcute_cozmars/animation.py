@@ -1,4 +1,4 @@
-import eye_animation, cube_animation
+from . import cube_animation
 
 animations = {}
 for anim in [cube_animation]:

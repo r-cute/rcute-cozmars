@@ -7,7 +7,7 @@ import colorzero
 
 def bgr(color):
     if isinstance(color, str):
-        return tuple(reversed(colorzero.Color(color).rgb_bytes))
+        return colorzero.Color(color).rgb_bytes[::-1]
     else:
         return color
 

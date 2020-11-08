@@ -24,7 +24,7 @@ import threading
 import logging
 import json
 from wsmprpc import RPCClient, RPCStream
-from . import util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, animation
+from . import util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, eye_animation
 from .animation import animations
 
 logger = logging.getLogger("rcute-cozmars")
