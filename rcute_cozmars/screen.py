@@ -116,25 +116,23 @@ class Screen(util.Component):
         await self._rpc.display(image_to_data(np.rot90(filled_img)), 0, 0, H-1, W-1)
 
     @util.mode()
-    async def text(self, text, color='cyan', size=30, font=None, bg_color='black', stop_eyes=True):
+    async def text(self, text, color='cyan', size=1, position=None, stop_eyes=True):
         """显示文本
 
         :param text: 要显示的文本
         :type text: str
-        :param font: 字体文件(ttf)，默认为微软雅黑
-        :type font: str, optional
-        :param size: 字体大小，默认为 `30`
-        :type size: int, optional
         :param color: 文本颜色，默认为青色
         :type color: str/tuple, optional
-        :param bg_color: 背景色，默认为黑色
-        :type bg_color: str/tuple, optional
         """
-        font = ImageFont.truetype(font or util.default_font, size)
-        image = Image.new("RGB", self.resolution, bg_color)
-        draw = ImageDraw.Draw(image)
-        location = tuple((a-b)/2 for a, b in zip(self.resolution, font.getsize(text)))
-        draw.text(location, text, fill=color, font=font)
+        # font = ImageFont.truetype(font or util.default_font, size)
+        # image = Image.new("RGB", self.resolution, bg_color)
+        # draw = ImageDraw.Draw(image)
+        # location = tuple((a-b)/2 for a, b in zip(self.resolution, font.getsize(text)))
+        # draw.text(location, text, fill=color, font=font)
+        W, H = self.resolution
+        image = np.zeros((H, W, 3), np.uint8)
+        position = position or ((W-18*len(text))//2,75)
+        image = cv2.putText(image, text, position, cv2.FONT_HERSHEY_SIMPLEX, size, util.bgr(color), 2)
         return await self.display(self, image, stop_eyes=stop_eyes)
 
     def _resize_to_screen(self, img):
