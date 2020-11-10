@@ -76,6 +76,8 @@ class EyeAnimation(util.Component):
             self._exp_before = None
 
     async def _set_exp(self, exp, wait=False):
+        if self._expression == exp:
+            return
         if self._exp_q:
             self._exp_q.full() and self._exp_q.get_nowait()
             self._exp_q.put_nowait(exp)
@@ -111,7 +113,7 @@ class EyeAnimation(util.Component):
             except asyncio.TimeoutError:
                 pass
             if self._expression == 'hidden':
-                await robot.screen.fill((0,0,0), stop_eyes=False, mode='aio')
+                await robot.screen.fill((0,0,0), stop_eyes=False)
                 self._ev.set()
                 while True:
                     self._expression = await self._exp_q.get()

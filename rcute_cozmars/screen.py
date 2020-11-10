@@ -116,8 +116,8 @@ class Screen(util.Component):
         await self._rpc.display(image_to_data(np.rot90(filled_img)), 0, 0, H-1, W-1)
 
     @util.mode()
-    async def text(self, text, color='cyan', size=1, position=None, stop_eyes=True):
-        """显示文本
+    async def text(self, text, color='cyan', stop_eyes=True):
+        """显示简单文本（暂不支持中文）
 
         :param text: 要显示的文本
         :type text: str
@@ -131,9 +131,8 @@ class Screen(util.Component):
         # draw.text(location, text, fill=color, font=font)
         W, H = self.resolution
         image = np.zeros((H, W, 3), np.uint8)
-        position = position or ((W-18*len(text))//2,75)
-        image = cv2.putText(image, text, position, cv2.FONT_HERSHEY_SIMPLEX, size, util.bgr(color), 2)
-        return await self.display(self, image, stop_eyes=stop_eyes)
+        image = cv2.putText(image, text, ((W-18*len(text))//2, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, util.bgr(color), 2)
+        return await self.display(image, stop_eyes=stop_eyes)
 
     def _resize_to_screen(self, img):
         h, w = img.shape[:2]
