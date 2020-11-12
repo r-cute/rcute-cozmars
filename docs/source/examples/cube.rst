@@ -1,4 +1,4 @@
-Cozmars的玩伴——魔方
+Cozmars 的玩伴——魔方
 =======================
 
 连接魔方
@@ -49,11 +49,11 @@ Cozmars的玩伴——魔方
 
 我们可以通过几个简单的属性或方法来控制魔方或查询魔方的状态：
 
-- :data:`color` 属性能查询或改变魔方 LED 的 RGB 颜色
+- :data:`color` 属性能查询或改变魔方 LED 的 GBR 颜色
 - :data:`static` 属性用来指示魔方是否在静止
 - :data:`last_action` 属性可以查询魔方的上一个动作
 - :data:`acc` 属性用来查询魔方的加速度/重力的矢量
-- :data:` top_face` 当魔方静止时，该属性用来查询魔方哪个面朝上
+- :data:`top_face` 当魔方静止时，该属性用来查询魔方哪个面朝上，放魔方不是静止状态时返回 `None`
 
 回调函数
 -----------
@@ -87,7 +87,7 @@ Cozmars的玩伴——魔方
         cube.when_rotated = turn
         input('回车结束程序')
 
-另一个例子，使用倾斜 tilted 手势：
+在看一个例子，使用 tilted 倾斜手势：
 
 .. code:: python
 
