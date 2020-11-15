@@ -5,4 +5,4 @@ opencv-python
 numpy
 sounddevice
 websockets
-wsmprpc
+wsmprpc>=1.1.1
