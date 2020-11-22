@@ -1,7 +1,7 @@
 Animation
 ==============
 
-一个 Animation 其实是一组动作
+一个 Animation 其实是一组动作。。。tobe continued...
 
 .. seealso::
 

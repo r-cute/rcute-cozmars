@@ -35,8 +35,8 @@
 
     注意：为了与 opencv 一致，我们使用 BGR 而不是 RGB 色彩模式！
 
-显示屏
----------
+图像和文字
+------------
 
 :class:`Robot` 还有一个 :data:`screen` 属性用来直接控制显示屏，用它的 :meth:`display` 方法来显示图片
 
@@ -58,7 +58,7 @@
         robot.screen.display(heart)
 
         # 然后让显示屏的亮度不断变化
-        for _ in range(5):
+        for _ in range(3):
             robot.screen.set_brightness(0, fade_duration=0.5)
             robot.screen.set_brightness(1, fade_duration=0.5)
 
@@ -68,6 +68,19 @@
 以下图片是程序中用到的 heart.png ，你可以右键把它另存到本地
 
 .. image:: ./heart.png
+
+另外，还可以用 :data:`screen` 的 :meth:`text` 方法显示简单的文本，比如：
+
+.. code:: python
+
+    from rcute_cozmars import Robot
+    from time import sleep
+
+    with Robot('0a3c') as robot:
+        robot.screen.text('I am...')
+        sleep(2)
+        robot.screen.text('COZMARS!', color='white')
+        sleep(2)
 
 .. seealso::
 

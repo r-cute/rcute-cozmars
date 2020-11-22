@@ -2,6 +2,7 @@ colorzero
 gpiozero
 aiohttp
 opencv-python
+opencv-contrib-python
 numpy
 sounddevice
 websockets

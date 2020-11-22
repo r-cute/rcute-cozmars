@@ -29,7 +29,7 @@
 
     with Robot('0a3c') as robot:
         while True:
-            print('按钮状态：','按下' if robot.button.pressed else '松开')
+            print('按钮状态：', '按下' if robot.button.pressed else '松开')
             print('红外传感器状态：', robot.infrared.state)
             print('前方障碍物距离：', robot.sonar.distance, '米')
             print('............................')

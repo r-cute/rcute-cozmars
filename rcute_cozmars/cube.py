@@ -20,6 +20,7 @@ class AioCube:
         self._mode = 'aio'
         self._state = 'moved'
         self._connected = False
+        self._dir2color = {'+X':'red', '-X':'green', '+Y':'blue', '-Y':'yellow', '+Z':'white', '-Z':'orange'}
         self.last_action = None
         """魔方的上一个动作"""
         self.when_flipped = None
@@ -29,7 +30,7 @@ class AioCube:
         self.when_rotated = None
         """回调函数，当魔方被水平旋转时调用（带一个方向参数表示顺时针或逆时针），默认为 `None` """
         self.when_pushed = None
-        """回调函数，当魔方被水平挪动时调用（带一个方向参数表示移动方向），默认为 `None` """
+        """回调函数，当魔方被平移时调用（带一个方向参数表示移动方向），默认为 `None` """
         self.when_tilted = None
         """回调函数，当魔方被倾斜时调用（带一个方向参数表示移动方向），默认为 `None` """
         self.when_tapped = None
@@ -72,15 +73,16 @@ class AioCube:
         self._event_rpc = self._rpc.mpu_event()
         async for event in self._event_rpc:
             try:
+                arg = self._dir2color.get(event[1], event[1])
                 if event[0] in ('static', 'moved'):
                     self._state = event[0]
                 else:
-                    self.last_action = event
+                    self.last_action = event[0], arg
                 if event[0] in ('static', 'moved', 'fall', 'tapped', 'shaked'):
                     await self._call_callback(getattr(self, 'when_'+event[0]))
                 else:
-                    await self._call_callback(getattr(self, 'when_'+event[0]), *event[1:])
-            except Excpetion as e:
+                    await self._call_callback(getattr(self, 'when_'+event[0]), arg)
+            except Exception as e:
                 logger.exception(e)
 
     @property
@@ -154,7 +156,7 @@ class AioCube:
 
     @util.mode(property_type='getter')
     async def top_face(self):
-        """哪一面朝上，在静止时返回`'+X'` 、 `'-X'` 、 `'+Y'` 等，非静止时返回 `None` """
+        """哪一面朝上，当魔方静止时返回朝上一面的二维码的颜色，非静止时返回 `None` """
         if self._state != 'static':
             return None
         acc = await self._rpc.mpu_acc()
@@ -162,7 +164,7 @@ class AioCube:
         for i in range(1, 3):
             if comp < abs(acc[i]):
                 comp, j = abs(acc[i]), i
-        return ('-' if acc[j]>0 else '+') + chr(88+j)
+        return self._dir2color[('-' if acc[j]>0 else '+') + chr(88+j)]
 
 
 class Cube(AioCube):

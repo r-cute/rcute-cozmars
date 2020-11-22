@@ -1,7 +1,9 @@
-眼睛和耳朵
-=========================
+看和听
+============
 
-屏幕下方的“樱桃小嘴”其实才是 Cozmars 的眼睛，这是一颗 500W 像素的摄像头；而 Cozmars 的耳朵（麦克风）奇怪地长在它的背上，就是按钮旁边那个小圆点。通过摄像头和麦克风回传数据，图像识别、语音识别等更有趣的玩法也成为可能
+其实，屏幕下方的“樱桃小嘴”才是 Cozmars 的眼睛，这是一颗 500W 像素的摄像头；而 Cozmars 的耳朵（麦克风）奇怪地长在它的背上，嗯，就是按钮旁边那个小圆点。
+
+通过摄像头和麦克风，我们就能以 Cozmars 的视角“观海听涛”，图像识别、语音识别等更有趣的玩法也成为可能
 
 .. raw:: html
 
@@ -26,8 +28,8 @@
     with Robot('0a3c') as robot:
 
         with robot.camera.get_buffer() as cam_buf:
-
             print('按下任意键退出')
+
             for frame in cam_buf:
                 cv2.imshow('cozmars camera', frame)
                 if cv2.waitKey(1) > 0:
@@ -71,7 +73,17 @@
                     break
 
 
-这个程序需要 soundfile 模块用来操作声音文件，如果没有安装 soundfile ，可以在命令行输入 `pip install soundfile` 安装
+这个程序需要 |soundfile| 模块用来操作声音文件，如果没有安装 soundfile，可以在命令行输入以下命令来安装：
+
+.. code::
+
+    pip install soundfile
+
+
+.. |soundfile| raw:: html
+
+   <a href='https://pysoundfile.readthedocs.io/en/0.10.0/' target='blank'>soundfile</a>
+
 
 
 如果细心的话，你会注意到程序中用到了 :data:`microphone` 的几个属性： :data:`volumn` 用来调节麦克风的音量大小， :data:`sample_rate` 、 :data:`channels` 和 :data:`frame_duration` 分别是麦克风的采样率、声道数和每次从输出流中读取的数据块的时长。除了音量外，这些属性通常不需要修改。

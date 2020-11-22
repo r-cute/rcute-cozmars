@@ -131,7 +131,7 @@ class Screen(util.Component):
         # draw.text(location, text, fill=color, font=font)
         W, H = self.resolution
         image = np.zeros((H, W, 3), np.uint8)
-        image = cv2.putText(image, text, ((W-18*len(text))//2, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, util.bgr(color), 2)
+        image = cv2.putText(image, text, ((W-20*len(text))//2, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, util.bgr(color), 2)
         return await self.display(image, stop_eyes=stop_eyes)
 
     def _resize_to_screen(self, img):

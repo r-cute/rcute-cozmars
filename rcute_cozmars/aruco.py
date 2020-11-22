@@ -1,14 +1,12 @@
 import cv2
+from cv2 import aruco
 import numpy as np
 
-class QRCodeRecognizer:
-# class QRCodeRecognizer(cv2.QRCodeDetector):
-# inheriting from cv2.QRCodeDetector will bring "segment fault (core dumped)" error when used with asyncio.
-# took me long time to debug, still unclear why.
-# so I had to make cv2.QRCodeDetector a member of this class
+class ArucoDetector:
 
     def __init__(self):
-        self.detector = cv2.QRCodeDetector()
+        self.aruco_dict = aruco.Dictionary_get(aruco.DICT_5X5_250)
+        self.parameters = aruco.DetectorParameters_create()
 
     def angle_between(self, v1, v2):
         return np.arccos(np.clip(np.dot(v1, v2)/np.linalg.norm(v1)/np.linalg.norm(v2), -1, 1))
@@ -31,14 +29,9 @@ class QRCodeRecognizer:
         tr, br = rightMost[np.argsort(rightMost[:, 1]), :]
         return tr, br, bl, tl
 
-    def recognize(self, img):
-        text, points = self.detector.detectAndDecode(img)[:2]
-        if points is not None:
-            points = points.reshape(-1, 2).astype(int)
-        return (points, text) if self.is_square(points) else (None, '')
+    def detect(self, img):
+        mean_c =  cv2.adaptiveThreshold(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY),255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,65,2)
+        return aruco.detectMarkers(mean_c, self.aruco_dict, parameters=self.parameters)[:2]
 
-    def draw_labels(self, img, points, text, color=(0,0,180)):
-        if points is not None:
-            if text:
-                cv2.putText(img, text, (30, 50), cv2.FONT_HERSHEY_DUPLEX, 0.75, color, 1)
-            cv2.polylines(img, [points.reshape(-1, 1, 2)], 1, color)
+    def draw_labels(self, img, corners, ids):
+        aruco.drawDetectedMarkers(img, corners, ids)
