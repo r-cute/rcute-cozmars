@@ -67,7 +67,7 @@
                 data = np.frombuffer(data, dtype=mic.dtype)
                 file.write(data)
 
-                duration += mic.frame_
+                duration += mic.frame_duration
                 # 麦克风输出流中每个数据块默认是 0.1 秒的音频，录制 5 秒后结束
                 if duration >= 5:
                     break

@@ -12,7 +12,7 @@ class MicrophoneMultiplexOutputStream(util.MultiplexOutputStream):
 
 class Microphone(util.MultiplexOutputStreamComponent):
     """麦克风"""
-    def __init__(self, robot, sample_rate=16000, dtype='int16', frame_duration=.1, q_size=5):
+    def __init__(self, robot, sample_rate=16000, dtype='int16', frame_duration=0.1, q_size=10):
         util.MultiplexOutputStreamComponent.__init__(self, robot, q_size, util.MultiplexOutputStream(self))
         self._sample_rate = sample_rate
         self._frame_duration = frame_duration
@@ -87,3 +87,10 @@ class Microphone(util.MultiplexOutputStreamComponent):
             raise RuntimeError('Cannot set volumn while microphone is recording')
         return await self._rpc.microphone_volumn(*args)
 
+    def get_buffer(self):
+        b = util.MultiplexOutputStreamComponent.get_buffer(self)
+        b.sample_width = self.sample_width
+        b.sample_rate = self.sample_rate
+        b.frame_duration = self.frame_duration
+        b.channels = self.channels
+        return b
