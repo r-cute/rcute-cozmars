@@ -24,7 +24,7 @@ import threading
 import logging
 import json
 from wsmprpc import RPCClient, RPCStream
-from . import util, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, eye_animation
+from . import util, env, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, eye_animation
 from .animation import animations
 
 logger = logging.getLogger("rcute-cozmars")
@@ -41,6 +41,7 @@ class AioRobot:
         self._host = 'rcute-cozmars-' + serial_or_ip + '.local' if len(serial_or_ip) == 4 else serial_or_ip
         self._mode = 'aio'
         self._connected = False
+        self._env = env.Env(self)
         self._screen = screen.Screen(self)
         self._camera = camera.Camera(self)
         self._microphone = microphone.Microphone(self)
@@ -90,6 +91,11 @@ class AioRobot:
     def eyes(self):
         """眼睛"""
         return self._eye_anim
+
+    @property
+    def env(self):
+        """环境变量"""
+        return self._env
 
     @property
     def button(self):

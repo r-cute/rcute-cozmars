@@ -6,7 +6,7 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 首先连接机器人：
 
     >>> from rute_cozmars import Robot
-    >>> robot = Robot('10a3c')
+    >>> robot = Robot('0a3c')
     >>> robot.connect()
 
 举举手

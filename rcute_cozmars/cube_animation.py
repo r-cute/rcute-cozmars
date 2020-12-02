@@ -21,6 +21,7 @@ async def detect_and_imshow(cam_buf, rec, win=None):
 
 async def search_for_cube(robot, cam_buf=None, clockwise=True, reverse=2, rec=None, debug=False):
     rec = rec or ArucoDetector()
+    await robot.lift.height(0)
     await robot.head.angle(-15)
     try:
         cam = cam_buf or robot.camera.get_buffer()
@@ -44,7 +45,7 @@ async def search_for_cube(robot, cam_buf=None, clockwise=True, reverse=2, rec=No
 async def center_cube(robot, cam_buf=None, rec=None, debug=False):
     rec = rec or ArucoDetector()
     mid = [a/2 for a in robot.camera.resolution]
-    mid[0] += 40#offset
+    # mid[0] += 40#offset
     try:
         cam = cam_buf or robot.camera.get_buffer()
         not cam_buf and (await cam.open())
@@ -89,8 +90,9 @@ async def aim_at_cube(robot, pts, rec=None, debug=False):
 
 async def dock_with_cube(robot, cam_buf=None, rec=None, debug=False):
     await robot.lift.height(0)
+    offset = await robot.env.get('cube_center_offset')
     rec = rec or ArucoDetector()
-    mid = robot.camera.resolution[0] /2 + 40#offset
+    mid = robot.camera.resolution[0] /2 + offset
     delay = 1 / robot.camera.frame_rate
     count = 0
     try:

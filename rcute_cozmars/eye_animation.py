@@ -9,11 +9,10 @@ class EyeAnimation(util.Component):
     def __init__(self, robot):
         util.Component.__init__(self, robot)
         self._exp_list = ['auto', 'happy', 'sad', 'surprised', 'angry', 'neutral', 'focused', 'sleepy']
-        self._canvas = np.zeros((134, 240, 3), np.uint8)
         self._size = 80
         self._radius = self._size // 4
         self._eye = np.zeros((self._size, self._size, 3), np.uint8)
-        self._expression = 'auto'
+        self._expression = 'auto.neutral'
         self._exp_before = None
         self._gap = 20
         self._color = (255, 255, 0) # cyan
@@ -93,6 +92,7 @@ class EyeAnimation(util.Component):
 
     # very urgly coded eye animation
     async def animate(self, robot):
+        self._canvas = np.zeros((134, 240, 3), np.uint8)
         self._ev = asyncio.Event()
         self._exp_q = asyncio.Queue(1)
         self._create_eye()
@@ -126,9 +126,17 @@ class EyeAnimation(util.Component):
                     if self._expression != 'stopped':
                         break
 
+            if self._expression == 'auto':
+                if random.random() >.7:
+                    self._expression = 'auto.neutral'
+                else:
+                    self._expression = f'auto.{random.choice(self._exp_list)}'
+                if self._expression == 'auto.auto':
+                    self._expression = 'auto'
+                    continue
 
-            if self._expression == 'auto' or 'neutral' in self._expression:
-                x, y = random.randint(-3, 3)*10, random.randint(-3, 3)*9
+            if 'neutral' in self._expression:
+                x, y = random.randint(-3, 3)*10, random.randint(-3, 1)*9
                 lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
 
                 # looking up -> may blink
@@ -143,17 +151,12 @@ class EyeAnimation(util.Component):
                     elif x< 0:
                         rresize = self._size, resize
 
+                if 'auto.' in self._expression and random.random()> .75:
+                    self._expression = 'auto'
+
                 # looking down -> eyelids half closed
-                elif y > 10 or y > 0 and random.random()>.5:
-                    ltbrow = rtbrow = self._size//4*(y//9), 0
-
-                if self._expression == 'auto' and random.random() > .75:
-                    self._expression = f'auto.{random.choice(self._exp_list)}'
-
-            elif self._expression == 'auto.auto':
-                await asyncio.sleep(duration/2)
-                self._expression = 'auto'
-                continue
+                # elif y > 10 or y > 0 and random.random()>.5:
+                #     ltbrow = rtbrow = self._size//4*(y//9), 0
 
             elif 'sleepy' in self._expression:
                 x, y = random.randint(-1, 1)*10, random.randint(2, 3)*9
