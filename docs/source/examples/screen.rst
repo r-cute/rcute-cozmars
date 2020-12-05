@@ -8,24 +8,9 @@
 
 眼睛 :data:`eyes` 可以通过设置 :data:`color` 和 :data:`expression` 来设置眼睛的颜色和表情。可以通过 :data:`eyes` 的 :data:`expression_list` 得到支持的所有表情
 
-让机器人表演一次川剧变脸：
-
-.. code:: python
-
-    from rcute_cozmars import Robot
-    from time import sleep
-
-    with Robot('0a3c') as robot:
-
-        robot.eyes.color = 'red'
-        robot.eyes.expression = 'angry'
-        sleep(3)
-
-        robot.lift.height = 1
-        robot.eyes.color = 'cyan'
-        robot.eyes.expression = 'happy'
-        robot.lift.height = 0
-        sleep(5)
+    >>> robot.eyes.color = 'red'
+    >>> robot.eyes.expression = 'angry'
+    >>> robot.eyes.expression = ('happy', 'lightgreen') # 或者，可以同时设置表情和颜色
 
 如果要隐藏眼睛，只需调用 :data:`eyes` 的 :meth:`hide` 方法； 而 :meth:`show` 方法让眼睛重新出现
 

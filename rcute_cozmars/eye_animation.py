@@ -23,7 +23,7 @@ class EyeAnimation(util.Component):
         if color:
             color = util.bgr(color)
             if color != self._color:
-                self._color = util.bgr(color)
+                self._color = color
                 self._create_eye()
                 await self._exp_q.put(self._expression)
         else:
@@ -45,12 +45,18 @@ class EyeAnimation(util.Component):
         return list(self._exp_list)
 
     @util.mode(property_type='setter')
-    async def expression(self, *args):
+    async def expression(self, exp=None):
         """表情，默认为 `'auto'`，即在所有的表情间随机切换"""
-        if args:
-            if args[0] not in self.expression_list:
+        if exp:
+            exp, color = exp if type(exp)==tuple else (exp, None)
+            if exp not in self.expression_list:
                 raise TypeError(f'Unknown expression not in {self.expression_list}')
-            await self._set_exp(args[0])
+            if color:
+                color = util.bgr(color)
+                if color != self._color:
+                    self._color = color
+                    self._create_eye()
+            await self._set_exp(exp)
         else:
             return self._expression.split('.')[0]
 
