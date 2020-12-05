@@ -52,7 +52,7 @@ Cozmars 的玩伴——魔方
 - :data:`color` 属性能查询或改变魔方 LED 的 GBR 颜色
 - :data:`static` 属性用来指示魔方是否在静止
 - :data:`last_action` 属性可以查询魔方的上一个动作
-- :data:`top_face` 当魔方静止时，该属性用来查询魔方哪个面朝上，放魔方不是静止状态时返回 `None`
+- :data:`top_face` 当魔方静止时，该属性用来查询魔方哪个面朝上，返回值是朝上一面的二维码对应的颜色，当魔方不是静止状态时返回 `None`
 
 ..
     - :data:`acc` 属性用来查询魔方的加速度/重力的矢量
@@ -64,10 +64,10 @@ Cozmars 的玩伴——魔方
 魔方内置运动传感器，支持丰富的手势识别，对应有以下许多不同的回调函数：
 
 - :data:`when_flipped` 在魔方被翻转90度或180度时调用（带有角度参数）
-- :data:`when_pushed` 在魔方被平移时调用（带有方向参数）
+- :data:`when_pushed` 在魔方被平移时调用（带有方向参数，用颜色表示）
 - :data:`when_rotated` 在魔方被顺/逆时针旋转时调用（带有方向参数）
 - :data:`when_shaked` 在魔方被摇晃时调用
-- :data:`when_tilted` 在魔方倾斜时调用（带有方向参数）
+- :data:`when_tilted` 在魔方倾斜时调用（带有方向参数，用颜色表示）
 - :data:`when_tapped` 在轻敲魔方时调用
 - :data:`when_fall` 在魔方失重/自由落体时调用
 - :data:`when_moved` 在魔方被移动时调用（包括以上动作）
@@ -98,14 +98,15 @@ Cozmars 的玩伴——魔方
 
     with Cube('556a') as cube, Cozmars('0a3c') as robot:
 
+        # 当魔方向不同颜色的面倾斜时，机器人做出不同的动作
         def move_robot(dir):
-            if dir == '+Y':
+            if dir == 'red':
                 robot.head.angle = 20
-            elif dir == '-Y':
+            elif dir == 'green':
                 robot.head.angle = -20
-            elif dir == '+X':
+            elif dir == 'blue':
                 robot.lift.height = 1
-            elif dir == '-X':
+            elif dir == 'yellow':
                 robot.lift.height = 0
 
         cube.when_tilted = move_robot
