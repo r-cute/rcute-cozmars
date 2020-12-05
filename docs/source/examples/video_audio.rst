@@ -3,7 +3,7 @@
 
 其实，屏幕下方的“樱桃小嘴”才是 Cozmars 的眼睛，这是一颗 500W 像素的摄像头；而 Cozmars 的耳朵（麦克风）奇怪地长在它的背上，嗯，就是按钮旁边那个小圆点。
 
-通过摄像头和麦克风，我们就能以 Cozmars 的视角“观海听涛”，图像识别、语音识别等更有趣的玩法也成为可能
+通过摄像头和麦克风，我们就能以 Cozmars 的视角“观海听 `Tao <https://github.com/yikeke/tao-of-programming>`_ ”，图像识别、语音识别等更有趣的玩法也成为可能
 
 .. raw:: html
 
@@ -55,20 +55,17 @@
     with Robot('0a3c') as robot:
         mic = robot.microphone
 
-        # 把麦克风的音量调到 100%
-        mic.volumn = 100
-
-        print(f'麦克风输出流中每个数据块是 {mic.frame_duration} 秒的音频')
+        print(f'音量增益 {mic.gain}')
 
         with mic.get_buffer() as mic_buf, sf.SoundFile('sound.wav', mode='w', samplerate=mic.sample_rate, channels=mic.channels, subtype='PCM_24') as file:
 
             duration = 0
-            for data in mic_buf:
-                data = np.frombuffer(data, dtype=mic.dtype)
+            for segment in mic_buf:
+                data = np.frombuffer(segment.raw_data, dtype=mic.dtype)
                 file.write(data)
 
-                duration += mic.frame_duration
                 # 麦克风输出流中每个数据块默认是 0.1 秒的音频，录制 5 秒后结束
+                duration += segment.duration_seconds
                 if duration >= 5:
                     break
 
@@ -86,7 +83,7 @@
 
 
 
-如果细心的话，你会注意到程序中用到了 :data:`microphone` 的几个属性： :data:`volumn` 用来调节麦克风的音量大小， :data:`sample_rate` 、 :data:`channels` 和 :data:`frame_duration` 分别是麦克风的采样率、声道数和每次从输出流中读取的数据块的时长。除了音量外，这些属性通常不需要修改。
+:data:`microphone` 还有几个属性： :data:`volume` 和 :data:`gain` 用来调节麦克风的音量大小， :data:`sample_rate` 、 :data:`channels` 和 :data:`frame_duration` 分别是麦克风的采样率、声道数和每次从输出流中读取的数据块的时长。除了音量增益 :data:`gain` 以外，这些属性通常不需要修改。
 
 .. seealso::
 

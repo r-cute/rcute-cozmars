@@ -73,20 +73,6 @@ class AioRobot:
         """动作列表"""
         return list(animations.keys())
 
-    @util.mode()
-    async def pick_up_cube(self, height=1, debug=False):
-        """拾取魔方
-
-        :param debug: 默认为 `False`，设为 `True` 则会显示摄像头画面
-        :type debug: bool
-        """
-        return await animations['pick_up_cube'](self, height, debug=debug)
-
-    @util.mode()
-    async def put_down_cube(self, height=0):
-        """放下魔方"""
-        return await animations['put_down_cube'](self, height)
-
     @property
     def eyes(self):
         """眼睛"""

@@ -83,29 +83,28 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 
     >>> robot.disconnect()
 
-伸展运动
+川剧变脸
 -------------------
 
-下面是一段完整的代码，让机器人做个伸展运动：
+下面是一段完整的代码，让机器人表演个变脸魔术：
 
 .. code:: python
 
+    import time
     from rcute_cozmars import Robot
 
     with Robot('0a3c') as robot:
 
         robot.head.default_speed = None # defaul_speed 设为 None，表示最快速度
+        robot.lift.default_speed *= 2
 
-        robot.motor.speed = 0.5
-        robot.head.angle = 30
-        robot.lift.set_height(1, duration=2)
-
-        robot.motor.speed = -0.5
-        robot.head.angle = -30
-        robot.lift.set_height(0, duration=2)
-
-        robot.motor.stop()
-        robot.head.set_angle(0, duration=1)
+        for color in ['white', 'red', 'yellow', 'lightgreen']:
+            robot.head.angle = -15
+            robot.lift.height = 1
+            robot.eyes.color = color
+            robot.head.angle = 0
+            robot.lift.height = 0
+            time.sleep(3)
 
 
 .. seealso::

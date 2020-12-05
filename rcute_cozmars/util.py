@@ -2,8 +2,17 @@ import functools
 import asyncio
 from concurrent import futures
 from wsmprpc import RPCStream
-import numpy as np
 import colorzero
+from os import path
+
+PKG = path.dirname(__file__)
+RESOURCE = path.join(PKG, 'resources')
+
+def resource(file_name):
+    return path.join(RESOURCE, file_name)
+
+def pkg(file_name):
+    return path.join(PKG, file_name)
 
 def bgr(color):
     if isinstance(color, str):

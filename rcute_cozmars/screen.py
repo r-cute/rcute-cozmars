@@ -1,6 +1,7 @@
 from . import util
 import numpy as np
 import cv2
+from PIL import Image, ImageFont, ImageDraw
 
 class Screen(util.Component):
     """显示屏"""
@@ -116,23 +117,29 @@ class Screen(util.Component):
         await self._rpc.display(image_to_data(np.rot90(filled_img)), 0, 0, H-1, W-1)
 
     @util.mode()
-    async def text(self, text, color='cyan', stop_eyes=True):
-        """显示简单文本（暂不支持中文）
+    async def text(self, text, size=30, color='cyan', bg_color='black', font=None, stop_eyes=True):
+        """显示简单文本
 
         :param text: 要显示的文本
         :type text: str
+        :param size: 字体大小，默认为 30
+        :type size: int, optional
         :param color: 文本颜色，默认为青色
         :type color: str/tuple, optional
+        :param bg_color: 背景颜色，默认为黑色
+        :type bg_color: str/tuple, optional
+        :param font: 字体文件，默认使用微软雅黑（支持中/英文）
+        :type font: str, optional
         """
-        # font = ImageFont.truetype(font or util.default_font, size)
-        # image = Image.new("RGB", self.resolution, bg_color)
-        # draw = ImageDraw.Draw(image)
-        # location = tuple((a-b)/2 for a, b in zip(self.resolution, font.getsize(text)))
-        # draw.text(location, text, fill=color, font=font)
-        W, H = self.resolution
-        image = np.zeros((H, W, 3), np.uint8)
-        image = cv2.putText(image, text, ((W-20*len(text))//2, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, util.bgr(color), 2)
-        return await self.display(image, stop_eyes=stop_eyes)
+        font = ImageFont.truetype(font or util.resource('msyh.ttc'), size)
+        image = Image.new("RGB", self.resolution, util.bgr(bg_color))
+        draw = ImageDraw.Draw(image)
+        location = tuple((a-b)/2 for a, b in zip(self.resolution, font.getsize(text)))
+        draw.text(location, text, fill=util.bgr(color), font=font)
+        # W, H = self.resolution
+        # image = np.zeros((H, W, 3), np.uint8)
+        # image = cv2.putText(image, text, ((W-20*len(text))//2, 75), cv2.FONT_HERSHEY_SIMPLEX, 1.5, util.bgr(color), 2)
+        return await self.display(np.array(image), stop_eyes=stop_eyes)
 
     def _resize_to_screen(self, img):
         h, w = img.shape[:2]

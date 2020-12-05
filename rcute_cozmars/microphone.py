@@ -2,19 +2,22 @@ import asyncio
 from . import util
 
 
-import numpy as np
+# import numpy as np
+from pydub import AudioSegment
 class MicrophoneMultiplexOutputStream(util.MultiplexOutputStream):
     def __init__(self, component):
         util.MultiplexOutputStream.__init__(self, component)
 
     def force_put_nowait(self, o):
         if not isinstance(o, Exception):
-            o = (np.frombuffer(o, dtype=self._dtype) * self._component.gain).tobytes()
+            # o = (np.frombuffer(o, dtype=self._dtype) * self._component.gain).tobytes()
+            o = AudioSegment(data=o, sample_width=self._component.sample_width, frame_rate=self._component.sample_rate, channels=self._component.channels)
+            o = o.apply_gain(self._component.gain)
         util.MultiplexOutputStream.force_put_nowait(self, o)
 
 class Microphone(util.MultiplexOutputStreamComponent):
     """麦克风"""
-    def __init__(self, robot, gain=10, sample_rate=16000, dtype='int16', frame_duration=0.1, q_size=1):
+    def __init__(self, robot, gain=25, sample_rate=16000, dtype='int16', frame_duration=0.1, q_size=1):
         util.MultiplexOutputStreamComponent.__init__(self, robot, q_size, MicrophoneMultiplexOutputStream(self))
         self._sample_rate = sample_rate
         self._frame_duration = frame_duration
@@ -92,17 +95,17 @@ class Microphone(util.MultiplexOutputStreamComponent):
 
     @property
     def gain(self):
-        """音量增益, 默认为 10"""
+        """音量增益(dBFS), 默认为 25"""
         return self._gain
 
     @gain.setter
     def gain(self, g):
         self._gain = g
 
-    def get_buffer(self):
-        b = util.MultiplexOutputStreamComponent.get_buffer(self)
-        b.sample_width = self.sample_width
-        b.sample_rate = self.sample_rate
-        b.frame_duration = self.frame_duration
-        b.channels = self.channels
-        return b
+    # def get_buffer(self):
+    #     b = util.MultiplexOutputStreamComponent.get_buffer(self)
+    #     b.sample_width = self.sample_width
+    #     b.sample_rate = self.sample_rate
+    #     b.frame_duration = self.frame_duration
+    #     b.channels = self.channels
+    #     return b

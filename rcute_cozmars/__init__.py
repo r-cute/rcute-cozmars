@@ -9,4 +9,5 @@ rcute-cozmars 是3d打印教育机器人 Cozmars 的 Python SDK，实现对机�
 
 from .robot import Robot, AsyncRobot, AioRobot
 from .cube import Cube, AsyncCube, AioCube
+from .animation import animations
 from .version import __version__

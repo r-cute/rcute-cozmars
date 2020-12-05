@@ -12,7 +12,6 @@ class EyeAnimation(util.Component):
         self._size = 80
         self._radius = self._size // 4
         self._eye = np.zeros((self._size, self._size, 3), np.uint8)
-        self._expression = 'auto.neutral'
         self._exp_before = None
         self._gap = 20
         self._color = (255, 255, 0) # cyan
@@ -22,8 +21,11 @@ class EyeAnimation(util.Component):
     async def color(self, color=None):
         """眼睛的颜色(BGR 模式)，默认是青色"""
         if color:
-            self._color = util.bgr(color)
-            self._create_eye()
+            color = util.bgr(color)
+            if color != self._color:
+                self._color = util.bgr(color)
+                self._create_eye()
+                await self._exp_q.put(self._expression)
         else:
             return self._color
 
@@ -91,10 +93,11 @@ class EyeAnimation(util.Component):
         self._exp_before = None
 
     # very urgly coded eye animation
-    async def animate(self, robot):
+    async def animate(self, robot, start_exp=None):
         self._canvas = np.zeros((134, 240, 3), np.uint8)
         self._ev = asyncio.Event()
         self._exp_q = asyncio.Queue(1)
+        self._exp_q.put_nowait(start_exp or 'auto.neutral')
         self._create_eye()
         H, W = self._canvas.shape[:2]
         LX, RX, Y = (W-self._gap-self._size)//2, (W+self._size+self._gap)//2, H//2
@@ -118,12 +121,14 @@ class EyeAnimation(util.Component):
                 while True:
                     self._expression = await self._exp_q.get()
                     if self._expression != 'hidden':
+                        ox0, oy0, ox1, oy1 = 0, 0, *robot.screen.resolution
                         break
             elif self._expression == 'stopped':
                 self._ev.set()
                 while True:
                     self._expression = await self._exp_q.get()
                     if self._expression != 'stopped':
+                        ox0, oy0, ox1, oy1 = 0, 0, *robot.screen.resolution
                         break
 
             if self._expression == 'auto':
