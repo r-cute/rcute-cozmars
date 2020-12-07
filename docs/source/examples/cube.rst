@@ -1,12 +1,12 @@
-Cozmars 的玩伴——魔方
+Cozmars' playmate-Rubik's Cube
 =======================
 
-连接魔方
+Connect cube
 ----------
 
-魔方是独立于 Cozmars 机器人的配件，要控制魔方或者获取魔方的传感器数据，需要与魔方建立连接。方法和 :class:`Robot` 十分类似。
+The Rubik's Cube is an accessory independent of the Cozmars robot. To control the Rubik's Cube or obtain sensor data from the Rubik's Cube, it is necessary to establish a connection with the Rubik's Cube. The method is very similar to :class:`Robot`.
 
-按下电源开关后，首先导入 :class:`rcute_cozmars.Cube`
+After pressing the power switch, first import :class:`rcute_cozmars.Cube`
 
 .. code:: python
 
@@ -18,62 +18,63 @@ Cozmars 的玩伴——魔方
 
 .. role:: red
 
-然后与魔方建立连接，可以使用 :red:`with` 语法：
+Then to establish a connection with the Rubik's Cube, you can use the :red:`with` syntax:
 
 .. code:: python
 
     from rcute_cozmars import Cube
     import time
 
-    # 假设魔方的序列号是 556a，你需要把它换成你的魔方的序列号！
-    with Cube('556a') as cube:
-        cube.color = 'red' # 亮红灯3秒钟
-        time.sleep(3)
+# Assuming that the serial number of the Rubik's Cube is 556a, you need to replace it with the serial number of your Rubik's Cube!
+     with Cube('556a') as cube:
+         cube.color ='red' # red light for 3 seconds
+         time.sleep(3)
 
-也可以显示地调用 :meth:`connect` 和 :meth:`disconnect` 方法来建立和断开连接：
+
+You can also explicitly call the :meth:`connect` and :meth:`disconnect` methods to establish and disconnect the connection:
 
 
     >>> from rcute_cozmars import Cube
     >>> cube = Cube('556a')
     >>> cube.connet()
-    >>> cube.color = 'red'
-    >>> cube.disconnect()  # 最后记得断开连接
+    >>> cube.color ='red'
+    >>> cube.disconnect() # Finally remember to disconnect
 
 
 .. note::
 
-    魔方也是同时只能与一个程序连接
+    The Rubik's Cube can only be connected to one program
 
-几个属性
+Several attributes
 ---------------
 
-我们可以通过几个简单的属性或方法来控制魔方或查询魔方的状态：
+We can control the Rubik's Cube or query the status of the Rubik's Cube through a few simple attributes or methods:
 
-- :data:`color` 属性能查询或改变魔方 LED 的 GBR 颜色
-- :data:`static` 属性用来指示魔方是否在静止
-- :data:`last_action` 属性可以查询魔方的上一个动作
-- :data:`top_face` 当魔方静止时，该属性用来查询魔方哪个面朝上，返回值是朝上一面的二维码对应的颜色，当魔方不是静止状态时返回 `None`
+-:data:`color` property can query or change the GBR color of the Rubik's cube LED
+-The :data:`static` attribute is used to indicate whether the cube is still
+-:data:`last_action` property can query the last action of the Rubik's Cube
+-:data:`top_face` When the Rubik’s Cube is stationary, this attribute is used to query which side of the Rubik’s Cube is facing up. The return value is the color corresponding to the QR code on the upper side. When the Rubik’s Cube is not stationary, it returns `None`
 
 ..
-    - :data:`acc` 属性用来查询魔方的加速度/重力的矢量
+    -The :data:`acc` attribute is used to query the acceleration/gravity vector of the Rubik’s cube
 
 
-手势识别
+Gesture Recognition
 -----------
 
-魔方内置运动传感器，支持丰富的手势识别，对应有以下许多不同的回调函数：
+The Rubik’s cube has a built-in motion sensor, supports rich gesture recognition, and corresponds to many different callback functions as follows:
 
-- :data:`when_flipped` 在魔方被翻转90度或180度时调用（带有角度参数）
-- :data:`when_pushed` 在魔方被平移时调用（带有方向参数，用颜色表示）
-- :data:`when_rotated` 在魔方被顺/逆时针旋转时调用（带有方向参数）
-- :data:`when_shaked` 在魔方被摇晃时调用
-- :data:`when_tilted` 在魔方倾斜时调用（带有方向参数，用颜色表示）
-- :data:`when_tapped` 在轻敲魔方时调用
-- :data:`when_fall` 在魔方失重/自由落体时调用
-- :data:`when_moved` 在魔方被移动时调用（包括以上动作）
-- :data:`when_static` 在魔方恢复静止时调用
+-:data:`when_flipped` is called when the cube is flipped 90 degrees or 180 degrees (with angle parameter)
+-:data:`when_pushed` is called when the cube is translated (with direction parameter, indicated by color)
+-:data:`when_rotated` is called when the cube is rotated clockwise/counterclockwise (with direction parameter)
+-:data:`when_shaked` is called when the cube is shaken
+-:data:`when_tilted` is called when the cube is tilted (with direction parameter, indicated by color)
+-:data:`when_tapped` is called when tapping the cube
+-:data:`when_fall` is called when the cube is weightless/free fall
+-:data:`when_moved` is called when the cube is moved (including the above actions)
+-:data:`when_static` is called when the cube returns to static
 
-下面的程序分别连接魔方和 Cozmars 机器人，当魔方顺时针转动时让机器人右转，当魔方逆时针转动时让机器人左转：
+The following program connects the Rubik's Cube and the Cozmars robot respectively. When the Rubik's Cube turns clockwise, the robot turns right, and when the Rubik's Cube rotates counterclockwise, the robot turns left:
 
 .. code:: python
 
@@ -82,15 +83,15 @@ Cozmars 的玩伴——魔方
     with Cube('556a') as cube, Cozmars('0a3c') as robot:
 
         def turn(direction):
-            if direction == 'CW': # 顺时针旋转
+            if direction =='CW': # rotate clockwise
                 robot.turn_right(2)
-            elif direction == 'CCW': # 逆时针旋转
+            elif direction =='CCW': # rotate counterclockwise
                 robot.turn_left(2)
 
         cube.when_rotated = turn
-        input('回车结束程序')
+        input('Enter to end the program')
 
-再看一个例子，使用 tilted 倾斜手势：
+Let's look at another example, using tilted gesture:
 
 .. code:: python
 
@@ -98,24 +99,24 @@ Cozmars 的玩伴——魔方
 
     with Cube('556a') as cube, Cozmars('0a3c') as robot:
 
-        # 当魔方向不同颜色的面倾斜时，机器人做出不同的动作
+        # When the magic direction tilts on the different colored surfaces, the robot makes different actions
         def move_robot(dir):
-            if dir == 'red':
+            if dir =='red':
                 robot.head.angle = 20
-            elif dir == 'green':
+            elif dir =='green':
                 robot.head.angle = -20
-            elif dir == 'blue':
+            elif dir =='blue':
                 robot.lift.height = 1
-            elif dir == 'yellow':
+            elif dir =='yellow':
                 robot.lift.height = 0
 
         cube.when_tilted = move_robot
-        input('回车结束程序')
+        input('Enter to end the program')
 
 .. note::
 
-    看到了吧，魔方和 Cozmars 的序列号并不是同一个!
-    以上程序分别与 Cozmars 和 魔方都建立了连接
+    As you can see, the serial numbers of Rubik's Cube and Cozmars are not the same!
+    The above procedures have established connections with Cozmars and Rubik’s Cube respectively
 
 
 .. seealso::

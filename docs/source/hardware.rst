@@ -1,51 +1,49 @@
-机器人和魔方的设置
+Robot and Rubik's cube settings
 ===================
 
-开机 / 关机
+Power on/off
 ----------------
+Power on: Press the black power button on the *side* of the Cozmars robot. If the yellow light inside the head is on, it means that Cozmars has started. The start-up process takes about tens of seconds to one minute, and the start-up is complete with a beep. At this time, if you click the button on the *top*, Cozmars's *four-digit serial number* will appear on the screen
 
-开机：按下 Cozmars 机器人 *侧面* 的黑色电源键，如果头部内的黄灯亮着则表示 Cozmars 已经启动，启动过程需要大约几十秒至一分钟，直到“嘀”的一声，启动完毕。这时如果点击 *顶部* 的按钮，屏幕上会出现 Cozmars 的 *四位序列号*
+Shutdown: Press and hold the *top* button for about 5 seconds, and you will hear a beep to shut down. Wait for the yellow light in the head to go out and then press the power button on the *side* to disconnect the power.
 
-关机：长按 *顶上* 的按钮约 5 秒后，听到“嘀～”的一声即是关机，等待头部内的黄色灯熄灭后再按一下 *侧面* 的电源键，断开电源。
-
-而魔方的开/关机就简单多了，开机时按下黑色电源键，如果要关机就再按一次就是了。
+Turning on/off the Rubik's Cube is much simpler. Press the black power button when starting up, and then press it again if you want to shut down.
 
 .. note::
 
-    由于 Cozmars 机器人是由树莓派 zero w 控制，运行的是 raspbian 操作系统，就像电脑一样，关机时最好先关闭操作系统后再断电；而 Cube 魔方是由 ESP8266 单片机控制，关机就不用那么讲究啦
+    Since the Cozmars robot is controlled by the raspberry pi zero w, it runs the raspbian operating system, just like a computer, it is best to shut down the operating system before powering off when shutting down; while the Cube is controlled by the ESP8266 single-chip microcomputer, it does not need to be shut down. Be particular
 
-wifi 设置
+wifi settings
 -----------
 
-Cozmars：第一次启动时由于还没设置 wifi，它默认会提供一个名为 :data:`rcute-cozmars-xxxx` 的 wifi 热点，其中 :data:`xxxx` 是 Cozmars 的序列号。连接这个 wifi 热点，输入密码 :data:`xxxxxxxx` (即两遍序列号)，然后用浏览器访问 :data:`http://rcute-cozmars-xxxx.local`，点击 :data:`wifi 设置` 按钮，输入家里或办公环境的 wifi 名和密码，点击保存。重启网络后机器人即可自动连接刚刚设置的 wifi。
+Cozmars: Since the wifi has not been set up for the first time, it will provide a wifi hotspot named :data:`rcute-cozmars-xxxx` by default, where :data:`xxxx` is the serial number of Cozmars. Connect to this wifi hotspot, enter the password: data:`xxxxxxxx` (ie the serial number twice), then use the browser to visit: data:`http://rcute-cozmars-xxxx.local`, click: data:`wifi settings `Button, enter the wifi name and password of the home or office environment, and click save. After restarting the network, the robot can automatically connect to the wifi just set.
 
-魔方：和 Cozmars 类似，如果未设置 wifi，魔方在启动时会提供一个名为 :data:`rcute-cube-****` 的 wifi 热点，这里 :data:`****` 是魔方的序列号（不同于 Cozmars 的序列号），连接 wifi 热点后，输入 :data:`********` 两遍序列号作为密码，然后访问 :data:`http://rcute-cube-****.local` 可以进行 wifi 设置。
+Rubik's Cube: Similar to Cozmars, if wifi is not set, Rubik's Cube will provide a wifi hotspot named: data:`rcute-cube-****` when starting, where: data:`****` is Rubik's cube Serial number (different from Cozmars serial number), after connecting to the wifi hotspot, enter: data:`********` twice the serial number as the password, then visit: data:`http://rcute-cube -****.local` can set wifi.
 
-每次启动时 Cozmars 和魔方都会先尝试连接设置好的 wifi，如果无法连接则会提供默认的 wifi 热点。
+Cozmars and Rubik's Cube will first try to connect to the set wifi every time they start, and if they cannot connect, they will provide the default wifi hotspot.
 
 
-充电
+Recharge
 ------------
 
-将 Cozmars 或魔方放在充电器上充电，当充电器的灯变绿时表示已经充满。如果出现无法开机、无故重启、连接异常等问题，很可能是电量不足造成的，充电后再试试。
+Put Cozmars or Rubik's Cube on the charger to charge. When the charger's light turns green, it means it is fully charged. If there are problems such as unable to turn on, restarting without reason, abnormal connection, etc., it is likely to be caused by insufficient power. Try again after charging.
 
-建议每次使用前先充满电，这样保证一次能够使用较长时间
+It is recommended to fully charge before each use, so as to ensure that it can be used for a long time.
 
 
-固件升级
+Firmware upgrade
 ----------------
 
-Cozmars 和魔方的固件更新都通过网络推送，在联网时用浏览器访问 Cozmars 的页面 :data:`http://rcute-cozmars-xxxx.local` 或 魔方的页面 :data:`http://rcute-cube-****.local` ，当出现 :data:`更新` 按钮时表示有新版本的固件，点击按钮即可更新固件
+The firmware updates of Cozmars and Rubik's Cube are pushed through the Internet. When connected to the Internet, use a browser to visit the Cozmars page: data:`http://rcute-cozmars-xxxx.local` or the Rubik's Cube page: data:`http://rcute -cube-****.local`, when the :data:`update` button appears, it means there is a new version of the firmware, click the button to update the firmware
 
 
-舵机调试
+Servo debugging
 ----------
-Cozmars 机器人的头部和左、右手臂分别是由三个舵机驱动的，当头部或手臂无法运动到指定位置，或者左右手臂不同步时，可以访问 :data:`http://rcute-cozmars-xxxx.local` 页面，点击 :data:`舵机调试` 按钮进行调试
+The head and left and right arms of the Cozmars robot are driven by three servos respectively. When the head or arms cannot move to the specified position, or the left and right arms are not synchronized, you can visit: data:`http://rcute- cozmars-xxxx.local` page, click the :data:`Servo debugging` button to debug
+(... to be continued...)
 
-（。。。未完待续。。。）
-
-马达调试
+Motor debugging
 ----------
-Cozmars 机器人的左、右轮子由两个马达驱动，当 Cozmars 前进或后退无法走直线时，可以访问 :data:`http://rcute-cozmars-xxxx.local` 页面，点击 :data:`马达调试` 按钮进行调试
+The left and right wheels of the Cozmars robot are driven by two motors. When Cozmars cannot go straight when moving forward or backward, you can visit the page: data:`http://rcute-cozmars-xxxx.local`, click: data:`motor debugging `Button to debug
 
-（。。。未完待续。。。）
+(... to be continued...)

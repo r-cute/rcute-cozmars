@@ -1,41 +1,41 @@
-欢迎阅读 rcute-cozmars 的文档！
-=========================================
+Welcome to the documentation of rcute-cozmars!
+========================================
 
 .. automodule:: rcute_cozmars
-   :noindex:
+    :noindex:
 
 ---------
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
    prepare
    examples/index
    async
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   api/index
+    api/index
 
 
-欢迎提问或反馈bug到 https://github.com/hyansuper/rcute-cozmars/issues
+Welcome to ask questions or feedback bugs to https://github.com/hyansuper/rcute-cozmars/issues
 
-另外，有没有愿意帮忙把文档翻译成英语的小伙伴？欢迎联系我 hyansuper(艾特)foxmail.com
+In addition, are there any friends who are willing to help translate the document into English? Welcome to contact me hyansuper(艾特)foxmail.com
 
 -----------------------
 
-相关资料：
+Relevant information:
 ++++++++++++++++
 
-* 3d 模型： https://www.thingiverse.com/thing:4657644
-* 固件： https://github.com/hyansuper/rcute-cozmars-server
+* 3d model: https://www.thingiverse.com/thing:4657644
+* Firmware: https://github.com/hyansuper/rcute-cozmars-server
 
-DIY 爱好者可根据开源资料自己制作、使用
+DIY enthusiasts can make and use according to open source materials
 
 .. warning::
 
-    他人禁止售卖该机器人的模型打印件、成品或其改装
+     Others are forbidden to sell the model prints, finished products or modifications of the robot
 
 -------------
 

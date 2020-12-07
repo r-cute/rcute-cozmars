@@ -1,50 +1,49 @@
 Animation
 ==============
 
-一个 Animation 就是一组事先定义好的动作，例如自带的 animation :data:`'pick_up_cube'` ，可以通过 Cozmars 的 :data:`animation_list` 属性查看，通过 :meth:`animate` 方法调用。
+An animation is a set of pre-defined actions, such as the built-in animation :data:`'pick_up_cube'`, which can be viewed through Cozmars' :data:`animation_list` property, and called by the :meth:`animate` method.
 
-Cozmars 的 :meth:`animate` 方法的第一参数是动作的名称，还可以接受其他的可选参数。比如拾取魔方的动作 :data:`'pick_up_cube'` ，就带有一个 :data:`show_view` 参数用来指定是否显示摄像头画面。把魔方摆放在 Cozmars 附近，然后试试：
+The first parameter of Cozmars' :meth:`animate` method is the name of the action, and other optional parameters can be accepted. For example, the action of picking up the cube :data:`'pick_up_cube'` has a :data:`show_view` parameter to specify whether to display the camera screen. Place the Rubik's Cube near Cozmars and try:
 
     >>> robot.animate('pick_up_cube', show_view=True)
 
-接下来的内容对 Python 初学者来说有点“超纲”，抓稳扶好了哦。。。
+The following content is a bit "super-class" for Python beginners, so take care of it...
 
-自定义 animation
+Custom animation
 ---------------------
 
-Animation 好玩的地方在于它是可以自定义的，类似于事先定义好一个函数，在需要的时候调用它就行。我说“类似”，是因为我们要定义的不是函数而是协程（coroutine），如果你没听过“协程”也没关系，它在形式上跟函数很像。先做再说。
+The fun part of Animation is that it can be customized, which is similar to defining a function in advance and calling it when needed. I say "similar" because what we want to define is not a function but a coroutine. It doesn't matter if you haven't heard of a "coroutine". It is very similar in form to a function. Do it first.
 
-有了拾取魔方的动作，我们也来试着自定义一个放下魔方的动作，就把它叫做 'put_down_cube' 吧：
+With the action of picking up the cube, let's try to customize an action of putting down the cube, just call it'put_down_cube':
 
 .. code:: python
 
     from rcute_cozmars import Robot, animations
 
-    # 用 async def 开头定义一个协程
+    # Define a coroutine at the beginning of async def
     async def put_down_cube(robot):
-        await robot.lift.height(0)  # 放下手臂
-        await robot.backward(1)    # 后退 1 秒
+        await robot.lift.height(0) # Put down the arm
+        await robot.backward(1) # Back 1 second
 
-    # 这就完了，简单吧，比大象关进冰箱还少一步
+    # That's it, it's easy, one step less than the elephant in the refrigerator
 
-    # 接下来把我们自定义的动作加入动作列表里
+    # Next, add our custom action to the action list
     animations.update({'put_down_cube', put_down_cube})
 
-    # 然后就可以使用这个动作了
+    # Then you can use this action
     with Robot('0a3c') as robot:
         robot.animate('pick_up_cube')
         robot.animate('put_down_cube')
 
 .. note::
 
-    自定义的 animation 协程需要接受 robot 作为第一个参数，也可以有其他可选参数。
+    The custom animation coroutine needs to accept robot as the first parameter, and can also have other optional parameters.
 
-    在这个协程里，调用的机器人动作的命令也都要改成协程的调用方式，比如我们把 :data:`robot.backward(1)` 改成了 :data:`await robot.backward(1)`，把 :data:`robot.lift.height = 0` 改成了 :data:`await robot.lift.height(0)`
+In this coroutine, the command of the called robot action must also be changed to the method of invoking the coroutine. For example, we change :data:`robot.backward(1)` to:data:`await robot.backward(1 )`, change:data:`robot.lift.height = 0` to:data:`await robot.lift.height(0)`
 
-变脸 animation
+Face change animation
 ------------------
-
-让我们试着把前面写过的 `川剧变脸 <move.html#id5>`_ 程序改造成一个自定义动作 'bian_lian'，注意比较函数和协程的区别：
+Let's try to transform the `Sichuan Opera Change Face <move.html#id5>`_ program written earlier into a custom action'bian_lian', pay attention to the difference between the comparison function and the coroutine:
 
 .. code:: python
 
@@ -54,7 +53,7 @@ Animation 好玩的地方在于它是可以自定义的，类似于事先定义�
         robot.head.default_speed = None
         robot.lift.default_speed *= 2
 
-        for color in ['white', 'red', 'yellow', 'lightgreen']:
+        for color in ['white','red','yellow','lightgreen']:
             await robot.head.angle(-15)
             await robot.lift.height(1)
             await robot.eyes.color(color)
@@ -65,10 +64,10 @@ Animation 好玩的地方在于它是可以自定义的，类似于事先定义�
     from rcute_cozmars import animations
     animations.update({'bian_lian', bian_lian})
 
-`独乐乐不如众乐乐 <https://www.zhihu.com/question/22524653/answer/574482596>`_
--------------------------------------------------------------------------------------------------
+`It’s not as good as the others <https://www.zhihu.com/question/22524653/answer/574482596>`_
+-------------------------------------------------- -----------------------------------------------
 
-现在可以把这段代码保存到一个叫 :data:`bian_lian_animation.py` 文件中，然后把它分享给别人，别人引用你的文件后就可以在他/她的代码中使用这个动作了：
+Now you can save this code in a file called :data:`bian_lian_animation.py`, and then share it with others. After someone quotes your file, you can use this action in his/her code:
 
 .. code:: python
 

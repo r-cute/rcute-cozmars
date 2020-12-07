@@ -1,19 +1,19 @@
 import asyncio
-from . import util
+from. import util
 
 class Lift(util.Component):
-    """手臂
+    """Arm
     """
 
     def __init__(self, robot):
         util.Component.__init__(self, robot)
         self._relax_timeout = None
         self.default_speed = 2
-        """设置 :data:`height` 时的默认移臂速度（/秒），默认为 `2` ，若设为 `None` 则表示用最快速度移臂"""
+        """The default arm moving speed (/sec) when setting :data:`height`, the default is `2`, if it is set to `None`, it means the arm is moved at the fastest speed"""
         self.auto_relax_delay = 1
-        """多长时间内没有动作则自动放松（秒），默认为 `1`，若设为 `None` 则表示不会自动放松
+        """If there is no action for a long time, it will automatically relax (seconds), the default is `1`, if it is set to `None`, it will not automatically relax
 
-        舵机移动到目标位置后，使其放松能防止长期受力造成损坏，也能节约电池电量
+        After the steering gear is moved to the target position, it can be relaxed to prevent damage caused by long-term force, and it can also save battery power
         """
 
     def _cancel_relax_timeout(self):
@@ -29,20 +29,20 @@ class Lift(util.Component):
 
     @property
     def max_height(self):
-        """移臂最大高度，`1.0` ，只读
+        """Maximum height of moving arm, `1.0`, read only
         """
         return 1.0
 
     @property
     def min_height(self):
-        """移臂最低高度， `0.0` ，只读
+        """Minimum height of arm moving, `0.0`, read only
         """
         return 0.0
 
     @util.mode(property_type='setter')
     async def height(self, *args):
-        """臂的高度，0.0~1.0"""
-        if len(args) > 1:
+        """The height of the arm, 0.0~1.0"""
+        if len(args)> 1:
             raise TypeError('Height accepts at most one parameter')
         if args:
             self._cancel_relax_timeout()
@@ -54,19 +54,18 @@ class Lift(util.Component):
 
     @util.mode(force_sync=False)
     async def set_height(self, height, *, duration=None, speed=None):
-        """设置臂的高度
+        """Set the height of the arm
 
-        :param height: 要设置的臂的高度
+        :param height: the height of the arm to be set
         :type height: float
-        :param duration: 移动臂的持续时间（秒），默认为 `None` ，表示用最快速度移动
+        :param duration: the duration of the moving arm (seconds), the default is `None`, which means to move at the fastest speed
         :type duration: float, optional
-        :param speed: 移动臂的速度（/秒），默认为 `None` ，表示用最快速度移动
+        :param speed: the speed of the moving arm (/s), the default is `None`, which means to move at the fastest speed
         :type speed: float, optional
-        :raises TypeError: 不能同时设置 `duration` 和 `speed` ，否则抛出异常
+        :raises TypeError: `duration` and `speed` cannot be set at the same time, otherwise an exception will be thrown
         """
         if duration and speed:
             raise TypeError('Cannot set both duration and speed')
         self._cancel_relax_timeout()
         await self._rpc.lift(height, duration, speed)
         self._reset_relax_timeout()
-

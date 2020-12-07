@@ -1,34 +1,34 @@
-from . import util
+from. import util
 import numpy as np
 import cv2
 from PIL import Image, ImageFont, ImageDraw
 
 class Screen(util.Component):
-    """显示屏"""
+    """Display"""
 
     def __init__(self, robot):
         util.Component.__init__(self, robot)
         self.default_fade_speed = None
-        """设置 :data:`brightness` 时的默认的渐变速度，默认为 `None` ，表示没有渐变"""
+        """The default gradient speed when setting :data:`brightness`, the default is `None`, which means there is no gradient"""
 
     @property
     def resolution(self):
-        """分辨率，`(240, 135)`，只读"""
+        """Resolution, `(240, 135)`, read-only """
         return 240, 135
 
     @property
     def max_brightness(self):
-        """最大亮度， `1.0` ，只读"""
+        """Maximum brightness, `1.0`, read-only"""
         return 1.0
 
     @property
     def min_brightness(self):
-        """最低亮度，即黑屏， `0.0` ，只读"""
+        """Minimum brightness, ie black screen, `0.0`, read only"""
         return .0
 
     @util.mode(property_type='setter')
     async def brightness(self, *args):
-        """显示屏亮度，0~1，默认是 `0.05`
+        """Display brightness, 0~1, default is `0.05`
         """
         if args:
             await self._rpc.backlight(args[0], None, self.default_fade_speed)
@@ -37,15 +37,15 @@ class Screen(util.Component):
 
     @util.mode(force_sync=False)
     async def set_brightness(self, brightness, *, fade_duration=None, fade_speed=None):
-        """设置显示屏亮度
+        """Set display brightness
 
-        :param brightness: 亮度，0~1
+        :param brightness: brightness, 0~1
         :type brightness: float
-        :param fade_duration: 渐变时间（秒） ， 默认是 `None`，表示没有渐变
+        :param fade_duration: fade time (seconds), the default is `None`, which means no fade
         :type fade_duration: float
-        :param fade_speed: 渐变速度（/秒） ， 默认是 `None`，表示没有渐变
+        :param fade_speed: fade speed (/sec), the default is `None`, which means no fade
         :type fade_speed: float
-        :raises TypeError: 不能同时设置 `fade_duration` 和 `fade_speed` ，否则抛出异常
+        :raises TypeError: `fade_duration` and `fade_speed` cannot be set at the same time, otherwise an exception will be thrown
         """
         if fade_duration and fade_speed:
             raise TypeError('Cannot set both fade_duration and fade_speed')
@@ -53,19 +53,19 @@ class Screen(util.Component):
 
     @util.mode()
     async def fill(self, color, x=0, y=0, w=240, h=135, stop_eyes=True):
-        """填充屏幕
+        """Fill the screen
 
-        :param color: 要填充的颜色（bgr 模式）
+        :param color: the color to be filled (bgr mode)
         :type color: str/tuple
-        :param x: 填充方块的左上角 x 坐标，默认为 `0`
+        :param x: The x coordinate of the upper left corner of the filled square, the default is `0`
         :type x: int
-        :param y: 填充方块的左上角 y 坐标，默认为 `0`
+        :param y: The y coordinate of the upper left corner of the filled square, the default is `0`
         :type y: int
-        :param w: 填充方块的宽，默认为屏幕宽度 `240`
+        :param w: the width of the filled square, the default is the screen width `240`
         :type w: int
-        :param h: 填充方块的宽，默认为屏幕高度 `135`
+        :param h: The width of the filled square, the default is the screen height `135`
         :type h: int
-        :raises ValueError: 填充区域超出屏幕范围时抛出异常
+        :raises ValueError: throw an exception when the filled area exceeds the screen area
         """
         if not self._in_range((x, y), (w, h)):
             raise ValueError(f'Fill area must not exceed dimensions of screen {self.resolution}')
@@ -75,15 +75,15 @@ class Screen(util.Component):
 
     @util.mode()
     async def set_pixel(self, x, y, color):
-        """设置像素点的颜色
+        """Set the color of the pixel
 
-        :param x: 要设置的像素点的 x 坐标
+        :param x: the x coordinate of the pixel to be set
         :type x: int
-        :param y: 要设置的像素点的 y 坐标
+        :param y: the y coordinate of the pixel to be set
         :type y: int
-        :param color: 颜色（bgr 模式）
+        :param color: color (bgr mode)
         :type color: str/tuple
-        :raises ValueError: 坐标超出屏幕范围时抛出异常
+        :raises ValueError: An exception is thrown when the coordinates exceed the screen range
         """
         if not self._in_range((x, y)):
             raise ValueError(f'Pixel must not exceed dimensions of screen {self.resolution}')
@@ -97,15 +97,15 @@ class Screen(util.Component):
         raises AssertionError: raise error when the area to display exceeds screen
         """
         h, w = image.shape[:2]
-        assert self._in_range((x, y), (x+w-1, y+h-1)), 'Display area must not exceed dimensions of screen {self.resolution}'
+        assert self._in_range((x, y), (x+w-1, y+h-1)),'Display area must not exceed dimensions of screen {self.resolution}'
         x, y = y, 240-x-w
         await self._rpc.display(image_to_data(np.rot90(image)), x, y, x+h-1, y+w-1)
 
     @util.mode()
     async def display(self, image, stop_eyes=True):
-        """显示图像
+        """Display image
 
-        :param image: 要显示的图像（bgr 模式）
+        :param image: the image to be displayed (bgr mode)
         :type image: numpy.ndarray
         """
         x, y, image = self._resize_to_screen(image)
@@ -118,17 +118,17 @@ class Screen(util.Component):
 
     @util.mode()
     async def text(self, text, size=30, color='cyan', bg_color='black', font=None, stop_eyes=True):
-        """显示简单文本
+        """Display simple text
 
-        :param text: 要显示的文本
+        :param text: the text to be displayed
         :type text: str
-        :param size: 字体大小，默认为 30
+        :param size: font size, default is 30
         :type size: int, optional
-        :param color: 文本颜色，默认为青色
+        :param color: text color, default is cyan
         :type color: str/tuple, optional
-        :param bg_color: 背景颜色，默认为黑色
+        :param bg_color: background color, the default is black
         :type bg_color: str/tuple, optional
-        :param font: 字体文件，默认使用微软雅黑（支持中/英文）
+        :param font: Font file, Microsoft Yahei is used by default (Chinese/English is supported)
         :type font: str, optional
         """
         font = ImageFont.truetype(font or util.resource('msyh.ttc'), size)
@@ -144,7 +144,7 @@ class Screen(util.Component):
     def _resize_to_screen(self, img):
         h, w = img.shape[:2]
         W, H = self.resolution
-        if W/H > w/h:
+        if W/H> w/h:
             f = int(w/h*H)
             return (W-f)//2, 0, cv2.resize(img, (f, H))
         else:

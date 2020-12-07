@@ -5,9 +5,9 @@ from wsmprpc import RPCStream
 
 
 class Buzzer(util.InputStreamComponent):
-    """蜂鸣器
+    """buzzer
 
-    蜂鸣器能以不同的频率振动，从而发出不同的 `音调`。
+    The buzzer can vibrate at different frequencies to emit different `tones`.
 
     .. |Tone| raw:: html
 
@@ -15,11 +15,11 @@ class Buzzer(util.InputStreamComponent):
 
     .. note::
 
-        这里所说的 `音调` ，在程序中可以用不同的数据类型表示。
+        The `tone` mentioned here can be represented by different data types in the program.
 
-        比如 C 大调 do re me 中的 do 音，音乐记号是 `'C4'` ，频率是 440.0 Hz，MIDI 代码是 #69，那么，`'C4'` 、 `440.0` 和 `69` 都可以用来表示这个音调，也可以用 |Tone| 对象来表示
+        For example, the do sound in C major do re me, the music symbol is `'C4'`, the frequency is 440.0 Hz, and the MIDI code is #69, then `'C4'`, `440.0` and `69` can all be used To represent this tone, you can also use the |Tone| object to represent
 
-        用 `None` 或 `0` 表示静音
+        Use `None` or `0` to indicate mute
 
     """
 
@@ -33,7 +33,7 @@ class Buzzer(util.InputStreamComponent):
 
     @util.mode(property_type='setter')
     async def tone(self, *args):
-        """蜂鸣器当前的 `音调`
+        """The current `tone` of the buzzer
         """
         if args:
             await self.set_tone(args[0])
@@ -42,11 +42,11 @@ class Buzzer(util.InputStreamComponent):
 
     @util.mode(force_sync=False)
     async def set_tone(self, tone, duration=None):
-        """设置蜂鸣器的 `音调`
+        """Set the `tone` of the buzzer
 
-        :param tone: `音调`
+        :param tone: `tone`
         :type tone: str / int / |Tone|
-        :param duration: 持续时间（秒），默认为 `None` ，表示无限长，直到调用 :func:`quiet`
+        :param duration: duration (seconds), the default is `None`, which means infinite length, until :func:`quiet` is called
         :type duration: float
 
         """
@@ -58,7 +58,7 @@ class Buzzer(util.InputStreamComponent):
 
     @util.mode()
     async def quiet(self):
-        """静音/停止"""
+        """Mute/Stop"""
         await self._close()
         await self._rpc.tone(None, None)
         self._tone = None
@@ -77,23 +77,23 @@ class Buzzer(util.InputStreamComponent):
 
     @util.mode(force_sync=False)
     async def play(self, song, tempo=120, duty_cycle=.9):
-        """播放一段音乐
+        """Play a piece of music
 
-        :param song: 要播放的音乐
+        :param song: the music to be played
         :type song: collections.Iterable
-        :param tempo: 播放速度，BPM，默认是 `120` 拍/分钟
+        :param tempo: playback speed, BPM, default is `120` beats/minute
         :type tempo: int
-        :param duty_cycle: 占空比，即音节播放时间与整个音节的时间的比值，0~1，默认是 `0.9`
+        :param duty_cycle: duty cycle, that is, the ratio of the syllable playing time to the time of the entire syllable, 0~1, the default is `0.9`
         :type duty_cycle: float
 
         .. warning::
 
-            这个 API 将来可能会改变，我们还在探索更方便播放音乐的 API
+            This API may change in the future, we are still exploring an API that is more convenient to play music
 
         """
 
         if not 0< duty_cycle <=1:
-            raise ValueError('duty_cycle out of range (0, 1]')
+            raise ValueError('duty_cycle out of range (0, 1)')
         delay = 60 / tempo
         async with self:
             for tone in song:
@@ -104,9 +104,9 @@ class Buzzer(util.InputStreamComponent):
     '''
     @property
     def input_stream(self):
-        """蜂鸣器输入流
+        """Buzzer input stream
 
-        获取输入流必须在蜂鸣器打开之后，否则抛出异常
+        The input stream must be obtained after the buzzer is turned on, otherwise an exception will be thrown
         """
         if self.closed:
             raise RuntimeError('Buzzer is closed')
@@ -123,3 +123,4 @@ class Buzzer(util.InputStreamComponent):
         t = Tone(obj) if obj else None
         freq = t.frequency if t else None
         return t, freq
+

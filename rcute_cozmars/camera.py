@@ -9,7 +9,7 @@ class CameraMultiplexOutputStream(util.MultiplexOutputStream):
         util.MultiplexOutputStream.force_put_nowait(self, o)
 
 class Camera(util.MultiplexOutputStreamComponent):
-    """摄像头
+    """camera
     """
     def __init__(self, robot, resolution=(480,360), frame_rate=3, q_size=1):
         util.MultiplexOutputStreamComponent.__init__(self, robot, q_size, CameraMultiplexOutputStream(self))
@@ -19,17 +19,17 @@ class Camera(util.MultiplexOutputStreamComponent):
 
     @property
     def resolution(self):
-        """摄像头的分辨率，默认是 `(480, 360)`
+        """The resolution of the camera, the default is `(480, 360)`
 
-        摄像头已经打开之后不能修改分辨率，否则抛出异常
+        The resolution cannot be modified after the camera has been opened, otherwise an exception will be thrown
         """
         return self._resolution
 
     @property
     def frame_rate(self):
-        """摄像头录像的帧率，即 FPS，默认是 `3`
+        """The frame rate of camera recording, namely FPS, default is `3`
 
-        摄像头已经打开之后不能修改帧率，否则抛出异常
+        The frame rate cannot be modified after the camera has been opened, otherwise an exception will be thrown
         """
         return self._frame_rate
 
@@ -53,18 +53,18 @@ class Camera(util.MultiplexOutputStreamComponent):
 
     @util.mode()
     async def capture(self, output=None, **options):
-        """拍照
+        """Photo
 
-        :param output: 输出，如果是文件路径，或者是带有 :meth:`write` 方法的对象，则会被保存到指定位置。默认为 `None`
-        :type output: str/writable, optional
-        :param options:
-            * delay -- 默认为 1，即摄像头开启 1 秒后再拍照，多给摄像头一点时间预热和对焦，图像质量可能更好
-            * standby -- 默认为 False，如果设为 True，则摄像头拍照后不会关闭，方便连续拍照。连续使用 standby 模式拍照时，delay 默认为 0
-            * 其他可选参数参考 `PiCamera.capture() <https://picamera.readthedocs.io/en/release-1.13/api_camera.html#picamera.PiCamera.capture>`_
-        :type options: optional
-        :return: 如果 :data:`output` 为 None，则返回一个 numpy.ndarray 对象
-        :raises RuntimeError: 摄像头正在传输视频是不能拍照；而处于 standby 拍照模式时同样不能传输视频
-        """
+         :param output: Output, if it is a file path or an object with the :meth:`write` method, it will be saved to the specified location. Default is `None`
+         :type output: str/writable, optional
+         :param options:
+             * delay - The default is 1, which means the camera is turned on for 1 second before taking pictures. Give the camera more time to warm up and focus, and the image quality may be better
+             * standby - the default is False, if it is set to True, the camera will not turn off after taking pictures, which is convenient for continuous taking pictures. When taking photos in standby mode continuously, delay defaults to 0
+             * For other optional parameters refer to `PiCamera.capture() <https://picamera.readthedocs.io/en/release-1.13/api_camera.html#picamera.PiCamera.capture>`_
+         :type options: optional
+         :return: If :data:`output` is None, return a numpy.ndarray object
+         :raises RuntimeError: The camera cannot take pictures when it is transmitting video; and it cannot transmit video when in standby mode.
+         """
         if not self.closed:
             raise RuntimeError('Cannot capture image while camera is streaming video')
         op = {'delay': 0 if self._standby else 1, 'resize': self.resolution}
@@ -80,4 +80,3 @@ class Camera(util.MultiplexOutputStreamComponent):
                 file.write(data)
         else:
             output.write(data)
-

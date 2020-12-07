@@ -1,77 +1,77 @@
-动起来
+Move
 ===============
 
-Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课我们用命令行交互的方式来让机器人做做运动。
+The movable parts of the Cozmars robot are the head, arms and wheels. In this lesson, we use command line interaction to make the robot move.
 
-首先连接机器人：
+First connect the robot:
 
     >>> from rute_cozmars import Robot
     >>> robot = Robot('0a3c')
     >>> robot.connect()
 
-举举手
+Raise hand
 -------------
 
-我们通过机器人的 :data:`lift` 属性来控制机器人的手臂，通过设置 :data:`lift` 的 :data:`height` 属性可以控制手臂举起的高度：
+We use the robot's :data:`lift` property to control the robot's arm, and set the :data:`height` property of :data:`lift` to control the height of the arm lift:
 
     >>> robot.lift.height = 1
     >>> robot.lift.height = 0
 
-手臂的高度可以设置为 0 和 1 之间的数，输入以上两句命令，可以看到机器人的手臂举起后再放下。
+The height of the arm can be set to a number between 0 and 1. Enter the above two commands, you can see that the robot arm is raised and then lowered.
 
-手臂的移动速度可以通过 :data:`default_speed` 来设置，默认是 2/秒。我们把速度降到 0.5 ，来试试“左手右手一个慢动作”：
+The moving speed of the arm can be set by :data:`default_speed`, the default is 2/sec. Let's reduce the speed to 0.5 and try "a slow motion with left hand and right hand":
 
     >>> robot.lift.default_speed = 0.5
     >>> robot.lift.height = 1
     >>> robot.lift.height = 0
 
-:data:`default_speed` 的设置对后续的手臂移动都有效。如果要临时改变手臂的移动速度，可以用 :meth:`set_height` 方法来控制，以下两句代码和上面的代码是等效的：
+The setting of :data:`default_speed` is effective for subsequent arm movements. If you want to temporarily change the moving speed of the arm, you can use the :meth:`set_height` method to control. The following two sentences of code are equivalent to the above code:
 
     >>> robot.lift.set_height(1, speed=0.5)
     >>> robot.lift.set_height(0, speed=0.5)
 
-如果觉得速度不够直观， :meth:`set_height` 也可以通过 :data:`duration` 参数设置手臂移动的时间，比如要让手臂在两秒之内抬起：
+If you feel that the speed is not intuitive enough, :meth:`set_height` can also set the arm movement time through the :data:`duration` parameter, for example, to raise the arm within two seconds:
 
     >>> robot.lift.set_height(1, duration=2)
 
-点点头
+Nod
 -------------
 
-机器人的头部通过 :data:`head` 属性来控制，可以设置 :data:`head` 的 :data:`angle` 属性来控制头部转动的角度。头部可以在 -20~20 度之间转动，0 度表示平视前方，负数则表示低头。比如，让机器人点两下头：
+The head of the robot is controlled by the :data:`head` property. You can set the :data:`angle` property of :data:`head` to control the angle of head rotation. The head can be rotated between -20 and 20 degrees, 0 degrees means looking straight ahead, and a negative number means lowering your head. For example, let the robot nod twice:
 
-    >>> for i in range(2):
-    ...     robot.head.angle = -20
-    ...     robot.head.angle = 0
+     >>> for i in range(2):
+     ... robot.head.angle = -20
+     ... robot.head.angle = 0
 
-头部的控制和手臂的控制非常相似， :data:`head` 也有 :data:`default_speed` 属性（默认是 60 度/秒）和 :meth:`set_angle` 方法，这里就不啰嗦了，你可以自己探索
+The head control is very similar to the arm control. :data:`head` also has :data:`default_speed` property (default is 60 degrees/sec) and :meth:`set_angle` method. I won’t be too wordy here, you can Explore by yourself
 
-向前进
+move forward
 --------------
 
-下面我们来操作机器人的马达 :data:`motor` ，从而控制机器人的移动
+Let's operate the robot's motor :data:`motor` to control the movement of the robot
 
 .. note::
 
-    实际上机器人左右各有一个马达，从语法的角度讲应该用复数“motors”，但我们暂且在逻辑上把它们看成一个整体吧，因为我们也是以整体的方式来设置马达速度的 :)
+    In fact, there is a motor on the left and right of the robot. From a grammatical point of view, the plural "motors" should be used, but let's logically regard them as a whole for the time being, because we also set the motor speed in a whole way :)
 
 
 .. warning::
 
-    移动的时候请小心别让机器人从桌上掉下来！
+    Please be careful not to let the robot fall off the table when moving!
 
 
-马达的速度 :data:`speed` 可以是 -1~1 之间数，0 表示停止，1 是全速前进，那负数当然就是后退喽：
+The speed of the motor :data:`speed` can be a number between -1~1, 0 means stop, 1 means full speed forward, and of course a negative number means backward:
 
     >>> robot.motor.speed = 1
     >>> robot.motor.speed = -1
     >>> robot.motor.speed = 0
 
-马达的速度也可以是由两元素组成的元组( `tuple` )，两个元素分别表示左右马达的速度。比如，通过让两个马达转向相反，可以让机器人原地转圈：
+The speed of the motor can also be a tuple (`tuple`) composed of two elements, which respectively represent the speed of the left and right motors. For example, by making the two motors turn in opposite directions, the robot can make a circle on the spot:
 
     >>> robot.motor.speed = (1, -1)
-    >>> robot.motor.stop()  # 效果等同于 robot.motor.speed=0
+    >>> robot.motor.stop() # The effect is equivalent to robot.motor.speed=0
 
-:data:`motor` 还有一个 :meth:`set_speed` 方法，用来设置速度和持续时间。比如，要机器人转圈 5 秒：
+:data:`motor` also has a :meth:`set_speed` method to set speed and duration. For example, to rotate the robot for 5 seconds:
 
     >>> robot.motor.set_speed((1, -1), duration=15)
 
@@ -79,14 +79,14 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 
 
 
-最后，不要忘记断开程序与机器人的连接：
+Finally, don't forget to disconnect the program from the robot:
 
     >>> robot.disconnect()
 
-川剧变脸
+Sichuan Opera Changing Face
 -------------------
 
-下面是一段完整的代码，让机器人表演个变脸魔术：
+The following is a complete code to make the robot perform a face-changing magic:
 
 .. code:: python
 
@@ -95,10 +95,10 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 
     with Robot('0a3c') as robot:
 
-        robot.head.default_speed = None # defaul_speed 设为 None，表示最快速度
+        robot.head.default_speed = None # defaul_speed is set to None, which means the fastest speed
         robot.lift.default_speed *= 2
 
-        for color in ['white', 'red', 'yellow', 'lightgreen']:
+        for color in ['white','red','yellow','lightgreen']:
             robot.head.angle = -15
             robot.lift.height = 1
             robot.eyes.color = color
@@ -109,7 +109,7 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 
 .. seealso::
 
-    `rcute_cozmars.lift <../api/lift.html>`_ ，`rcute_cozmars.head <../api/head.html>`_ ，`rcute_cozmars.motor <../api/motor.html>`_
+    `rcute_cozmars.lift <../api/lift.html>`_, `rcute_cozmars.head <../api/head.html>`_, `rcute_cozmars.motor <../api/motor.html>`_
 
 
-    `rcute_cozmars.Robot.forward <../api/robot.html#rcute_cozmars.robot.Robot.forward>`_ ，`rcute_cozmars.Robot.backward <../api/robot.html#rcute_cozmars.robot.Robot.backward>`_ ， `rcute_cozmars.Robot.turn_left <../api/robot.html#rcute_cozmars.robot.Robot.turn_left>`_ ， `rcute_cozmars.Robot.turn_right <../api/robot.html#rcute_cozmars.robot.Robot.turn_right>`_
+    `rcute_cozmars.Robot.forward <../api/robot.html#rcute_cozmars.robot.Robot.forward>`_, `rcute_cozmars.Robot.backward <../api/robot.html#rcute_cozmars.robot.Robot.backward >`_, `rcute_cozmars.Robot.turn_left <../api/robot.html#rcute_cozmars.robot.Robot.turn_left>`_, `rcute_cozmars.Robot.turn_right <../api/robot.html#rcute_cozmars.robot .Robot.turn_right>`_

@@ -1,5 +1,5 @@
 import asyncio
-from . import util
+from. import util
 
 
 # import numpy as np
@@ -16,7 +16,7 @@ class MicrophoneMultiplexOutputStream(util.MultiplexOutputStream):
         util.MultiplexOutputStream.force_put_nowait(self, o)
 
 class Microphone(util.MultiplexOutputStreamComponent):
-    """麦克风"""
+    """Microphone"""
     def __init__(self, robot, gain=25, sample_rate=16000, dtype='int16', block_duration=0.1, q_size=1):
         util.MultiplexOutputStreamComponent.__init__(self, robot, q_size, MicrophoneMultiplexOutputStream(self))
         self._sample_rate = sample_rate
@@ -30,9 +30,9 @@ class Microphone(util.MultiplexOutputStreamComponent):
 
     @property
     def sample_rate(self):
-        """麦克风的采样率，默认是 `16000` ，不建议修改
+        """ The sampling rate of the microphone, the default is `16000`, it is not recommended to modify
 
-        麦克风已经打开之后不能进行设置，否则抛出异常
+        The microphone cannot be set after it is turned on, otherwise an exception will be thrown
         """
         return self._sample_rate
 
@@ -44,9 +44,9 @@ class Microphone(util.MultiplexOutputStreamComponent):
 
     @property
     def dtype(self):
-        """麦克风采样的数据类型，如 `'int8'` 或 `'float32'` 等，默认是 `'int16'` ，不建议修改
+        """ The data type of microphone sampling, such as `'int8'` or `'float32'`, etc. The default is `'int16'`, it is not recommended to modify
 
-        麦克风已经打开之后不能进行设置，否则抛出异常
+        The microphone cannot be set after it is turned on, otherwise an exception will be thrown
         """
         return self._dtype
 
@@ -58,20 +58,20 @@ class Microphone(util.MultiplexOutputStreamComponent):
 
     @property
     def channels(self):
-        """麦克风的声道数，默认是 `1` ，只读
+        """The number of microphone channels, the default is `1`, read only
         """
         return 1
 
     @property
     def sample_width(self):
-        """一个采样包含几个字节，与 :data:`dtype` 对应，只读"""
+        """A sample contains several bytes, corresponding to :data:`dtype`, read only 
+        """
         return util.sample_width(self.dtype)
 
     @property
     def block_duration(self):
-        """流中每一帧声音片段持续的时间（秒），默认是 `0.1` ，不建议修改
-
-        麦克风已经打开之后不能进行设置，否则抛出异常
+        """The duration of each frame of sound clip in the stream (seconds), the default is `0.1`, it is not recommended to modify
+        The microphone cannot be set after it is turned on, otherwise an exception will be thrown
         """
         return self._block_duration
 
@@ -83,11 +83,11 @@ class Microphone(util.MultiplexOutputStreamComponent):
 
     @util.mode(property_type='setter')
     async def volume(self, *args):
-        """麦克风的音量大小，0~100，百分制，设置以后会自动保存，重启后依然有效，一般设置成 100%，不建议修改
+        """ The volume of the microphone, 0~100, in percent system, it will be automatically saved after setting, and it will still be effective after restarting, generally set to 100%, it is not recommended to modify
 
-        若要调整音量，应该修改音量增益
+        To adjust the volume, you should modify the volume gain
 
-        麦克风已经打开之后不能进行设置，否则抛出异常
+        The microphone cannot be set after it is turned on, otherwise an exception will be thrown
         """
         if args and not self.closed:
             raise RuntimeError('Cannot set volume while microphone is recording')
@@ -95,7 +95,7 @@ class Microphone(util.MultiplexOutputStreamComponent):
 
     @property
     def gain(self):
-        """音量增益(dBFS), 默认为 25"""
+        """Volume gain (dBFS), default is 25"""
         return self._gain
 
     @gain.setter

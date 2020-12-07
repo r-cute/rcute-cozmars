@@ -1,19 +1,17 @@
 """
-rcute_cozmars.robot 模块包括 :class:`Robot`, :class:`AsyncRobot` 和 :class:`AioRobot` 三个用于连接和控制 Cozmars 机器人的类：
+The rcute_cozmars.robot module includes :class:`Robot`, :class:`AsyncRobot` and :class:`AioRobot` three classes for connecting and controlling Cozmars robots:
 
-:class:`Robot` 会以阻塞的方式顺序执行每一条指令；
+:class:`Robot` will execute each instruction sequentially in a blocking manner;
+:class:`AsyncRobot` will return a :class:`concurrent.futures.Future` object immediately when it encounters a time-consuming instruction in a non-blocking manner, and then immediately execute the next instruction;
+:class:`AioRobot` executes instructions asynchronously (async/await)
 
-:class:`AsyncRobot` 遇到耗时的指令时会以非阻塞的方式立即返回一个 :class:`concurrent.futures.Future` 对象，然后立刻执行下一条指令；
+.. |Latest version on pypi| raw:: html
 
-:class:`AioRobot` 则是以异步 (async/await) 的方式执行指令
-
-.. |pypi上的最新版本| raw:: html
-
-   <a href='https://pypi.org/project/rcute-cozmars-server' target='blank'>pypi上的最新版本</a>
+   <a href='https://pypi.org/project/rcute-cozmars-server' target='blank'>The latest version on pypi</a>
 
 .. warning::
 
-   Cozmars 机器人只能同时被一个程序控制，如果正在用 Scratch 控制 Cozmars，Python 程序将不能连接，反之亦然
+   Cozmars robots can only be controlled by one program at the same time. If Scratch is being used to control Cozmars, the Python program will not be connected, and vice versa
 
 """
 
@@ -24,7 +22,7 @@ import threading
 import logging
 import json
 from wsmprpc import RPCClient, RPCStream
-from . import util, env, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, eye_animation
+from. import util, env, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, eye_animation
 from .animation import animations
 
 logger = logging.getLogger("rcute-cozmars")
@@ -32,14 +30,14 @@ logger = logging.getLogger("rcute-cozmars")
 
 
 class AioRobot:
-    """Cozmars 机器人的异步 (async/await) 模式
+    """Async/await mode of Cozmars robot
 
-    :param serial_or_ip: 要连接的 Cozmars 的 IP 地址或序列号
+    :param serial_or_ip: IP address or serial number of Cozmars to connect
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
-        self._host = 'rcute-cozmars-' + serial_or_ip + '.local' if len(serial_or_ip) == 4 else serial_or_ip
-        self._mode = 'aio'
+        self._host ='rcute-cozmars-' + serial_or_ip +'.local' if len(serial_or_ip) == 4 else serial_or_ip
+        self._mode ='aio'
         self._connected = False
         self._env = env.Env(self)
         self._screen = screen.Screen(self)
@@ -59,86 +57,86 @@ class AioRobot:
 
     @util.mode()
     async def animate(self, name, *args, **kwargs):
-        """执行动作
+        """Execute action
 
-        :param name: 动作的名称
+        :param name: the name of the action
         :type name: str
         """
         anim = animations[name]
-        anim = getattr(anim, 'animate', anim)
+        anim = getattr(anim,'animate', anim)
         await anim(self, *args, **kwargs)
 
     @property
     def animation_list(self):
-        """动作列表"""
+        """Action List"""
         return list(animations.keys())
 
     @property
     def eyes(self):
-        """眼睛"""
+        """eye"""
         return self._eye_anim
 
     @property
     def env(self):
-        """环境变量"""
+        """Environmental Variables"""
         return self._env
 
     @property
     def button(self):
-        """按钮"""
+        """Button"""
         return self._button
 
     @property
     def infrared(self):
-        """红外传感器，在机器人底部"""
+        """Infrared sensor, on the bottom of the robot"""
         return self._infrared
 
     @property
     def sonar(self):
-        """声纳，即超声波距离传感器"""
+        """Sonar, namely ultrasonic distance sensor"""
         return self._sonar
 
     @property
     def motor(self):
-        """马达"""
+        """motor"""
         return self._motor
 
     @property
     def head(self):
-        """头"""
+        """head"""
         return self._head
 
     @property
     def lift(self):
-        """手臂"""
+        """Arm"""
         return self._lift
 
     @property
     def buzzer(self):
-        """蜂鸣器"""
+        """buzzer"""
         return self._buzzer
 
     @property
     def screen(self):
-        """屏幕"""
+        """screen"""
         return self._screen
 
     @property
     def camera(self):
-        """摄像头"""
+        """camera"""
         return self._camera
 
     @property
     def microphone(self):
-        """麦克风"""
+        """microphone"""
         return self._microphone
 
     async def connect(self):
-        """连接 Cozmars"""
+        """Connect Cozmars"""
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self._host}/rpc')
-            if '-1' == await self._ws.recv():
-                raise RuntimeError('无法连接 Cozmars, 请先关闭其他已经连接 Cozmars 的程序')
+            if'-1' == await self._ws.recv():
+                raise RuntimeError('Could not connect to Cozmars, please close other programs that are already connected to Cozmars')
             self._rpc = RPCClient(self._ws)
             about = json.loads(await self._get('/about'))
             self._ip = about['ip']
@@ -152,12 +150,12 @@ class AioRobot:
 
     @property
     def connected(self):
-        """是否连接上了机器人"""
+        """Are robots connected?"""
         return self._connected
 
     async def _call_callback(self, cb, *args):
         if cb:
-            if self._mode == 'aio':
+            if self._mode =='aio':
                 (await cb(*args)) if asyncio.iscoroutinefunction(cb) else cb(*args)
             else:
                 self._lo.run_in_executor(None, cb, *args)
@@ -166,34 +164,34 @@ class AioRobot:
         self._sensor_data_rpc = self._rpc.sensor_data()
         async for event, data in self._sensor_data_rpc:
             try:
-                if event == 'pressed':
+                if event =='pressed':
                     if not data:
                         self.button._held = self.button._double_pressed = False
                     self.button._pressed = data
                     await self._call_callback(self.button.when_pressed if data else self.button.when_released)
-                elif event == 'held':
+                elif event =='held':
                     self.button._held = data
                     await self._call_callback(self.button.when_held)
-                elif event == 'double_pressed':
+                elif event =='double_pressed':
                     self.button._pressed = data
                     self.button._double_pressed = data
                     await self._call_callback(self.button.when_pressed)
                     await self._call_callback(self.button.when_double_pressed)
-                elif event == 'out_of_range':
+                elif event =='out_of_range':
                     await self._call_callback(self.sonar.when_out_of_range, data)
-                elif event == 'in_range':
+                elif event =='in_range':
                     await self._call_callback(self.sonar.when_in_range, data)
-                elif event == 'lir':
+                elif event =='lir':
                     self.infrared._state = data, self.infrared._state[1]
                     await self._call_callback(self.infrared.when_state_changed, self.infrared._state)
-                elif event == 'rir':
+                elif event =='rir':
                     self.infrared._state = self.infrared._state[0], data
                     await self._call_callback(self.infrared.when_state_changed, self.infrared._state)
             except Exception as e:
                 logger.exception(e)
 
     async def disconnect(self):
-        """断开 Cozmars 的连接"""
+        """Disconnect Cozmars"""
         if self._connected:
             self._sensor_task.cancel()
             self._eye_anim_task.cancel()
@@ -211,78 +209,78 @@ class AioRobot:
 
     @util.mode(force_sync=False)
     async def forward(self, duration=None):
-        """前进
+        """go ahead
 
-        :param duration: 持续时间（秒）
+        :param duration: duration (seconds)
         :type duration: float
         """
         await self._rpc.speed((1,1), duration)
 
     @util.mode(force_sync=False)
     async def backward(self, duration=None):
-        """后退
+        """Back
 
-        :param duration: 持续时间（秒）
+        :param duration: duration (seconds)
         :type duration: float
         """
         await self._rpc.speed((-1,-1), duration)
 
     @util.mode(force_sync=False)
     async def turn_left(self, duration=None):
-        """左传
+        """Turn left
 
-        :param duration: 持续时间（秒）
+        :param duration: duration (seconds)
         :type duration: float
         """
         await self._rpc.speed((-1,1), duration)
 
     @util.mode(force_sync=False)
     async def turn_right(self, duration=None):
-        """右转
+        """Turn right
 
-        :param duration: 持续时间（秒）
+        :param duration: duration (seconds)
         :type duration: float
         """
         await self._rpc.speed((1,-1), duration)
 
     @util.mode()
     async def stop(self):
-        """停止"""
+        """stop"""
         await self._rpc.speed((0, 0))
 
     @property
     def hostname(self):
-        """Cozmars 的网址"""
+        """Cozmars URL"""
         return self._hostname
 
     @property
     def ip(self):
-        """Cozmars 的 IP 地址"""
+        """Cozmars' IP address"""
         return self._ip
 
     @property
     def firmware_version(self):
-        """Cozmars 的固件版本
+        """Cozmars firmware version
 
-        如果低于 |pypi上的最新版本| ，可以登陆机器人的页面进行更新
+        If it is lower than the latest version on |pypi|, you can log in to the robot's page to update
 
         """
         return self._firmware_version
 
     @property
     def mac(self):
-        """Cozmars 的 MAC 地址"""
+        """Cozmars MAC address"""
         return self._mac
 
 
     @property
     def serial(self):
-        """Cozmars 的序列号"""
+        """Cozmars serial number"""
         return self._serial
 
     @util.mode()
     async def poweroff(self):
-        """关闭 Cozmars"""
+        """Close Cozmars"""
         await AioRobot.disconnect(self)
         try:
             await self._get('/poweroff')
@@ -291,7 +289,7 @@ class AioRobot:
 
     @util.mode()
     async def reboot(self):
-        """重启 Cozmars"""
+        """Restart Cozmars"""
         await AioRobot.disconnect(self)
         try:
             await self._get('/reboot')
@@ -304,14 +302,14 @@ class AioRobot:
                 return await resp.text()
 
 class Robot(AioRobot):
-    """Cozmars 机器人的同步模式
+    """Cozmars robot synchronization mode
 
-    :param serial_or_ip: 要连接的 Cozmars 的 IP 地址或序列号
+    :param serial_or_ip: IP address or serial number of Cozmars to connect
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
         AioRobot.__init__(self, serial_or_ip)
-        self._mode = 'sync'
+        self._mode ='sync'
 
     def _in_event_loop(self):
         return self._event_thread == threading.current_thread()
@@ -324,14 +322,14 @@ class Robot(AioRobot):
         self.disconnect()
 
     def connect(self):
-        """连接 Cozmars"""
+        """Connect Cozmars"""
         self._lo = asyncio.new_event_loop()
         self._event_thread = threading.Thread(target=self._run_loop, args=(self._lo,), daemon=True)
         self._event_thread.start()
         asyncio.run_coroutine_threadsafe(AioRobot.connect(self), self._lo).result()
 
     def disconnect(self):
-        """断开 Cozmars 的连接"""
+        """Disconnect Cozmars"""
         asyncio.run_coroutine_threadsafe(AioRobot.disconnect(self), self._lo).result()
         self._lo.call_soon_threadsafe(self._done_ev.set)
         self._event_thread.join(timeout=5)
@@ -349,13 +347,13 @@ class Robot(AioRobot):
         asyncio.set_event_loop(None)
 
 class AsyncRobot(Robot):
-    """Cozmars 机器人的异步 (concurrent.futures.Future) 模式
+    """Asynchronous (concurrent.futures.Future) mode of the Cozmars robot
 
-    :param serial_or_ip: 要连接的 Cozmars 的 IP 地址或序列号
+    :param serial_or_ip: IP address or serial number of Cozmars to connect
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
         Robot.__init__(self, serial_or_ip)
-        self._mode = 'async'
+        self._mode ='async'
 
 

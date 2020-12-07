@@ -1,33 +1,33 @@
-显示屏：并非木得感情的证明
+Display screen: not proof of wooden feeling
 ===========================
 
-眼睛是心灵的窗户。Cozmars 用它的卡姿兰大眼睛把心情都写在了 240x135 像素的显示屏上，证明自己绝非木得感情
+The eyes are the windows of the soul. Cozmars wrote his mood on the 240x135-pixel display with its big eyes, proving that he is definitely not emotional
 
-眼睛和表情
+Eyes and expressions
 -------------
 
-眼睛 :data:`eyes` 可以通过设置 :data:`color` 和 :data:`expression` 来设置眼睛的颜色和表情。可以通过 :data:`eyes` 的 :data:`expression_list` 得到支持的所有表情
+Eyes :data:`eyes` You can set the color and expression of the eyes by setting :data:`color` and :data:`expression`. All emojis that can be supported by :data:`eyes` of :data:`expression_list`
 
-    >>> robot.eyes.color = 'red'
-    >>> robot.eyes.expression = 'angry'
-    >>> robot.eyes.expression = ('happy', 'lightgreen') # 或者，可以同时设置表情和颜色
+    >>> robot.eyes.color ='red'
+    >>> robot.eyes.expression ='angry'
+    >>> robot.eyes.expression = ('happy','lightgreen') # Or, you can set the expression and color at the same time
 
-如果要隐藏眼睛，只需调用 :data:`eyes` 的 :meth:`hide` 方法； 而 :meth:`show` 方法让眼睛重新出现。眼睛的动态效果会占用一点 Cozmars 的带宽，当你想要尽量避免网络延迟的时候，用 :meth:`stop` 和 :meth:`resume` 方法来暂停和继续眼睛的动态效果。
+If you want to hide the eyes, just call the :meth:`hide` method of :data:`eyes`; and the :meth:`show` method makes the eyes reappear. The dynamic effects of the eyes will take up a bit of Cozmars bandwidth. When you want to avoid network delays as much as possible, use the :meth:`stop` and :meth:`resume` methods to pause and continue the dynamic effects of the eyes.
 
 .. note ::
 
-    设置颜色时可以用表示颜色的字符串，例如 `robot.eyes.color = 'yellow'`，也可以用 BGR 色彩模式 `robot.eyes.color = (255, 255, 0)`
+    When setting the color, you can use a string representing the color, for example, `robot.eyes.color ='yellow'`, or use the BGR color mode `robot.eyes.color = (255, 255, 0)`
 
-    注意：为了与 opencv 一致，我们使用 BGR 而不是 RGB 色彩模式！
+    Note: To be consistent with opencv, we use BGR instead of RGB color mode!
 
-显示图片
+Display Image
 ------------
 
-:class:`Robot` 还有一个 :data:`screen` 属性用来直接控制显示屏，用它的 :meth:`display` 方法来显示图片
+:class:`Robot` also has a :data:`screen` attribute to directly control the display screen, use its :meth:`display` method to display pictures
 
-:data:`screen` 的 :data:`brightness` 属性可以用来设置显示屏的亮度，`1` 表示最亮，`0` 表示全暗，为了省电和护眼，默认显示亮度是 `0.05` ；也可以通过 :meth:`set_brightness` 方法的 :data:`fade_duration` 或 :data:`fade_speed` 参数来控制亮度的渐变速度
+The :data:`brightness` property of :data:`screen` can be used to set the brightness of the display, `1` means the brightest, and `0` means all dark. In order to save power and protect the eyes, the default display brightness is `0.05 `;You can also use the :data:`fade_duration` or :data:`fade_speed` parameter of the :meth:`set_brightness` method to control the brightness gradient speed
 
-以下的程序显示一个心跳在屏幕上：
+The following program displays a heartbeat on the screen:
 
 .. code:: python
 
@@ -36,28 +36,29 @@
 
     with Robot('0a3c') as robot:
 
-        # 读取一幅 ❤❤ 图片
+        # Read a picture ❤❤
         heart = cv2.imread('./heart.png')
 
-        # 在显示屏显示图片
+        # Show pictures on the display
         robot.screen.display(heart)
 
-        # 然后让显示屏的亮度不断变化
+        # Then let the brightness of the display keep changing
         for _ in range(3):
             robot.screen.set_brightness(0, fade_duration=0.5)
             robot.screen.set_brightness(1, fade_duration=0.5)
 
-        # 如果要让眼睛重新出现:
+        # If you want to make the eyes reappear:
         # robot.eyes.show()
 
-以下图片是程序中用到的 heart.png ，你可以右键把它另存到本地
+The following picture is the heart.png used in the program, you can right-click to save it locally
 
 .. image:: ./heart.png
 
-显示文字
+Display text
 ---------------
 
-另外，还可以用 :data:`screen` 的 :meth:`text` 方法显示简单的文本，比如：
+In addition, you can also use the :meth:`text` method of :data:`screen` to display simple text, such as:
+=======
 
 .. code:: python
 
@@ -72,4 +73,4 @@
 
 .. seealso::
 
-    `rcute_cozmars.screen <../api/screen.html>`_ ， `rcute_cozmars.animation.EyeAnimation <../api/animation.html#rcute_cozmars.animation.EyeAnimation>`_
+    `rcute_cozmars.screen <../api/screen.html>`_, `rcute_cozmars.animation.EyeAnimation <../api/animation.html#rcute_cozmars.animation.EyeAnimation>`_

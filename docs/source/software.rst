@@ -1,27 +1,26 @@
-软件安装
+Software Installation
 ==============
 
-安装 Python
+Install Python
 -------------------
 
-首先需要安装 Python 3.7 或以上的版本
+First you need to install Python 3.7 or above
 
-从 `Python 官网 <https://www.python.org/>`_ 下载并安装 Python，目前（2020.7月）的最新版本是 Python3.8
+Download and install Python from the `Python official website <https://www.python.org/>`_, the latest version currently (January 2020.7) is Python3.8
 
-安装 Cozmars Python SDK
+Install Cozmars Python SDK
 ----------------------------
 
-从命令行安装 rcute_comzars 模块：
+Install the rcute_comzars module from the command line:
 
 .. code::
 
-   python3 -m pip install rcute-comzars
+    pip install rcute-comzars
 
-国内的小伙伴可以用以下命令安装，速度更快：
+Domestic friends can use the following command to install, faster:
 
 .. code::
 
-    python3 -m pip install rcute-cozmars -i https://pypi.tuna.tsinghua.edu.cn/simple
+     pip install rcute-cozmars -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-如果你是用 Windows 10，可以从 [开始] 菜单里找到 PowerShell，右键选择“以管理员身份运行”，在弹出的蓝色窗口中输入上面的命令
-
+If you are using Windows 10, you can find PowerShell from the [Start] menu, right-click and select "Run as administrator", and enter the above command in the pop-up blue window

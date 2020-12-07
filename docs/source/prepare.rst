@@ -1,9 +1,8 @@
-准备工作
+Ready to work
 ============
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   hardware
-   software
-
+    hardware
+    software

@@ -1,21 +1,21 @@
-连接
+connection
 ==============
 
-`rcute_cozmars` 是用来控制 Cozmars 机器人和 Cube 魔方的 Python 模块，要使用该模块，只要在程序的开头导入它：
+`rcute_cozmars` is a Python module used to control Cozmars robots and Cube cubes. To use this module, just import it at the beginning of the program:
 
 .. code:: python
 
     import rcute_cozmars
 
-但，通常我们只需要导入 :class:`rcute_cozmars.Robot` 就行了：
+But, usually we only need to import :class:`rcute_cozmars.Robot`:
 
 .. code:: python
 
     from rcute_cozmars import Robot
 
-然后以机器人的 序列号 或 IP 地址为参数新建一个 :class:`Robot` 对象，并连接机器人。
+Then create a new :class:`Robot` object with the robot's serial number or IP address as a parameter, and connect to the robot.
 
-有两种连接方法：
+There are two connection methods:
 
 .. raw:: html
 
@@ -29,36 +29,35 @@
 
 .. role:: shell
 
-1. 使用 :red:`with` 语法，类似与文件操作，会自动建立与机器人的连接，并在 :red:`with` 以下缩进的代码块结束时自动断开连接：
+1. Use :red:`with` syntax, similar to file operations, it will automatically establish a connection with the robot, and automatically disconnect when the indented code block below :red:`with` ends:
 
     .. code:: python
 
         from rcute_cozmars import Robot
-
-        # 以后均假设机器人的序列号是 '0a3c', 你需要把它换成你的 Cozmars 的序列号！
+        # From now on assume that the serial number of the robot is '0a3c', you need to replace it with the serial number of your Cozmars!
         with Robot('0a3c') as robot:
-            robot.forward(2)    # 让机器人前进 2 秒
+            robot.forward(2) # Let the robot move forward for 2 seconds
 
 
-2. 显式地调用 :meth:`connect` 和 :meth:`disconnect` 方法来建立和断开连接，这种方法适合在终端窗口里用交互的方式控制机器人：
+2. Explicitly call the :meth:`connect` and :meth:`disconnect` methods to establish and disconnect the connection. This method is suitable for interactively controlling the robot in the terminal window:
 
     >>> from rcute_cozmars import Robot
     >>> robot = Robot('0a3c')
     >>> robot.connet()
     >>> robot.forward(2)
-    >>> robot.disconnect()  # 最后记得断开连接
+    >>> robot.disconnect() # Finally remember to disconnect
 
 .. note::
 
-    注意到以上代码开头的 :shell:`>>>`  符号了吗？它表示这些代码是在终端窗口里输入的命令；
+    Did you notice the :shell:`>>>` symbol at the beginning of the above code? It means that these codes are commands entered in the terminal window;
 
-    而 *没有* :shell:`>>>` 符号的代码块则表示文件中的整段代码
+    And the code block with *no* :shell:`>>>` symbol represents the entire code in the file
 
 .. note::
 
-    一个 Cozmars 机器人同时只能与一个程序连接，只有断开连接之后才能接受下一个程序的连接
+    A Cozmars robot can only be connected to one program at the same time, and only after disconnecting can it accept the connection of the next program
 
 
 .. seealso::
 
-    `rcute_cozmars.Robot.connect <../api/robot.html#rcute_cozmars.robot.Robot.connect>`_ ， `rcute_cozmars.Robot.disconnect <../api/robot.html#rcute_cozmars.robot.Robot.disconnect>`_
+    `rcute_cozmars.Robot.connect <../api/robot.html#rcute_cozmars.robot.Robot.connect>`_, `rcute_cozmars.Robot.disconnect <../api/robot.html#rcute_cozmars.robot.Robot.disconnect >`_
