@@ -166,7 +166,7 @@ async def pick_up_cube(robot, height=1, retry=3, id_filter=cube_id, show_view=Fa
                 return await pick_up_cube(robot, height, retry-1, id_filter, show_view)
             else:
                 return False
-
+'''
 async def search_for_charger(robot, cam_buf=None, clockwise=True, reverse=2, rec=None, show_view=False):
     if type(show_view) != str:
         show_view = 'search_for_charger'
@@ -243,13 +243,15 @@ async def drive_on_charger(robot, show_view=False):
                 continue
             corner = await animations['approach_charger'](robot, buf, rec=rec, show_view=show_view)
             return await animations['dock_with_charger'](robot, corner, rec=rec)
+'''
 
 animations = {'search_for_cube': search_for_cube,
     'center_cube': center_cube,
     'aim_at_cube': aim_at_cube,
     'dock_with_cube': dock_with_cube,
     'pick_up_cube': pick_up_cube,
-    'search_for_charger': search_for_charger,
-    'approach_charger': approach_charger,
-    'drive_on_charger': drive_on_charger,
-    'dock_with_charger': dock_with_charger}
+    # 'search_for_charger': search_for_charger,
+    # 'approach_charger': approach_charger,
+    # 'drive_on_charger': drive_on_charger,
+    # 'dock_with_charger': dock_with_charger,
+    }

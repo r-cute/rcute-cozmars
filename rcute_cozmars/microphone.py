@@ -17,16 +17,16 @@ class MicrophoneMultiplexOutputStream(util.MultiplexOutputStream):
 
 class Microphone(util.MultiplexOutputStreamComponent):
     """麦克风"""
-    def __init__(self, robot, gain=25, sample_rate=16000, dtype='int16', frame_duration=0.1, q_size=1):
+    def __init__(self, robot, gain=25, sample_rate=16000, dtype='int16', block_duration=0.1, q_size=1):
         util.MultiplexOutputStreamComponent.__init__(self, robot, q_size, MicrophoneMultiplexOutputStream(self))
         self._sample_rate = sample_rate
-        self._frame_duration = frame_duration
+        self._block_duration = block_duration
         self._dtype = dtype
         self._gain = gain
 
     def _get_rpc(self):
         self._multiplex_output_stream._dtype = self._dtype
-        return self._rpc.microphone(self.sample_rate, self.dtype, self.frame_duration, response_stream=self._multiplex_output_stream)
+        return self._rpc.microphone(self.sample_rate, self.dtype, self.block_duration, response_stream=self._multiplex_output_stream)
 
     @property
     def sample_rate(self):
@@ -68,18 +68,18 @@ class Microphone(util.MultiplexOutputStreamComponent):
         return {'int16':2, 'float32':4, 'int8':1, 'int32':4}[self.dtype]
 
     @property
-    def frame_duration(self):
+    def block_duration(self):
         """流中每一帧声音片段持续的时间（秒），默认是 `0.1` ，不建议修改
 
         麦克风已经打开之后不能进行设置，否则抛出异常
         """
-        return self._frame_duration
+        return self._block_duration
 
-    @frame_duration.setter
-    def frame_duration(self, fd):
+    @block_duration.setter
+    def block_duration(self, fd):
         if not self.closed:
-            raise RuntimeError('Cannot set frame_duration while microphone is recording')
-        self._frame_duration = fd
+            raise RuntimeError('Cannot set block_duration while microphone is recording')
+        self._block_duration = fd
 
     @util.mode(property_type='setter')
     async def volume(self, *args):
@@ -106,6 +106,6 @@ class Microphone(util.MultiplexOutputStreamComponent):
     #     b = util.MultiplexOutputStreamComponent.get_buffer(self)
     #     b.sample_width = self.sample_width
     #     b.sample_rate = self.sample_rate
-    #     b.frame_duration = self.frame_duration
+    #     b.block_duration = self.block_duration
     #     b.channels = self.channels
     #     return b

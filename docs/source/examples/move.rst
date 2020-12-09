@@ -37,10 +37,10 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 点点头
 -------------
 
-机器人的头部通过 :data:`head` 属性来控制，可以设置 :data:`head` 的 :data:`angle` 属性来控制头部转动的角度。头部可以在 -30~30 度之间转动，0 度表示平视前方，负数则表示低头。比如，让机器人点两下头：
+机器人的头部通过 :data:`head` 属性来控制，可以设置 :data:`head` 的 :data:`angle` 属性来控制头部转动的角度。头部可以在 -20~20 度之间转动，0 度表示平视前方，负数则表示低头。比如，让机器人点两下头：
 
     >>> for i in range(2):
-    ...     robot.head.angle = -30
+    ...     robot.head.angle = -20
     ...     robot.head.angle = 0
 
 头部的控制和手臂的控制非常相似， :data:`head` 也有 :data:`default_speed` 属性（默认是 60 度/秒）和 :meth:`set_angle` 方法，这里就不啰嗦了，你可以自己探索

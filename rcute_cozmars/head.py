@@ -28,15 +28,15 @@ class Head(util.Component):
 
     @property
     def max_angle(self):
-        """最大角度，即最高的仰角， `30` 度，只读
+        """最大角度，即最高的仰角， `20` 度，只读
         """
-        return 30
+        return 20
 
     @property
     def min_angle(self):
-        """最小角度，即最低的俯视角， `-30` 度，只读
+        """最小角度，即最低的俯视角， `-20` 度，只读
         """
-        return -30
+        return -20
 
     @util.mode(property_type='setter')
     async def angle(self, *args):

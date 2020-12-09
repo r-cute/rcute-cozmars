@@ -83,7 +83,7 @@
 
 
 
-:data:`microphone` 还有几个属性： :data:`volume` 和 :data:`gain` 用来调节麦克风的音量大小， :data:`sample_rate` 、 :data:`channels` 和 :data:`frame_duration` 分别是麦克风的采样率、声道数和每次从输出流中读取的数据块的时长。除了音量增益 :data:`gain` 以外，这些属性通常不需要修改。
+:data:`microphone` 还有几个属性： :data:`volume` 和 :data:`gain` 用来调节麦克风的音量大小， :data:`sample_rate` 、 :data:`channels` 和 :data:`block_duration` 分别是麦克风的采样率、声道数和每次从输出流中读取的数据块的时长。除了音量增益 :data:`gain` 以外，这些属性通常不需要修改。
 
 .. seealso::
 

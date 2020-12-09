@@ -1,5 +1,5 @@
-from . import cube_charge_animation
+from . import cube_animation
 
 animations = {}
-for anim in [cube_charge_animation]:
+for anim in [cube_animation]:
     animations.update(anim.animations)
