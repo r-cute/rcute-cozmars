@@ -20,6 +20,7 @@
 
 欢迎提问或反馈bug到 https://github.com/hyansuper/rcute-cozmars/issues
 
+另外，有没有愿意帮忙把文档翻译成英语的小伙伴？欢迎联系我 hyansuper(艾特)foxmail.com
 
 -------------
 
