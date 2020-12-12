@@ -65,7 +65,7 @@ class Microphone(util.MultiplexOutputStreamComponent):
     @property
     def sample_width(self):
         """一个采样包含几个字节，与 :data:`dtype` 对应，只读"""
-        return {'int16':2, 'float32':4, 'int8':1, 'int32':4}[self.dtype]
+        return util.sample_width(self.dtype)
 
     @property
     def block_duration(self):

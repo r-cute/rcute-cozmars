@@ -20,6 +20,9 @@ def bgr(color):
     else:
         return color
 
+def sample_width(dtype):
+    return {'int16':2, 'float32':4, 'float64':8, 'int8':1, 'int32':4}[dtype]
+
 def mode(force_sync=True, property_type=None):
     def func_deco(func):
 
@@ -50,6 +53,23 @@ def mode(force_sync=True, property_type=None):
             return new_func
 
     return func_deco
+
+class withmixin:
+    async def __aenter__(self):
+        await self.open()
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.close()
+
+    def __enter__(self):
+        if self._mode == 'aio':
+            raise AttributeError('__enter__')
+        self.open()
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self.close()
 
 class Component:
     def __init__(self, robot):
@@ -99,8 +119,20 @@ class StreamComponent(Component):
         '''
         raise NotImplementedError
 
+class InputStreamComponent(StreamComponent, withmixin):
+    def __init__(self, robot):
+        StreamComponent.__init__(self, robot)
 
-class OutputStream(RPCStream):
+    @mode()
+    async def open(self):
+        return await self._open()
+
+    @mode()
+    async def close(self):
+        return await self._close()
+
+
+class OutputStream(RPCStream, withmixin):
     """输出数据流"""
     def __init__(self, parent, maxsize=0):
         RPCStream.__init__(self, maxsize)
@@ -131,22 +163,6 @@ class OutputStream(RPCStream):
     async def read(self):
         """从数据流中读取一帧数据"""
         return await self.__anext__()
-
-    async def __aenter__(self):
-        await self.open()
-        return self
-
-    async def __aexit__(self, exc_type, exc, tb):
-        await self.close()
-
-    def __enter__(self):
-        if self._mode == 'aio':
-            raise AttributeError('__enter__')
-        self.open()
-        return self
-
-    def __exit__(self, exc_type, exc, tb):
-        self.close()
 
     def __iter__(self):
         if self._mode == 'aio':

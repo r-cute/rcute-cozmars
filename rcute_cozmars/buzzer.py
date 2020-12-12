@@ -4,7 +4,7 @@ from gpiozero.tones import Tone
 from wsmprpc import RPCStream
 
 
-class Buzzer(util.StreamComponent):
+class Buzzer(util.InputStreamComponent):
     """蜂鸣器
 
     蜂鸣器能以不同的频率振动，从而发出不同的 `音调`。
@@ -36,7 +36,7 @@ class Buzzer(util.StreamComponent):
         """蜂鸣器当前的 `音调`
         """
         if args:
-            await self.set_tone(args[0], aio_mode=True)
+            await self.set_tone(args[0])
         else:
             return self._tone
 
@@ -51,9 +51,8 @@ class Buzzer(util.StreamComponent):
 
         """
         if self.closed:
-            t = self._encode(tone)
-            await self._rpc.tone(t.frequency, duration)
-            self._tone = t
+            self._tone, freq = self._encode(tone)
+            await self._rpc.tone(freq, duration)
         else:
             raise RuntimeError('Cannot set tone while buzzer is playing')
 
@@ -69,7 +68,8 @@ class Buzzer(util.StreamComponent):
             for t in tone:
                 await self._play_one_tone(t, delay/2, duty_cycle)
         else:
-            await self._input_stream.put(self._encode(tone))
+            self._tone, freq = self._encode(tone)
+            await self._input_stream.put(freq)
             await asyncio.sleep(delay* duty_cycle)
             if duty_cycle != 1:
                 await self._input_stream.put(None)
@@ -99,6 +99,7 @@ class Buzzer(util.StreamComponent):
             for tone in song:
                 await self._play_one_tone(tone, delay, duty_cycle)
             await self._input_stream.put(None)
+            self._tone = None
 
     '''
     @property
@@ -119,7 +120,6 @@ class Buzzer(util.StreamComponent):
 
 
     def _encode(self, obj):
-        return Tone(obj).frequency if obj else None
-
-
-
+        t = Tone(obj) if obj else None
+        freq = t.frequency if t else None
+        return t, freq
