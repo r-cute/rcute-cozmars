@@ -12,7 +12,7 @@
     >>> robot.eyes.expression = 'angry'
     >>> robot.eyes.expression = ('happy', 'lightgreen') # 或者，可以同时设置表情和颜色
 
-如果要隐藏眼睛，只需调用 :data:`eyes` 的 :meth:`hide` 方法； 而 :meth:`show` 方法让眼睛重新出现
+如果要隐藏眼睛，只需调用 :data:`eyes` 的 :meth:`hide` 方法； 而 :meth:`show` 方法让眼睛重新出现。眼睛的动态效果会占用一点 Cozmars 的带宽，当你想要尽量避免网络延迟的时候，用 :meth:`stop` 和 :meth:`resume` 方法来暂停和继续眼睛的动态效果。
 
 .. note ::
 
@@ -20,12 +20,12 @@
 
     注意：为了与 opencv 一致，我们使用 BGR 而不是 RGB 色彩模式！
 
-图像和文字
+显示图片
 ------------
 
 :class:`Robot` 还有一个 :data:`screen` 属性用来直接控制显示屏，用它的 :meth:`display` 方法来显示图片
 
-:data:`screen` 的 :data:`brightness` 属性可以用来设置显示屏的亮度，`1` 表示最亮，`0` 表示全暗，默认是 `0.05` ；也可以通过 :meth:`set_brightness` 方法的 :data:`fade_duration` 或 :data:`fade_speed` 参数来控制亮度的渐变速度
+:data:`screen` 的 :data:`brightness` 属性可以用来设置显示屏的亮度，`1` 表示最亮，`0` 表示全暗，为了省电和护眼，默认显示亮度是 `0.05` ；也可以通过 :meth:`set_brightness` 方法的 :data:`fade_duration` 或 :data:`fade_speed` 参数来控制亮度的渐变速度
 
 以下的程序显示一个心跳在屏幕上：
 
@@ -54,6 +54,9 @@
 
 .. image:: ./heart.png
 
+显示文字
+---------------
+
 另外，还可以用 :data:`screen` 的 :meth:`text` 方法显示简单的文本，比如：
 
 .. code:: python
@@ -64,7 +67,7 @@
     with Robot('0a3c') as robot:
         robot.screen.text('I am...')
         sleep(2)
-        robot.screen.text('COZMARS!', color='white')
+        robot.screen.text('COZMARS!', size=35, color='black', bg_color='cyan')
         sleep(2)
 
 .. seealso::

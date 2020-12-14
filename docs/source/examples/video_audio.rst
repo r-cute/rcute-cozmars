@@ -37,6 +37,10 @@
 
     cv2.destroyAllWindows()
 
+当摄像头没有在传输视频时，也可以用 :meth:`capture` 方法拍张照
+
+    >>> robot.camera.capture('./photo.jpeg')
+
 随便提一下，:data:`camera` 可以通过 :data:`frame_rate` 和 :data:`resolution` 属性来改变帧率和分辨率
 
 读取麦克风
@@ -70,11 +74,7 @@
                     break
 
 
-这个程序需要 |soundfile| 模块用来操作声音文件，如果没有安装 soundfile，可以在命令行输入以下命令来安装：
-
-.. code::
-
-    pip install soundfile
+（这个程序需要 |soundfile| 模块用来保存声音文件，如果没有安装 soundfile，可以在命令行输入 :data:`python3 -m pip install soundfile` 进行安装，如果是 Linux 系统，还要输入 :data:`sudo apt-get install libsndfile1` 手动安装 libsndfile）
 
 
 .. |soundfile| raw:: html

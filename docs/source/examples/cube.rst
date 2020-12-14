@@ -20,15 +20,15 @@ Cozmars 的玩伴——魔方
 
 然后与魔方建立连接，可以使用 :red:`with` 语法：
 
-    .. code:: python
+.. code:: python
 
-        from rcute_cozmars import Cube
-        import time
+    from rcute_cozmars import Cube
+    import time
 
-        # 假设魔方的序列号是 556a，你需要把它换成你的魔方的序列号！
-        with Cube('556a') as cube:
-            cube.color = 'red' # 亮红灯3秒钟
-            time.sleep(3)
+    # 假设魔方的序列号是 556a，你需要把它换成你的魔方的序列号！
+    with Cube('556a') as cube:
+        cube.color = 'red' # 亮红灯3秒钟
+        time.sleep(3)
 
 也可以显示地调用 :meth:`connect` 和 :meth:`disconnect` 方法来建立和断开连接：
 

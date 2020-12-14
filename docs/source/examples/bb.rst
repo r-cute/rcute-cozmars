@@ -1,6 +1,10 @@
 能动手也要 bb
 =================
 
+    >>> robot.buzzer.play([500, 500])
+
+上面的命令让机器人发出两个 500Hz 的音节
+
 :class:`Robot` 的 :data:`buzzer` 属性代表机器人内部的一个蜂鸣器，蜂鸣器能以不同的频率振动，从而发出不同的 `音调`。
 
 .. |Tone| raw:: html
@@ -41,7 +45,6 @@
 .. code:: python
 
     from rute_cozmars import Robot
-    import time
 
     song = ['D4', 'G4', 'G4', 'B4', 'C5', 'B4', 'A4',
             ('G4', 'A4'), 'B4', 'B4', 'B4', 'B4', ('A4', 'B4'), 'A4', 'G4']

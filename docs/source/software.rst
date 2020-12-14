@@ -15,13 +15,13 @@
 
 .. code::
 
-   pip install rcute-comzars
+   python3 -m pip install rcute-comzars
 
 国内的小伙伴可以用以下命令安装，速度更快：
 
 .. code::
 
-    pip install rcute-cozmars -i https://pypi.tuna.tsinghua.edu.cn/simple
+    python3 -m pip install rcute-cozmars -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 如果你是用 Windows 10，可以从 [开始] 菜单里找到 PowerShell，右键选择“以管理员身份运行”，在弹出的蓝色窗口中输入上面的命令
 
