@@ -39,7 +39,7 @@ Animation 好玩的地方在于它是可以自定义的，类似于事先定义�
 
     自定义的 animation 协程需要接受 robot 作为第一个参数，也可以有其他可选参数。
 
-    在这个协程里，调用的机器人动作的命令也都要改成协程的调用方式，比如我们把 `robot.lift.height = 0` 改成了 `await robot.lift.height(0)`
+    在这个协程里，调用的机器人动作的命令也都要改成协程的调用方式，比如我们把 :data:`robot.backward(1)` 改成了 :data:`await robot.backward(1)`，把 :data:`robot.lift.height = 0` 改成了 :data:`await robot.lift.height(0)`
 
 变脸 animation
 ------------------

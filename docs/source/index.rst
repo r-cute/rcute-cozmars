@@ -11,7 +11,7 @@
 
    prepare
    examples/index
-   async/index
+   async
 
 .. toctree::
    :maxdepth: 1
@@ -35,7 +35,7 @@ DIY 爱好者可根据开源资料自己制作、使用
 
 .. warning::
 
-    禁止他人售卖该机器人的模型打印件、成品或其改装
+    他人禁止售卖该机器人的模型打印件、成品或其改装
 
 -------------
 

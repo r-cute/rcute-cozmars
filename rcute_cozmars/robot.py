@@ -3,7 +3,7 @@ rcute_cozmars.robot 模块包括 :class:`Robot`, :class:`AsyncRobot` 和 :class:
 
 :class:`Robot` 会以阻塞的方式顺序执行每一条指令；
 
-:class:`AsyncRobot` 遇到耗时的指令时会以非阻塞的方式立即返回一个 :class:`concurrent.futures.Future` 后续可用于获得该指令最终的返回结果，并立即执行下一条指令；
+:class:`AsyncRobot` 遇到耗时的指令时会以非阻塞的方式立即返回一个 :class:`concurrent.futures.Future` 对象，然后立刻执行下一条指令；
 
 :class:`AioRobot` 则是以异步 (async/await) 的方式执行指令
 
