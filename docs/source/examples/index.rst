@@ -11,4 +11,3 @@
    video_audio
    screen
    animation
-   cube

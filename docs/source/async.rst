@@ -52,10 +52,6 @@ async 异步模式
 我们已经稍微见识过，这里就不再演示了。除了开发 animation，你应该不需要用到这个模式：）
 
 
-.. note::
-
-    对应地，魔方也同样有三个类 :data:`Cube` , :data:`AsyncCube`, :data:`AioCube` 实现三种不同的控制方式
-
 .. seealso::
 
     `concurrent.futures.Future <https://docs.python.org/zh-cn/3/library/concurrent.futures.html#future-objects>`_ ，

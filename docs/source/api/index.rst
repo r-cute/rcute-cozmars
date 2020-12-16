@@ -18,4 +18,3 @@ API
    microphone
    animation
    env
-   cube

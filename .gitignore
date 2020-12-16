@@ -3,6 +3,7 @@
 */__pycache__/
 build/
 dist/
+.eggs/
 *.egg-info/
 *.py[cod]
 test*.py
