@@ -24,7 +24,7 @@ import threading
 import logging
 import json
 from wsmprpc import RPCClient, RPCStream
-from . import util, env, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, motor, eye_animation
+from . import util, env, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, speaker, motor, eye_animation
 from .animation import animations
 
 logger = logging.getLogger("rcute-cozmars")
@@ -51,6 +51,7 @@ class AioRobot:
         self._lift = lift.Lift(self)
         self._head = head.Head(self)
         self._buzzer = buzzer.Buzzer(self)
+        self._speaker = speaker.Speaker(self)
         self._motor = motor.Motor(self)
         self._eye_anim = eye_animation.EyeAnimation(self)
 
@@ -117,6 +118,11 @@ class AioRobot:
     def buzzer(self):
         """蜂鸣器"""
         return self._buzzer
+
+    @property
+    def speaker(self):
+        """扬声器"""
+        return self._speaker
 
     @property
     def screen(self):
@@ -198,7 +204,7 @@ class AioRobot:
             self._sensor_task.cancel()
             self._eye_anim_task.cancel()
             self._sensor_data_rpc.cancel()
-            await asyncio.gather(self.camera._close(), self.microphone._close(), self.buzzer._close(), return_exceptions=True)
+            await asyncio.gather(self.camera.close(), self.microphone.close(), self.speaker.close(), self.buzzer.close(), return_exceptions=True)
             await self._ws.close()
             self._connected = False
 

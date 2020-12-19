@@ -24,7 +24,7 @@ class Buzzer(util.InputStreamComponent):
     """
 
     def __init__(self, robot):
-        util.StreamComponent.__init__(self, robot)
+        util.InputStreamComponent.__init__(self, robot)
         self._tone = None
 
     def _get_rpc(self):

@@ -20,9 +20,6 @@ def bgr(color):
     else:
         return color
 
-def sample_width(dtype):
-    return {'int16':2, 'float32':4, 'float64':8, 'int8':1, 'int32':4}[dtype]
-
 def mode(force_sync=True, property_type=None):
     def func_deco(func):
 
@@ -100,18 +97,6 @@ class StreamComponent(Component):
         """数据流是否关闭"""
         return not self._stream_rpc or self._stream_rpc.done()
 
-    async def _close(self):
-        if not self.closed:
-            self._stream_rpc.cancel()
-            try:
-                await self._stream_rpc
-            except asyncio.CancelledError:
-                pass
-
-    async def _open(self):
-        if self.closed:
-            self._stream_rpc = self._get_rpc()
-            self._stream_rpc.request()
 
     def _get_rpc(self):
         '''
@@ -123,13 +108,21 @@ class InputStreamComponent(StreamComponent, withmixin):
     def __init__(self, robot):
         StreamComponent.__init__(self, robot)
 
-    @mode()
-    async def open(self):
-        return await self._open()
-
-    @mode()
+    @util.mode()
     async def close(self):
-        return await self._close()
+        if not self.closed:
+            try:
+                self._input_stream.force_put_nowait(StopAsyncIteration())
+                await self._stream_rpc
+            except asyncio.CancelledError:
+                pass
+
+    @util.mode()
+    async def open(self):
+        if self.closed:
+            self._input_stream = RPCStream()
+            self._stream_rpc = self._get_rpc()
+            self._stream_rpc.request()
 
 
 class OutputStream(RPCStream, withmixin):
@@ -213,3 +206,14 @@ class MultiplexOutputStreamComponent(StreamComponent):
             return OutputStream(self._multiplex_output_stream, maxsize=self._q_size)
         else:
             return asyncio.run_coroutine_threadsafe(self._async_get_buffer(), self._lo).result()
+
+    @util.mode()
+    async def close(self):
+        if not self.closed:
+            self._stream_rpc.cancel()
+
+    @util.mode()
+    async def open(self):
+        if self.closed:
+            self._stream_rpc = self._get_rpc()
+            self._stream_rpc.request()
