@@ -71,12 +71,10 @@ class SoundMixin:
 
     @util.mode(property_type='setter')
     async def volume(self, *args):
-        """音量大小，0~100，百分制，设置以后会自动保存，重启后依然有效，一般设置成 100%，不建议修改
+        """音量大小，0~100，百分制，设置以后会自动保存，重启后依然有效
 
-        若要调整音量，应该修改音量增益
+        麦克风音量推荐设置成 100%，然后可以通过音量增益进一步增大
 
-        设备已经打开之后不能进行设置，否则抛出异常
+        扬声器音量推荐设成 50%
         """
-        if args and not self.closed:
-            raise RuntimeError('Cannot set volume while device is streaming')
         return await (self._volume()(*args))

@@ -3,10 +3,7 @@ import inspect
 from . import util
 from .sound_mixin import SoundMixin
 import numpy as np
-import soundfile as sf
-import librosa
-from gpiozero.tones import Tone
-from wsmprpc import RPCStream
+import soundfile as sf, wave, io
 
 class Speaker(util.InputStreamComponent, SoundMixin):
     """扬声器"""
@@ -16,7 +13,8 @@ class Speaker(util.InputStreamComponent, SoundMixin):
         SoundMixin.__init__(self)
 
     def _get_rpc(self):
-        return self._rpc.speaker(self.samplerate, self.dtype, self.block_duration, request_stream=self._input_stream)
+        return self._rpc.speaker(self._temp_sample_rate or self.samplerate, self.dtype, self.block_duration, request_stream=self._input_stream)
+        self._temp_sample_rate = None
 
     def _volume(self):
         return self._rpc.speaker_volume
@@ -29,7 +27,11 @@ class Speaker(util.InputStreamComponent, SoundMixin):
             for b in file.blocks(dtype=self.dtype, blocksize=int(self.block_duration*file.samplerate), fill_value=0):
                 yield (b if b.ndim==1 else b.mean(axis=1, dtype=self.dtype)).tobytes()
         except (AssertionError, RuntimeError):
-            y, sr = librosa.load(src, sr=self.sample_rate, mono=True, res_type='kaiser_fast')
+            import functools, librosa # librosa supports more formats than soundfile
+            # down-sample if needed
+            sr = self.sample_rate if librosa.get_samplerate(src)> self.sample_rate else None
+            load = functools.partial(librosa.load, src, sr=sr, mono=True, res_type='kaiser_fast')
+            y, self._temp_sample_rate = await asyncio.get_running_loop().run_in_executor(None, load)
             yield from self._np_gen(y)
 
 
@@ -93,3 +95,26 @@ class Speaker(util.InputStreamComponent, SoundMixin):
                     await asyncio.sleep(self.block_duration * .9)
         else:
             raise TypeError(f'Unable to open {src}')
+
+    @util.mode()
+    async def say(txt, **options):
+        """说话
+
+        :param txt: 要说的话
+        :type txt: str
+        :param options: 见 `py-espeak-ng <https://github.com/gooofy/py-espeak-ng>`_
+            * voice 语言
+            * pitch 音调
+            * speed 语速
+        :type options: optional
+        """
+        if not self._esng:
+            from espeakng import ESpeakNG
+            self._esng = ESpeakNG()
+        op = {voice: 'en-us'}
+        op.update(options)
+        for k, v in op.items():
+            setattr(self._esng, k, v)
+        with wave.open(io.BytesIO(self._esng.synth_wav(txt))) as wav:
+            self._temp_sample_rate = wav.getframerate()
+            await self.play(wav.readframes(wav.getnframes()))

@@ -5,6 +5,10 @@ opencv-python
 opencv-contrib-python
 numpy
 pydub
+soundfile
+librosa
 websockets
 wsmprpc>=1.1.1
-# apt install ffmpeg
+Pillow
+py-espeak-ng
+# apt install ffmpeg libsndfile1 espeak espeak-ng

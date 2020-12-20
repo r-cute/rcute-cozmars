@@ -1,7 +1,7 @@
 import asyncio
 from . import util
 from gpiozero.tones import Tone
-from wsmprpc import RPCStream
+# from wsmprpc import RPCStream
 
 
 class Buzzer(util.InputStreamComponent):
@@ -28,7 +28,7 @@ class Buzzer(util.InputStreamComponent):
         self._tone = None
 
     def _get_rpc(self):
-        self._input_stream = RPCStream()
+        # self._input_stream = RPCStream()
         return self._rpc.play(request_stream=self._input_stream)
 
     @util.mode(property_type='setter')
