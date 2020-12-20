@@ -52,7 +52,7 @@ Animation 好玩的地方在于它是可以自定义的，类似于事先定义�
 
     async def bian_lian(robot):
         robot.head.default_speed = None
-        robot.lift.default_speed *= 2
+        robot.lift.default_speed = 4
 
         for color in ['white', 'red', 'yellow', 'lightgreen']:
             await robot.head.angle(-15)

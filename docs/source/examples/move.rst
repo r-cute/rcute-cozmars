@@ -96,7 +96,7 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
     with Robot('0a3c') as robot:
 
         robot.head.default_speed = None # defaul_speed 设为 None，表示最快速度
-        robot.lift.default_speed *= 2
+        robot.lift.default_speed = 4
 
         for color in ['white', 'red', 'yellow', 'lightgreen']:
             robot.head.angle = -15

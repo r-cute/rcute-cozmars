@@ -7,4 +7,5 @@ numpy
 pydub
 websockets
 wsmprpc>=1.1.1
+Pillow
 # apt install ffmpeg
