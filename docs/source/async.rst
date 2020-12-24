@@ -52,6 +52,13 @@ async 异步模式
 我们已经稍微见识过，这里就不再演示了。除了开发 animation，你应该不需要用到这个模式：）
 
 
+.. warning::
+
+    需要注意的是，不能 *同时* 有两条指令控制机器人的同一个元件！
+
+    比如一条抬头的指令还未执行完，就立刻执行另一条低头的指令，这可能会损坏舵机
+
+
 .. seealso::
 
     `concurrent.futures.Future <https://docs.python.org/zh-cn/3/library/concurrent.futures.html#future-objects>`_ ，
