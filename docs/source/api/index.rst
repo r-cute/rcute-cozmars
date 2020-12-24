@@ -12,7 +12,7 @@ API
    motor
    lift
    head
-   buzzer
+   speaker
    screen
    camera
    microphone

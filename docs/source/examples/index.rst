@@ -6,7 +6,7 @@
 
    connect
    move
-   bb
+   speak
    sensor
    video_audio
    screen

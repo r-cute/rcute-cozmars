@@ -1,6 +1,5 @@
-colorzero
-gpiozero
 aiohttp
+gpiozero
 opencv-python
 opencv-contrib-python
 numpy
@@ -11,4 +10,4 @@ websockets
 wsmprpc>=1.1.1
 Pillow
 py-espeak-ng
-# apt install ffmpeg libsndfile1 espeak espeak-ng
+# apt install ffmpeg libsndfile1 espeak espeak-ng-espeak

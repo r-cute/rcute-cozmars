@@ -268,11 +268,7 @@ class AioRobot:
 
     @property
     def firmware_version(self):
-        """Cozmars 的固件版本
-
-        如果低于 |pypi上的最新版本| ，可以登陆机器人的页面进行更新
-
-        """
+        """Cozmars 的固件版本"""
         return self._firmware_version
 
     @property

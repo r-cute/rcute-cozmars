@@ -2,7 +2,7 @@ import functools
 import asyncio
 from concurrent import futures
 from wsmprpc import RPCStream
-import colorzero
+from PIL import ImageColor
 from os import path
 
 PKG = path.dirname(__file__)
@@ -16,7 +16,7 @@ def pkg(file_name):
 
 def bgr(color):
     if isinstance(color, str):
-        return colorzero.Color(color).rgb_bytes[::-1]
+        return ImageColor.getrgb(color)[::-1]
     else:
         return color
 
@@ -108,7 +108,7 @@ class InputStreamComponent(StreamComponent, withmixin):
     def __init__(self, robot):
         StreamComponent.__init__(self, robot)
 
-    @util.mode()
+    @mode()
     async def close(self):
         if not self.closed:
             try:
@@ -117,7 +117,7 @@ class InputStreamComponent(StreamComponent, withmixin):
             except asyncio.CancelledError:
                 pass
 
-    @util.mode()
+    @mode()
     async def open(self):
         if self.closed:
             self._input_stream = RPCStream()
@@ -207,12 +207,12 @@ class MultiplexOutputStreamComponent(StreamComponent):
         else:
             return asyncio.run_coroutine_threadsafe(self._async_get_buffer(), self._lo).result()
 
-    @util.mode()
+    @mode()
     async def close(self):
         if not self.closed:
             self._stream_rpc.cancel()
 
-    @util.mode()
+    @mode()
     async def open(self):
         if self.closed:
             self._stream_rpc = self._get_rpc()
