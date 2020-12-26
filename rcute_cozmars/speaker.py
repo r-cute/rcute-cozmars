@@ -78,7 +78,7 @@ class Speaker(util.InputStreamComponent, SoundMixin):
 
         :param src: 要播放的声音资源（文件/网址/数据）
         :type src: str/np.ndarray/bytes/iterable/file-like obj
-        :param repeat: 播放次数，默认为 1，-1 表示不断连续播放
+        :param repeat: 播放次数，默认为 1，-1 表示不断循环
         :type repeat: int, optional
         """
         sr = None
@@ -140,8 +140,9 @@ class Speaker(util.InputStreamComponent, SoundMixin):
         op.update(options)
         for k, v in op.items():
             setattr(self._esng, k, v)
-        with wave.open(io.BytesIO(self._esng.synth_wav(txt))) as wav:
-            await self.play(wav.readframes(wav.getnframes()), sample_rate=wav.getframerate(), dtype='int16')
+        wav_data = await asyncio.get_running_loop().run_in_executor(None, self._esng.synth_wav, txt)
+        with wave.open(io.BytesIO(wav_data)) as f:
+            await self.play(f.readframes(f.getnframes()), sample_rate=f.getframerate(), dtype='int16')
 
     @util.mode()
     async def beep(self, tones, repeat=1, tempo=120, duty_cycle=.9):

@@ -47,9 +47,21 @@ concurrent 异步模式
 async 异步模式
 ---------------------
 
-另一种异步模式是使用 *协程*，对应的类是 :data:`AioRobot`，这是 Cozmars 程序内部的运行方式，也是我们在 `自定义 animation <examples/animation.html#id1>`_ 时要使用协程的原因。
+另一种异步模式是使用 *协程*，对应的类是 :data:`AioRobot`，这是 Cozmars 程序内部的运行方式，也是我们在 `自定义 animation <examples/animation.html#id1>`_ 时要使用协程的原因。上面的代码改成 async 模式大概是这样的：
 
-我们已经稍微见识过，这里就不再演示了。除了开发 animation，你应该不需要用到这个模式：）
+.. code:: python
+
+    from rcute_cozmars import AioRobot
+    import asyncio
+
+    async def main():
+        async with AioRobot('0a3c') as robot:
+            await robot.lift.set_height(1, duration=2)
+            await robot.head.set_angle(20, duration=2)
+
+    asyncio.run(main())
+
+除了开发 animation，你应该不需要用到这个模式 :)
 
 .. warning::
 

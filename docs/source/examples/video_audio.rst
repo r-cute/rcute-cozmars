@@ -52,36 +52,25 @@
 .. code:: python
 
     from rcute_cozmars import Robot
-    import soundfile as sf
-    import numpy as np
+    import wave
 
     # 把以下序列号换成你的 Cozmars 的序列号
     with Robot('0a3c') as robot:
         mic = robot.microphone
 
-        print(f'音量增益 {mic.gain}')
-
-        with mic.get_buffer() as mic_buf, sf.SoundFile('sound.wav', mode='w', samplerate=mic.sample_rate, channels=mic.channels, subtype='PCM_24') as file:
+        with mic.get_buffer() as mic_buf, wave.open('record.wav', 'wb') as file:
+            f.setnchannels(1)
+            f.setframerate(mic.sample_rate)
+            f.setsampwidth(mic.sample_width)
 
             duration = 0
             for segment in mic_buf:
-                data = np.frombuffer(segment.raw_data, dtype=mic.dtype)
-                file.write(data)
+                file.writeframesraw(segment.raw_data)
 
                 # 麦克风输出流中每个数据块默认是 0.1 秒的音频，录制 5 秒后结束
                 duration += segment.duration_seconds
                 if duration >= 5:
                     break
-
-
-（这个程序需要 |soundfile| 模块用来保存声音文件，如果没有安装 soundfile，可以在命令行输入 :data:`python3 -m pip install soundfile` 进行安装，如果是 Linux 系统，还要输入 :data:`sudo apt-get install libsndfile1` 手动安装 libsndfile）
-
-
-.. |soundfile| raw:: html
-
-   <a href='https://pysoundfile.readthedocs.io/en/0.10.0/' target='blank'>soundfile</a>
-
-
 
 :data:`microphone` 还有几个属性： :data:`volume` 和 :data:`gain` 用来调节麦克风的音量大小， :data:`sample_rate` 、 :data:`channels` 和 :data:`block_duration` 分别是麦克风的采样率、声道数和每次从输出流中读取的数据块的时长。除了音量增益 :data:`gain` 以外，这些属性通常不需要修改。
 

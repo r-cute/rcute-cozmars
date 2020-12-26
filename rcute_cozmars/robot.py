@@ -117,11 +117,15 @@ class AioRobot:
     @property
     def buzzer(self):
         """蜂鸣器"""
+        if self._firmware_version.startswith('2'):
+            raise AttributeError('Cozmars V2 has no buzzer')
         return self._buzzer
 
     @property
     def speaker(self):
         """扬声器"""
+        if self._firmware_version.startswith('1'):
+            raise AttributeError('Cozmars V1 has no speaker')
         return self._speaker
 
     @property
