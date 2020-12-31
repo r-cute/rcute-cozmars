@@ -208,7 +208,7 @@ class AioRobot:
             self._sensor_task.cancel()
             self._eye_anim_task.cancel()
             self._sensor_data_rpc.cancel()
-            await asyncio.gather(self.camera.close(), self.microphone.close(), self.speaker.close(), self.buzzer.close(), return_exceptions=True)
+            await asyncio.gather(self.camera.close(), self.microphone.close(), self.speaker.close(), return_exceptions=True)
             await self._ws.close()
             self._connected = False
 

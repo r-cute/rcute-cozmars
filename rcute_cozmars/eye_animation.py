@@ -16,6 +16,7 @@ class EyeAnimation(util.Component):
         self._gap = 20
         self._color = (255, 255, 0) # cyan
         self._ev = self._exp_q = None
+        self._expression = None
 
     @util.mode(property_type='setter')
     async def color(self, color=None):
@@ -103,7 +104,7 @@ class EyeAnimation(util.Component):
         self._canvas = np.zeros((134, 240, 3), np.uint8)
         self._ev = asyncio.Event()
         self._exp_q = asyncio.Queue(1)
-        self._exp_q.put_nowait(start_exp or 'auto.neutral')
+        self._exp_q.put_nowait(start_exp or self._expression or 'auto.neutral')
         self._create_eye()
         H, W = self._canvas.shape[:2]
         LX, RX, Y = (W-self._gap-self._size)//2, (W+self._size+self._gap)//2, H//2

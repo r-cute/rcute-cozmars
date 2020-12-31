@@ -1,12 +1,12 @@
 能动手也要 bb
 ===============
 
-没声音，再好的戏也出不来。Cozmars V2 版相较于 V1 版的改进之一，是用扬声器取代了蜂鸣器。扬声器的频率响应更好，在音频功放驱动下，Cozmars 也可以说话、播放数字音乐了
+Cozmars V2 相较于 V1 的改进之一，是用扬声器取代了蜂鸣器。扬声器的频率响应更好，在音频功放驱动下，Cozmars 就可以说话、播放数字音乐了
 
-说人话
+好好说话
 ---------
 
-扬声器用 :data:`speaker` 属性表示。调用 :meth:`say` 函数，让 Cozmars 好好说话：
+扬声器用 :data:`speaker` 属性表示。调用 :meth:`say` 函数，让 Cozmars 说人话：
 
     >>> robot.speaker.say('不要睡，起来嗨')
 
@@ -16,16 +16,16 @@
 
     代码出错？如果你使用的是 Cozmars V1 版，请跳转 `这里 <../../v1/examples/bb.html>`_
 
-放音乐
---------
+Rock n roll
+---------------
 
 :data:`speaker` 的 :meth:`play` 函数能很方便地播放多种声音格式，只要把声音的文件路径、网址或 wav 数据作为 :meth:`play` 的参数即可
 
-    >>> robot.speaker.play('goodbye yellow brick road.mp3')
+    >>> robot.speaker.play('./waiting_for_the_end.mp3')
 
 各种歌曲顺手拈来，缓则“乐以教和”，躁可“动次打次”，取决于你喜欢怎样的 Cozmars
 
-哼调调
+哼小曲
 --------
 
 :meth:`beep` 函数通过播放不同频率的正弦波形，使扬声器可以模仿蜂鸣器，发出不同的 *音调*
@@ -51,7 +51,7 @@
     from rute_cozmars import Robot
 
     tones = ['D4', 'G4', 'G4', 'B4', 'C5', 'B4', 'A4',
-            ('G4', 'A4'), 'B4', 'B4', 'B4', 'B4', ('A4', 'B4'), 'A4', 'G4']
+            ('G4', 'A4'), 'B4', 'B4', 'B4', 'B4', ('A4', 'B4'), 'A4', 'G4', 0]
 
     with Robot('0a3c') as robot:
         robot.speaker.beep(tones, tempo=120, repeat=2)

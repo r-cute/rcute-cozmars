@@ -20,6 +20,9 @@ def bgr(color):
     else:
         return color
 
+def sample_width(dtype):
+    return {'int16':2, 'float32':4, 'float64':8, 'int8':1, 'int32':4}[dtype]
+
 def mode(force_sync=True, property_type=None):
     def func_deco(func):
 
@@ -174,13 +177,13 @@ class MultiplexOutputStream:
     async def add_stream(self, stream):
         self._output_streams.add(stream)
         if len(self._output_streams) == 1:
-            await self._component._open()
+            await self._component.open()
 
     async def remove_stream(self, stream):
         try:
             self._output_streams.remove(stream)
             if len(self._output_streams) == 0:
-                await self._component._close()
+                await self._component.close()
         except KeyError:
             pass
 

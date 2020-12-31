@@ -59,9 +59,9 @@
         mic = robot.microphone
 
         with mic.get_buffer() as mic_buf, wave.open('record.wav', 'wb') as file:
-            f.setnchannels(1)
-            f.setframerate(mic.sample_rate)
-            f.setsampwidth(mic.sample_width)
+            file.setnchannels(1)
+            file.setframerate(mic.sample_rate)
+            file.setsampwidth(mic.sample_width)
 
             duration = 0
             for segment in mic_buf:
@@ -72,7 +72,7 @@
                 if duration >= 5:
                     break
 
-:data:`microphone` 还有几个属性： :data:`volume` 和 :data:`gain` 用来调节麦克风的音量大小， :data:`sample_rate` 、 :data:`channels` 和 :data:`block_duration` 分别是麦克风的采样率、声道数和每次从输出流中读取的数据块的时长。除了音量增益 :data:`gain` 以外，这些属性通常不需要修改。
+:data:`microphone` 还有几个属性： :data:`volume` 和 :data:`gain` 用来调节麦克风的音量大小， :data:`sample_rate` 、 :data:`dtype` 和 :data:`block_duration` 分别是麦克风的采样率、数据类型和每次从输出流中读取的数据块的时长。除了音量增益 :data:`gain` 以外，这些属性通常不需要修改。
 
 .. seealso::
 

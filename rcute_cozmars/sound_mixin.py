@@ -1,8 +1,8 @@
 from . import util
 
-class SoundMixin:
+class soundmixin:
 
-    def __init__(self, dtype='int16', sample_rate=16000, block_duration=.1, gain=25):
+    def __init__(self, dtype, sample_rate, block_duration, gain):
         self._dtype = dtype
         self._sample_rate = sample_rate
         self._block_duration = block_duration
@@ -11,7 +11,7 @@ class SoundMixin:
 
     @property
     def sample_rate(self):
-        """采样率，默认是 `16000` ，不建议修改
+        """采样率
 
         设备已经打开之后不能进行设置，否则抛出异常
         """
@@ -46,11 +46,11 @@ class SoundMixin:
     @property
     def sample_width(self):
         """一个采样包含几个字节，与 :data:`dtype` 对应，只读"""
-        return {'int16':2, 'float32':4, 'float64':8, 'int8':1, 'int32':4}[self.dtype]
+        return util.sample_width(self.dtype)
 
     @property
     def block_duration(self):
-        """流中每一帧声音片段持续的时间（秒），默认是 `0.1` ，不建议修改
+        """流中每一帧声音片段持续的时间（秒），默认是 `0.1`
 
         设备已经打开之后不能进行设置，否则抛出异常
         """
@@ -64,7 +64,7 @@ class SoundMixin:
 
     @property
     def gain(self):
-        """音量增益(dBFS), 默认为 25"""
+        """音量增益(dBFS)"""
         return self._gain
 
     @gain.setter
