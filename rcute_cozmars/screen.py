@@ -1,55 +1,22 @@
 from . import util
+from . import led
 import numpy as np
 import cv2
 from PIL import Image, ImageFont, ImageDraw
 
-class Screen(util.Component):
+class Screen(led.LED):
     """显示屏"""
 
     def __init__(self, robot):
-        util.Component.__init__(self, robot)
-        self.default_fade_speed = None
-        """设置 :data:`brightness` 时的默认的渐变速度，默认为 `None` ，表示没有渐变"""
+        led.LED.__init__(self, robot)
+
+    def _light_rpc(self):
+        return self._rpc.backlight
 
     @property
     def resolution(self):
         """分辨率，`(240, 135)`，只读"""
         return 240, 135
-
-    @property
-    def max_brightness(self):
-        """最大亮度， `1.0` ，只读"""
-        return 1.0
-
-    @property
-    def min_brightness(self):
-        """最低亮度，即黑屏， `0.0` ，只读"""
-        return .0
-
-    @util.mode(property_type='setter')
-    async def brightness(self, *args):
-        """显示屏亮度，0~1，默认是 `0.05`
-        """
-        if args:
-            await self._rpc.backlight(args[0], None, self.default_fade_speed)
-        else:
-            return round(await self._rpc.backlight(), 2)
-
-    @util.mode(force_sync=False)
-    async def set_brightness(self, brightness, *, fade_duration=None, fade_speed=None):
-        """设置显示屏亮度
-
-        :param brightness: 亮度，0~1
-        :type brightness: float
-        :param fade_duration: 渐变时间（秒） ， 默认是 `None`，表示没有渐变
-        :type fade_duration: float
-        :param fade_speed: 渐变速度（/秒） ， 默认是 `None`，表示没有渐变
-        :type fade_speed: float
-        :raises TypeError: 不能同时设置 `fade_duration` 和 `fade_speed` ，否则抛出异常
-        """
-        if fade_duration and fade_speed:
-            raise TypeError('Cannot set both fade_duration and fade_speed')
-        await self._rpc.backlight(brightness, fade_duration, fade_speed)
 
     @util.mode()
     async def fill(self, color, x=0, y=0, w=240, h=135, stop_eyes=True):
@@ -106,8 +73,10 @@ class Screen(util.Component):
         """显示图像
 
         :param image: 要显示的图像（bgr 模式）
-        :type image: numpy.ndarray
+        :type image: PIL.Image/numpy.ndarray
         """
+        if isinstance(image, Image.Image):
+            image = np.array(image)
         x, y, image = self._resize_to_screen(image)
         W, H = self.resolution
         filled_img = np.zeros((H, W, 3), np.uint8)

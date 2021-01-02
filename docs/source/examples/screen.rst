@@ -20,14 +20,17 @@
 
     注意：为了与 opencv 一致，我们使用 BGR 而不是 RGB 色彩模式！
 
+背光亮度
+----------
+
+:data:`screen` 的 :data:`brightness` 属性可以用来设置显示屏的背光亮度，1 表示最亮，0 表示全暗，为了省电和护眼，默认显示亮度只有 0.05；也可以通过 :meth:`set_brightness` 方法的 :data:`fade_duration` 或 :data:`fade_speed` 参数来控制亮度的渐变速度
+
 显示图片
 ------------
 
 :class:`Robot` 还有一个 :data:`screen` 属性用来直接控制显示屏，用它的 :meth:`display` 方法来显示图片
 
-:data:`screen` 的 :data:`brightness` 属性可以用来设置显示屏的亮度，`1` 表示最亮，`0` 表示全暗，为了省电和护眼，默认显示亮度只有 `0.05` ；也可以通过 :meth:`set_brightness` 方法的 :data:`fade_duration` 或 :data:`fade_speed` 参数来控制亮度的渐变速度
-
-以下的程序显示一个心跳在屏幕上：
+下面的程序结合了背光亮度的控制，让心跳显示在屏幕上：
 
 .. code:: python
 
