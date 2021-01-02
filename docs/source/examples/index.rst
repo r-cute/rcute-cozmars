@@ -10,6 +10,5 @@
    sensor
    video_audio
    screen
-   led
    animation
    cube

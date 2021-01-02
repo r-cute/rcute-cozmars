@@ -24,7 +24,7 @@ import threading
 import logging
 import json
 from wsmprpc import RPCClient, RPCStream
-from . import util, env, screen, led, camera, microphone, button, sonar, infrared, lift, head, buzzer, speaker, motor, eye_animation
+from . import util, env, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, speaker, motor, eye_animation
 from .animation import animations
 
 logger = logging.getLogger("rcute-cozmars")
@@ -43,7 +43,6 @@ class AioRobot:
         self._connected = False
         self._env = env.Env(self)
         self._screen = screen.Screen(self)
-        self._led = led.LED(self)
         self._camera = camera.Camera(self)
         self._microphone = microphone.Microphone(self)
         self._button = button.Button(self)
@@ -133,12 +132,6 @@ class AioRobot:
     def screen(self):
         """屏幕"""
         return self._screen
-
-    @property
-    def led(self):
-        if self._firmware_version.startswith('1'):
-            raise AttributeError('Cozmars V1 has no LED')
-        return self._led
 
     @property
     def camera(self):

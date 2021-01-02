@@ -14,7 +14,6 @@ API
    head
    speaker
    screen
-   led
    camera
    microphone
    animation
