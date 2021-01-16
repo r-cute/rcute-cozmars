@@ -32,13 +32,12 @@ class Buzzer(util.InputStreamComponent):
         return self._rpc.play(request_stream=self._input_stream)
 
     @util.mode(property_type='setter')
-    async def tone(self, *args):
+    async def tone(self, tone):
         """The current `tone` of the buzzer
         """
-        if args:
-            await self.set_tone(args[0])
-        else:
+        if tone == None:
             return self._tone
+        await self.set_tone(tone)
 
     @util.mode(force_sync=False)
     async def set_tone(self, tone, duration=None):

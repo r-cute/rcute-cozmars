@@ -215,6 +215,15 @@ class AioRobot:
         :type duration: float
         """
         await self._rpc.speed((1,1), duration)
+    
+    @util.mode(force_sync=False)
+    async def drive(self, speed, duration=1):
+        """go ahead
+
+        :param duration: duration (seconds)
+        :type duration: float
+        """
+        await self._rpc.speed(speed, duration)
 
     @util.mode(force_sync=False)
     async def backward(self, duration=None):

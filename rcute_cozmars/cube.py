@@ -51,7 +51,7 @@ class AioCube:
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self._host}:81')
             if'-1' == await self._ws.recv():
-                raise RuntimeError('Cannot connect to Rubik's Cube, please close other programs that are connecting Rubik's Cube')
+                raise RuntimeError("""Cannot connect to Rubik's Cube, please close other programs that are connecting Rubik's Cube""")
             self._rpc = RPCClient(self._ws)
             about = json.loads(await self._get('/about'))
             self._ip = about['ip']
