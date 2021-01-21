@@ -14,7 +14,6 @@ class EyeAnimation(util.Component):
         self._eye = np.zeros((self._size, self._size, 3), np.uint8)
         self._exp_before = None
         self._gap = 20
-        self._color = (255, 255, 0) # cyan
         self._ev = self._exp_q = None
         self._expression = None
 
@@ -101,6 +100,7 @@ class EyeAnimation(util.Component):
 
     # very urgly coded eye animation
     async def animate(self, robot, start_exp=None):
+        self._color = util.bgr(await self._robot.env.get('eye_color') or 'cyan')
         self._canvas = np.zeros((134, 240, 3), np.uint8)
         self._ev = asyncio.Event()
         self._exp_q = asyncio.Queue(1)

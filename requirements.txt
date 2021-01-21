@@ -10,4 +10,4 @@ websockets
 wsmprpc>=1.1.1
 Pillow
 py-espeak-ng
-# apt install ffmpeg libsndfile1 espeak espeak-ng-espeak
+# apt install ffmpeg espeak-ng # espeak espeak-ng-espeak

@@ -24,7 +24,7 @@ class Speaker(util.InputStreamComponent, soundmixin):
         return self._rpc.speaker_volume
 
     @util.mode()
-    async def play(self, src, repeat=1, preload=1, **kw):
+    async def play(self, src, repeat=1, preload=5, **kw):
         """播放
 
         :param src: 要播放的声音资源（文件/网址/数据）
@@ -37,10 +37,10 @@ class Speaker(util.InputStreamComponent, soundmixin):
         bd = kw.get('block_duration', self.block_duration)
         bs = int(bd * sr)
         if isinstance(src, str) or hasattr(src, 'read'): # for file-like obj
-            sr, bs, src = await asyncio.get_running_loop().run_in_executor(None, file_sr_bs_gen, src, sr, dt, bd)
+            sr, dt, bs, src = await asyncio.get_running_loop().run_in_executor(None, file_sr_bs_gen, src, sr, dt, bd)
 
         elif isinstance(src, np.ndarray):
-            src = np_gen(src, dt, bs)
+            dt, src = np_gen(src, dt, bs)
 
         elif isinstance(src, bytes):
             src = raw_gen(src, dt, bs)
@@ -48,7 +48,7 @@ class Speaker(util.InputStreamComponent, soundmixin):
         # if inspect.isasyncgen(src):
         if isinstance(src, Iterable):
             async with self._lock:
-                self._t_sr = sr
+                self._t_sr = sr # temp
                 self._t_dt = dt
                 self._t_bs = bs
                 async with self:
@@ -56,6 +56,7 @@ class Speaker(util.InputStreamComponent, soundmixin):
                     for raw in repeat_gen(src, repeat):
                         await self._input_stream.put(raw)
                         if count < preload:
+                            await asyncio.sleep(bd * .5)
                             count += bd
                         else:
                             await asyncio.sleep(bd * .95)
@@ -130,7 +131,7 @@ def tone2audio(tones, base_beat_ms, duty_cycle, sr):
     duty = base_beat_ms * duty_cycle
     empty = base_beat_ms - duty
     return functools.reduce(lambda r,e: r+(tone2audio(e, base_beat_ms/2, duty_cycle, sr) if isinstance(e, (list, tuple)) else \
-            Sine(Tone(e).frequency, sample_rate=sr).to_audio_segment(duration=duty).append(AudioSegment.silent(duration=empty, frame_rate=sr), crossfade=empty)), \
+            (Sine(Tone(e).frequency, sample_rate=sr).to_audio_segment(duration=duty).append(AudioSegment.silent(duration=empty, frame_rate=sr), crossfade=empty)) if e else AudioSegment.silent(duration=base_beat_ms, frame_rate=sr)), \
         tones, AudioSegment.empty())
 
 def file_sr_bs_gen(src, sr, dt, block_duration):
@@ -145,7 +146,7 @@ def file_sr_bs_gen(src, sr, dt, block_duration):
         file = sf.SoundFile(src)
         assert file.samplerate <= sr
         bs = int(block_duration * file.samplerate)
-        return file.samplerate, bs, map(lambda b: (b if b.ndim==1 else b.mean(axis=1, dtype=dt)).tobytes(),
+        return file.samplerate, dt, bs, map(lambda b: (b if b.ndim==1 else b.mean(axis=1, dtype=dt)).tobytes(),
             file.blocks(dtype=dt, blocksize=bs, fill_value=0))
 
     except (AssertionError, RuntimeError):
@@ -155,7 +156,8 @@ def file_sr_bs_gen(src, sr, dt, block_duration):
             sr = None
         y, sr = librosa.load(src, sr=sr, mono=True, res_type='kaiser_fast')
         bs = int(sr * block_duration)
-        return sr, bs, np_gen(y, dt, bs)
+        dt, gen = np_gen(y, dt, bs)
+        return sr, dt, bs, gen
 
 def np_gen(data, dt, bs):
     # convert data to specified dtype
@@ -163,10 +165,14 @@ def np_gen(data, dt, bs):
         data = data.mean(axis=1, dtype=dt)
     if str(data.dtype).startswith('float') and dt.startswith('int'):
         data = (data * np.iinfo(dt).max).astype(dt)
-    elif str(data.dtype).startswith('int') and dt.startswith('float'):
-        data = data.astype(dt) / np.iinfo(data.dtype).max
+    elif (str(data.dtype).startswith('int') and dt.startswith('float')) or\
+        (str(data.dtype)=='float32' and dt=='float64'):
+        dt = str(data.dtype)
+    elif str(data.dtype)=='float64' and dt=='float32':
+        data = data.astype('float32')
+    #     data = data.astype(dt) / np.iinfo(data.dtype).max
     # elif (int8 <--> int16 <--> int32 convertion, but int8/32 is very rarely used)
-    yield from raw_gen(data.tobytes(), dt, bs)
+    return dt, raw_gen(data.tobytes(), dt, bs)
 
 def raw_gen(data, dt, bs):
     bs = bs* util.sample_width(dt)

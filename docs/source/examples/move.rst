@@ -73,7 +73,7 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 
 :data:`motor` 还有一个 :meth:`set_speed` 方法，用来设置速度和持续时间。比如，要机器人转圈 5 秒：
 
-    >>> robot.motor.set_speed((1, -1), duration=15)
+    >>> robot.motor.set_speed((1, -1), duration=5)
 
 
 
