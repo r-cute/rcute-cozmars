@@ -1,6 +1,1 @@
-# rcute-cozmars
-Python SDK for Cozmars, the 3d printable educational robot.
-
-Install: `python3 -m pip install rcute-cozmars`
-
-中文文档: https://rcute-cozmars.readthedocs.io/
+这个分支只为提供 Cozmars Python SDK 的中文文档，源码请跳转 https://github.com/hyansuper/rcute-cozmars/tree/master
