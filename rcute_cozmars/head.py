@@ -2,17 +2,17 @@ import asyncio
 from . import util
 
 class Head(util.Component):
-    """头部"""
+    """head"""
 
     def __init__(self, robot):
         util.Component.__init__(self, robot)
         self._relax_timeout = None
         self.default_speed = 100
-        """设置 :data:`angle` 时的默认的头部转动角速度（度/秒），默认为 `100` ，若设为 `None` 则表示用最快转头"""
+        """The default head rotation angular velocity (degrees/second) when setting :data:`angle`, the default is `100`, if it is set to `None`, it means the fastest head turning"""
         self.auto_relax_delay = 1
-        """多长时间内没有动作则自动放松（秒），默认为 `1`，若设为 `None` 则表示不会自动放松
+        """If there is no action for a long time, it will automatically relax (seconds), the default is `1`, if it is set to `None`, it means that it will not automatically relax
 
-        舵机移动到目标位置后，使其放松能防止长期受力造成损坏，也能节约电池电量
+        After the steering gear is moved to the target position, it can be relaxed to prevent damage caused by long-term force, and it can also save battery power
         """
 
     def _cancel_relax_timeout(self):
@@ -28,19 +28,19 @@ class Head(util.Component):
 
     @property
     def max_angle(self):
-        """最大角度，即最高的仰角， `20` 度，只读
+        """Maximum angle, the highest elevation angle, `20` degrees, read only
         """
         return 20
 
     @property
     def min_angle(self):
-        """最小角度，即最低的俯视角， `-20` 度，只读
+        """Minimum angle, that is, the lowest overhead angle, `-20` degrees, read only
         """
         return -20
 
     @util.mode(property_type='setter')
     async def angle(self, *args):
-        """头部的角度"""
+        """Angle of the head"""
         if len(args) > 1:
             raise TypeError('Angle accepts at most one parameter')
         if args:
@@ -53,19 +53,18 @@ class Head(util.Component):
 
     @util.mode(force_sync=False)
     async def set_angle(self, angle, *, duration=None, speed=None):
-        """设置头部的角度
+        """Set the angle of the head
 
-        :param angle: 要设置的头部角度
+        :param angle: head angle to be set
         :type angle: float
-        :param duration: 转动头部的持续时间（秒），默认为 `None` ，表示用最快速度转动
+        :param duration: the duration of turning the head (seconds), the default is `None`, which means turning at the fastest speed
         :type duration: float, optional
-        :param speed: 转动头部的角速度（度/秒），默认为 `None` ，表示用最快速度转动
+        :param speed: the angular speed of turning the head (degrees/second), the default is `None`, which means to rotate at the fastest speed
         :type speed: float, optional
-        :raises TypeError: 不能同时设置 `duration` 和 `speed` ，否则抛出异常
+        :raises TypeError: `duration` and `speed` cannot be set at the same time, otherwise an exception will be thrown
         """
         if duration and speed:
             raise TypeError('Cannot set both duration and speed')
         self._cancel_relax_timeout()
         await self._rpc.head(angle, duration, speed)
         self._reset_relax_timeout()
-
