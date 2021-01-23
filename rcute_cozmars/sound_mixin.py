@@ -11,9 +11,9 @@ class soundmixin:
 
     @property
     def sample_rate(self):
-        """采样率
+        """Sampling Rate
 
-        设备已经打开之后不能进行设置，否则抛出异常
+        The device cannot be set after it has been turned on, otherwise an exception will be thrown
         """
         return self._sample_rate
 
@@ -25,9 +25,9 @@ class soundmixin:
 
     @property
     def dtype(self):
-        """采样的数据类型，如 `'int8'` 或 `'float32'` 等，默认是 `'int16'` ，不建议修改
+        """Sampling data type, such as `'int8'` or `'float32'` etc. The default is `'int16'`, it is not recommended to modify
 
-        设备已经打开之后不能进行设置，否则抛出异常
+        The device cannot be set after it has been turned on, otherwise an exception will be thrown
         """
         return self._dtype
 
@@ -39,20 +39,20 @@ class soundmixin:
 
     @property
     def channels(self):
-        """声道数，默认是 `1` ，只读
+        """Number of channels, default is `1`, read only
         """
         return 1
 
     @property
     def sample_width(self):
-        """一个采样包含几个字节，与 :data:`dtype` 对应，只读"""
+        """A sample contains several bytes, corresponding to :data:`dtype`, read only """
         return util.sample_width(self.dtype)
 
     @property
     def block_duration(self):
-        """流中每一帧声音片段持续的时间（秒），默认是 `0.1`
+        """The duration of each frame of sound clip in the stream (seconds), the default is `0.1`
 
-        设备已经打开之后不能进行设置，否则抛出异常
+        The device cannot be set after it has been turned on, otherwise an exception will be thrown
         """
         return self._block_duration
 
@@ -64,7 +64,7 @@ class soundmixin:
 
     @property
     def gain(self):
-        """音量增益(dBFS)"""
+        """Volume Gain (dBFS)"""
         return self._gain
 
     @gain.setter
@@ -73,10 +73,10 @@ class soundmixin:
 
     @util.mode(property_type='setter')
     async def volume(self, *args):
-        """音量大小，0~100，百分制，设置以后会自动保存，重启后依然有效
+        """Volume level, 0~100, percentage system, the setting will be automatically saved after the setting, and it will still be valid after restarting
 
-        麦克风音量推荐设置成 100%，然后可以通过音量增益进一步增大
+        The microphone volume is recommended to be set to 100%, and then it can be further increased by volume gain
 
-        扬声器音量推荐设成 50%
+        The speaker volume is recommended to be set to 50%
         """
         return await (self._volume()(*args))

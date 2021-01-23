@@ -5,7 +5,7 @@ import cv2
 from PIL import Image, ImageFont, ImageDraw
 
 class Screen(led.LED):
-    """显示屏"""
+    """Display"""
 
     def __init__(self, robot):
         led.LED.__init__(self, robot)
@@ -15,24 +15,24 @@ class Screen(led.LED):
 
     @property
     def resolution(self):
-        """分辨率，`(240, 135)`，只读"""
+        """Resolution, `(240, 135)`, read-only """
         return 240, 135
 
     @util.mode()
     async def fill(self, color, x=0, y=0, w=240, h=135, stop_eyes=True):
-        """填充屏幕
+        """Fill the screen
 
-        :param color: 要填充的颜色（bgr 模式）
+        :param color: the color to be filled (bgr mode)
         :type color: str/tuple
-        :param x: 填充方块的左上角 x 坐标，默认为 `0`
+        :param x: The x coordinate of the upper left corner of the filled square, the default is `0`
         :type x: int
-        :param y: 填充方块的左上角 y 坐标，默认为 `0`
+        :param y: The y coordinate of the upper left corner of the filled square, the default is `0`
         :type y: int
-        :param w: 填充方块的宽，默认为屏幕宽度 `240`
+        :param w: the width of the filled square, the default is the screen width `240`
         :type w: int
-        :param h: 填充方块的宽，默认为屏幕高度 `135`
+        :param h: The width of the filled square, the default is the screen height `135`
         :type h: int
-        :raises ValueError: 填充区域超出屏幕范围时抛出异常
+        :raises ValueError: throw an exception when the filled area exceeds the screen area
         """
         if not self._in_range((x, y), (w, h)):
             raise ValueError(f'Fill area must not exceed dimensions of screen {self.resolution}')
@@ -42,15 +42,15 @@ class Screen(led.LED):
 
     @util.mode()
     async def set_pixel(self, x, y, color):
-        """设置像素点的颜色
+        """Set the color of the pixel
 
-        :param x: 要设置的像素点的 x 坐标
+        :param x: the x coordinate of the pixel to be set
         :type x: int
-        :param y: 要设置的像素点的 y 坐标
+        :param y: the y coordinate of the pixel to be set
         :type y: int
-        :param color: 颜色（bgr 模式）
+        :param color: color (bgr mode)
         :type color: str/tuple
-        :raises ValueError: 坐标超出屏幕范围时抛出异常
+        :raises ValueError: An exception is thrown when the coordinates exceed the screen range
         """
         if not self._in_range((x, y)):
             raise ValueError(f'Pixel must not exceed dimensions of screen {self.resolution}')
@@ -70,9 +70,9 @@ class Screen(led.LED):
 
     @util.mode()
     async def display(self, image, stop_eyes=True):
-        """显示图像
+        """Display image
 
-        :param image: 要显示的图像（bgr 模式）
+        :param image: the image to be displayed (bgr mode)
         :type image: PIL.Image/numpy.ndarray
         """
         if isinstance(image, Image.Image):
@@ -87,17 +87,17 @@ class Screen(led.LED):
 
     @util.mode()
     async def text(self, text, size=30, color='cyan', bg_color='black', font=None, stop_eyes=True):
-        """显示简单文本
+        """Display simple text
 
-        :param text: 要显示的文本
+        :param text: the text to be displayed
         :type text: str
-        :param size: 字体大小，默认为 30
+        :param size: font size, default is 30
         :type size: int, optional
-        :param color: 文本颜色，默认为青色
+        :param color: text color, default is cyan
         :type color: str/tuple, optional
-        :param bg_color: 背景颜色，默认为黑色
+        :param bg_color: background color, the default is black
         :type bg_color: str/tuple, optional
-        :param font: 字体文件，默认使用微软雅黑（支持中/英文）
+        :param font: Font file, Microsoft Yahei is used by default (support Chinese/English)
         :type font: str, optional
         """
         font = ImageFont.truetype(font or util.resource('msyh.ttc'), size)

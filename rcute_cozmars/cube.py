@@ -10,9 +10,9 @@ from . import util
 logger = logging.getLogger("rcute-cube")
 
 class AioCube:
-    """魔方的异步 (async/await) 模式
+    """Asynchronous (async/await) mode of Cube
 
-    :param serial_or_ip: 要连接的 魔方的 IP 地址或序列号
+    :param serial_or_ip: The IP address or serial number of the Rubik's Cube to be connected
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
@@ -22,36 +22,36 @@ class AioCube:
         self._connected = False
         self._dir2color = {'+X':'red', '-X':'green', '+Y':'blue', '-Y':'yellow', '+Z':'white', '-Z':'orange'}
         self.last_action = None
-        """魔方的上一个动作"""
+        """The last action of the Rubik's Cube"""
         self.when_flipped = None
-        """回调函数，当魔方被翻转时调用（带一个方向参数表示90度翻转或180度），默认为 `None` """
+        """Callback function, called when the Rubik's Cube is flipped (with a direction parameter to indicate 90 degree flip or 180 degrees), the default is `None` """
         self.when_shaked = None
-        """回调函数，当魔方被甩动时调用，默认为 `None` """
+        """Callback function, called when the Rubik's Cube is shaken, the default is `None` """
         self.when_rotated = None
-        """回调函数，当魔方被水平旋转时调用（带一个方向参数表示顺时针或逆时针），默认为 `None` """
+        """Callback function, called when the cube is rotated horizontally (with a direction parameter indicating clockwise or counterclockwise), the default is `None` """
         self.when_pushed = None
-        """回调函数，当魔方被平移时调用（带一个方向参数表示移动方向），默认为 `None` """
+        """Callback function, called when the cube is translated (with a direction parameter to indicate the direction of movement), the default is `None` """
         self.when_tilted = None
-        """回调函数，当魔方被倾斜时调用（带一个方向参数表示移动方向），默认为 `None` """
+        """Callback function, called when the cube is tilted (with a direction parameter to indicate the direction of movement), the default is `None` """
         self.when_tapped = None
-        """回调函数，轻敲魔方时被调用，默认为 `None` """
+        """Callback function, called when tapping the Rubik's Cube, the default is `None` """
         self.when_fall = None
-        """回调函数，当魔方失重/自由落体时调用，默认为 `None` """
+        """Callback function, called when the Rubik's Cube loses weight/free fall, the default is `None` """
         self.when_moved = None
-        """回调函数，当魔方被移动时调用（包括以上动作），默认为 `None` """
+        """Callback function, called when the cube is moved (including the above actions), the default is `None` """
         self.when_static = None
-        """回调函数，当魔方恢复静止时调用，默认为 `None` """
+        """Callback function, called when the Rubik's Cube comes to rest, the default is `None` """
 
 
     def _in_event_loop(self):
         return True
 
     async def connect(self):
-        """建立与魔方的连接"""
+        """Establish a connection with the Rubik's Cube"""
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self._host}:81')
             if '-1' == await self._ws.recv():
-                raise RuntimeError('无法连接魔方, 请先关闭其他正在连接魔方的程序')
+                raise RuntimeError("""Cannot connect to Rubik's Cube, please close other programs that are connecting Rubik's Cube""")
             self._rpc = RPCClient(self._ws)
             about = json.loads(await self._get('/about'))
             self._ip = about['ip']
@@ -87,11 +87,11 @@ class AioCube:
 
     @property
     def connected(self):
-        """是否连接上了魔方"""
+        """Whether connected to the Rubik's Cube"""
         return self._connected
 
     async def disconnect(self):
-        """断开与魔方的连接"""
+        """Disconnect from Rubik's Cube"""
         if self._connected:
             self._event_rpc.cancel()
             await asyncio.gather(self._event_task, return_exceptions=True)
@@ -107,27 +107,27 @@ class AioCube:
 
     @property
     def ip(self):
-        """魔方的 IP 地址"""
+        """Magic's Cube's IP Address"""
         return self._ip
 
     @property
     def hostname(self):
-        """魔方的网址"""
+        """The URL of the Rubik's Cube"""
         return self._hostname
 
     @property
     def firmware_version(self):
-        """魔方的固件版本"""
+        """The firmware version of the Rubik's Cube"""
         return self._firmware_version
 
     @property
     def mac(self):
-        """魔方的 MAC 地址"""
+        """Magic's Cube's MAC Address"""
         return self._mac
 
     @property
     def serial(self):
-        """魔方的序列号"""
+        """Serial Number of Rubik's Cube"""
         return self._serial
 
     async def _get(self, sub_url):
@@ -137,7 +137,7 @@ class AioCube:
 
     @util.mode(property_type='setter')
     async def color(self, *args):
-        """LED 灯的 BGR 颜色"""
+        """BGR color of LED light"""
         if args:
             await self._rpc.rgb(*(util.bgr(args[0]) if args[0] is not None else (0,0,0))[::-1])
         else:
@@ -145,18 +145,18 @@ class AioCube:
 
     @util.mode(property_type='getter')
     async def acc(self):
-        """加速度失量，当魔方静止时，加速度等于重力加速度（但实际上是有误差的）"""
+        """Acceleration loss, when the Rubik's Cube is stationary, the acceleration is equal to the acceleration of gravity (but in fact there is an error)"""
         return await self._rpc.mpu_acc()
 
     @util.mode(property_type='getter')
     async def static(self):
-        """是否静止"""
+        """Is it still"""
         #return await self._rpc.mpu_static()
         return self._state == 'static'
 
     @util.mode(property_type='getter')
     async def top_face(self):
-        """哪一面朝上，当魔方静止时返回朝上一面的二维码的颜色，非静止时返回 `None` """
+        """Which side is up, when the Rubik’s Cube is stationary, it returns to the color of the QR code on the upside, and returns to `None` """
         if self._state != 'static':
             return None
         acc = await self._rpc.mpu_acc()
@@ -168,9 +168,9 @@ class AioCube:
 
 
 class Cube(AioCube):
-    """魔方的同步模式
+    """Synchronous mode of Cube
 
-    :param serial_or_ip: 要连接的 魔方的 IP 地址或序列号
+    :param serial_or_ip: The IP address or serial number of the Rubik's Cube to be connected
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
@@ -188,14 +188,14 @@ class Cube(AioCube):
         self.disconnect()
 
     def connect(self):
-        """连接 魔方"""
+        """Connect Rubik's Cube"""
         self._lo = asyncio.new_event_loop()
         self._event_thread = threading.Thread(target=self._run_loop, args=(self._lo,), daemon=True)
         self._event_thread.start()
         asyncio.run_coroutine_threadsafe(AioCube.connect(self), self._lo).result()
 
     def disconnect(self):
-        """断开 魔方的连接"""
+        """Disconnect the Rubik's Cube"""
         asyncio.run_coroutine_threadsafe(AioCube.disconnect(self), self._lo).result()
         self._lo.call_soon_threadsafe(self._done_ev.set)
         self._event_thread.join(timeout=5)
@@ -214,13 +214,11 @@ class Cube(AioCube):
 
 
 class AsyncCube(Cube):
-    """魔方的异步 (concurrent.futures.Future) 模式
+    """Asynchronous (concurrent.futures.Future) mode of Rubik's Cube
 
-    :param serial_or_ip: 要连接的 魔方的 IP 地址或序列号
+    :param serial_or_ip: The IP address or serial number of the Rubik's Cube to be connected
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
         super(AsyncCube, self).__init__(serial_or_ip)
         self._mode = 'async'
-
-

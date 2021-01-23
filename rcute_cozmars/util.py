@@ -97,7 +97,7 @@ class StreamComponent(Component):
 
     @property
     def closed(self):
-        """数据流是否关闭"""
+        """Is the data stream closed"""
         return not self._stream_rpc or self._stream_rpc.done()
 
 
@@ -129,7 +129,7 @@ class InputStreamComponent(StreamComponent, withmixin):
 
 
 class OutputStream(RPCStream, withmixin):
-    """输出数据流"""
+    """Output Data Stream"""
     def __init__(self, parent, maxsize=0):
         RPCStream.__init__(self, maxsize)
         self._parent = parent
@@ -147,17 +147,17 @@ class OutputStream(RPCStream, withmixin):
 
     @mode()
     async def open(self):
-        """打开数据流"""
+        """Open data stream"""
         await self._parent.add_stream(self)
 
     @mode()
     async def close(self):
-        """关闭数据流"""
+        """Close data flow"""
         await self._parent.remove_stream(self)
 
     @mode()
     async def read(self):
-        """从数据流中读取一帧数据"""
+        """Read a frame of data from the data stream"""
         return await self.__anext__()
 
     def __iter__(self):
@@ -203,7 +203,7 @@ class MultiplexOutputStreamComponent(StreamComponent):
         return OutputStream(self._multiplex_output_stream, maxsize=self._q_size)
 
     def get_buffer(self):
-        """获取输出数据流
+        """Get output data stream
         """
         if self._in_event_loop():
             return OutputStream(self._multiplex_output_stream, maxsize=self._q_size)

@@ -1,38 +1,35 @@
 from . import util
 
 class Sonar(util.Component):
-    """声纳，即超声波距离传感器
+    """ Sonar, namely ultrasonic distance sensor
     """
     def __init__(self, robot):
         util.Component.__init__(self, robot)
         self.when_in_range = None
-        """回调函数，当探测到前方障碍物的距离小于阈值距离 :data:`threshold_distance` 时调用，默认为 `None`
+        """Callback function, called when the distance of detecting the obstacle ahead is less than the threshold distance :data:`threshold_distance`, the default is `None`
 
-        该回调函数接受一个参数，即此时探测到的前方距离（米）"""
+        The callback function accepts one parameter, which is the distance (meters) detected at this time """
         self.when_out_of_range = None
-        """回调函数，当探测到前方障碍物的距离大于阈值距离 :data:`threshold_distance` 时调用，默认为 `None`
+        """Callback function, which is called when the distance to the front obstacle is greater than the threshold distance :data:`threshold_distance`, the default is `None`
 
-        该回调函数接受一个参数，即此时探测到的前方距离（米）"""
+        The callback function accepts one parameter, which is the distance (meters) detected at this time """
 
     @util.mode(property_type='getter')
     async def distance(self):
-        """探测到前方障碍物的距离（米）
+        """Distance to detect obstacles ahead (m)
 
-        当距离超过 :data:`max_distance` 时只能也只显示 :data:`max_distance` """
+        When the distance exceeds :data:`max_distance`, it can only display :data:`max_distance` """
         return round(await self._rpc.distance(), 2)
 
     @util.mode(property_type='setter')
     async def max_distance(self, *args):
-        """最远能测量的距离（米），默认是 `0.5` """
+        """The farthest measurable distance (meters), the default is `0.5` """
         return await self._rpc.max_distance(*args)
 
 
     @util.mode(property_type='setter')
     async def threshold_distance(self, *args):
-        """阈值距离（米），默认时 `0.1`
+        """Threshold distance (m), default is `0.1`
 
-        当探测到前方障碍物的距离小于阈值距离时触发 :data:`when_in_range` 时间，大于阈值距离时触发 :data:`when_out_of_range` 事件 """
+        Trigger when the distance to the front obstacle is less than the threshold distance :data:`when_in_range` time, trigger when the distance is greater than the threshold distance :data:`when_out_of_range` event """
         return await self._rpc.threshod_distance(*args)
-
-
-

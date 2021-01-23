@@ -1,21 +1,19 @@
 from . import util
 
 class Infrared(util.Component):
-    """红外线传感器
+    """Infrared Sensor
     """
     def __init__(self, robot):
         util.Component.__init__(self, robot)
         self.when_state_changed = None
-        """回调函数，底部任一个红外线传感器的数值变化时调用，默认为 `None`
+        """Callback function, called when the value of any infrared sensor at the bottom changes, the default is `None`
 
-        该回调函数接受一个参数，即两个红外线传感器的数值组成的 `tuple` """
+        The callback function accepts one parameter, which is the `tuple` composed of the values of two infrared sensors"""
         self._state = (1, 1)
 
     @property
     def state(self):
-        """底部两个红外线传感器数值组成的一个两元素的 `tuple`，每个元素为 `0` 或者 `1`
+        """ A two-element `tuple` composed of two infrared sensor values at the bottom, each element is `0` or `1`
 
-        `1` 表示接收到反射，`0` 表示没有接收到反射"""
+        `1` means reflection is received, `0` means no reflection is received """
         return self._state
-
-

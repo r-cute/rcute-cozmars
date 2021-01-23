@@ -1,19 +1,19 @@
 """
-rcute_cozmars.robot 模块包括 :class:`Robot`, :class:`AsyncRobot` 和 :class:`AioRobot` 三个用于连接和控制 Cozmars 机器人的类：
+The rcute_cozmars.robot module includes :class:`Robot`, :class:`AsyncRobot` and :class:`AioRobot` three classes for connecting and controlling Cozmars robots:
 
-:class:`Robot` 会以阻塞的方式顺序执行每一条指令；
+:class:`Robot` will execute each instruction sequentially in a blocking manner;
 
-:class:`AsyncRobot` 遇到耗时的指令时会以非阻塞的方式立即返回一个 :class:`concurrent.futures.Future` 对象，然后立刻执行下一条指令；
+:class:`AsyncRobot` will return a :class:`concurrent.futures.Future` object immediately when it encounters a time-consuming instruction in a non-blocking manner, and then immediately execute the next instruction;
 
-:class:`AioRobot` 则是以异步 (async/await) 的方式执行指令
+:class:`AioRobot` executes instructions asynchronously (async/await)
 
-.. |pypi上的最新版本| raw:: html
+.. |Latest version on pypi| raw:: html
 
-   <a href='https://pypi.org/project/rcute-cozmars-server' target='blank'>pypi上的最新版本</a>
+    <a href='https://pypi.org/project/rcute-cozmars-server' target='blank'>The latest version on pypi</a>
 
 .. warning::
 
-   Cozmars 机器人只能同时被一个程序控制，如果正在用 Scratch 控制 Cozmars，Python 程序将不能连接，反之亦然
+    Cozmars robots can only be controlled by one program at the same time. If Scratch is being used to control Cozmars, the Python program will not be able to connect, and vice versa
 
 """
 
@@ -30,11 +30,10 @@ from .animation import animations
 logger = logging.getLogger("rcute-cozmars")
 
 
-
 class AioRobot:
-    """Cozmars 机器人的异步 (async/await) 模式
+    """Async/await mode of Cozmars robot
 
-    :param serial_or_ip: 要连接的 Cozmars 的 IP 地址或序列号
+    :param serial_or_ip: IP address or serial number of Cozmars to connect
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
@@ -60,9 +59,9 @@ class AioRobot:
 
     @util.mode()
     async def animate(self, name, *args, **kwargs):
-        """执行动作
+        """Execute action
 
-        :param name: 动作的名称
+        :param name: the name of the action
         :type name: str
         """
         anim = animations[name]
@@ -71,84 +70,84 @@ class AioRobot:
 
     @property
     def animation_list(self):
-        """动作列表"""
+        """Action List"""
         return list(animations.keys())
 
     @property
     def eyes(self):
-        """眼睛"""
+        """eye"""
         return self._eye_anim
 
     @property
     def env(self):
-        """环境变量"""
+        """Environmental Variables"""
         return self._env
 
     @property
     def button(self):
-        """按钮"""
+        """Button"""
         return self._button
 
     @property
     def infrared(self):
-        """红外传感器，在机器人底部"""
+        """Infrared sensor on the bottom of the robot"""
         return self._infrared
 
     @property
     def sonar(self):
-        """声纳，即超声波距离传感器"""
+        """Sonar, namely ultrasonic distance sensor"""
         return self._sonar
 
     @property
     def motor(self):
-        """马达"""
+        """motor"""
         return self._motor
 
     @property
     def head(self):
-        """头"""
+        """head"""
         return self._head
 
     @property
     def lift(self):
-        """手臂"""
+        """Arm"""
         return self._lift
 
     @property
     def buzzer(self):
-        """蜂鸣器"""
+        """buzzer"""
         if self._firmware_version.startswith('2'):
             raise AttributeError('Cozmars V2 has no buzzer')
         return self._buzzer
 
     @property
     def speaker(self):
-        """扬声器"""
+        """speaker"""
         if self._firmware_version.startswith('1'):
             raise AttributeError('Cozmars V1 has no speaker')
         return self._speaker
 
     @property
     def screen(self):
-        """屏幕"""
+        """screen"""
         return self._screen
 
     @property
     def camera(self):
-        """摄像头"""
+        """camera"""
         return self._camera
 
     @property
     def microphone(self):
-        """麦克风"""
+        """microphone"""
         return self._microphone
 
     async def connect(self):
-        """连接 Cozmars"""
+        """Connect Cozmars"""
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self._host}/rpc')
             if '-1' == await self._ws.recv():
-                raise RuntimeError('无法连接 Cozmars, 请先关闭其他已经连接 Cozmars 的程序')
+                raise RuntimeError('Could not connect to Cozmars, please close other programs that are already connected to Cozmars')
             self._rpc = RPCClient(self._ws)
             about = json.loads(await self._get('/about'))
             self._ip = about['ip']
@@ -162,7 +161,7 @@ class AioRobot:
 
     @property
     def connected(self):
-        """是否连接上了机器人"""
+        """Are robots connected?"""
         return self._connected
 
     async def _call_callback(self, cb, *args):
@@ -203,7 +202,7 @@ class AioRobot:
                 logger.exception(e)
 
     async def disconnect(self):
-        """断开 Cozmars 的连接"""
+        """Disconnect Cozmars"""
         if self._connected:
             self._sensor_task.cancel()
             self._eye_anim_task.cancel()
@@ -221,74 +220,74 @@ class AioRobot:
 
     @util.mode(force_sync=False)
     async def forward(self, duration=None):
-        """前进
+        """go ahead
 
-        :param duration: 持续时间（秒）
+        :param duration: duration (seconds)
         :type duration: float
         """
         await self._rpc.speed((1,1), duration)
 
     @util.mode(force_sync=False)
     async def backward(self, duration=None):
-        """后退
+        """Back
 
-        :param duration: 持续时间（秒）
+        :param duration: duration (seconds)
         :type duration: float
         """
         await self._rpc.speed((-1,-1), duration)
 
     @util.mode(force_sync=False)
     async def turn_left(self, duration=None):
-        """左传
+        """Zuo Zhuan
 
-        :param duration: 持续时间（秒）
+        :param duration: duration (seconds)
         :type duration: float
         """
         await self._rpc.speed((-1,1), duration)
 
     @util.mode(force_sync=False)
     async def turn_right(self, duration=None):
-        """右转
+        """Turn right
 
-        :param duration: 持续时间（秒）
+        :param duration: duration (seconds)
         :type duration: float
         """
         await self._rpc.speed((1,-1), duration)
 
     @util.mode()
     async def stop(self):
-        """停止"""
+        """stop"""
         await self._rpc.speed((0, 0))
 
     @property
     def hostname(self):
-        """Cozmars 的网址"""
+        """Cozmars URL"""
         return self._hostname
 
     @property
     def ip(self):
-        """Cozmars 的 IP 地址"""
+        """Cozmars' IP address"""
         return self._ip
 
     @property
     def firmware_version(self):
-        """Cozmars 的固件版本"""
+        """Cozmars firmware version"""
         return self._firmware_version
 
     @property
     def mac(self):
-        """Cozmars 的 MAC 地址"""
+        """Cozmars MAC address"""
         return self._mac
 
 
     @property
     def serial(self):
-        """Cozmars 的序列号"""
+        """Cozmars serial number"""
         return self._serial
 
     @util.mode()
     async def poweroff(self):
-        """关闭 Cozmars"""
+        """Close Cozmars"""
         await AioRobot.disconnect(self)
         try:
             await self._get('/poweroff')
@@ -297,7 +296,7 @@ class AioRobot:
 
     @util.mode()
     async def reboot(self):
-        """重启 Cozmars"""
+        """Restart Cozmars"""
         await AioRobot.disconnect(self)
         try:
             await self._get('/reboot')
@@ -310,9 +309,9 @@ class AioRobot:
                 return await resp.text()
 
 class Robot(AioRobot):
-    """Cozmars 机器人的同步模式
+    """Cozmars robot synchronization mode
 
-    :param serial_or_ip: 要连接的 Cozmars 的 IP 地址或序列号
+    :param serial_or_ip: IP address or serial number of Cozmars to connect
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
@@ -330,14 +329,14 @@ class Robot(AioRobot):
         self.disconnect()
 
     def connect(self):
-        """连接 Cozmars"""
+        """Connect Cozmars"""
         self._lo = asyncio.new_event_loop()
         self._event_thread = threading.Thread(target=self._run_loop, args=(self._lo,), daemon=True)
         self._event_thread.start()
         asyncio.run_coroutine_threadsafe(AioRobot.connect(self), self._lo).result()
 
     def disconnect(self):
-        """断开 Cozmars 的连接"""
+        """Disconnect Cozmars"""
         asyncio.run_coroutine_threadsafe(AioRobot.disconnect(self), self._lo).result()
         self._lo.call_soon_threadsafe(self._done_ev.set)
         self._event_thread.join(timeout=5)
@@ -355,13 +354,11 @@ class Robot(AioRobot):
         asyncio.set_event_loop(None)
 
 class AsyncRobot(Robot):
-    """Cozmars 机器人的异步 (concurrent.futures.Future) 模式
+    """Asynchronous (concurrent.futures.Future) mode of the Cozmars robot
 
-    :param serial_or_ip: 要连接的 Cozmars 的 IP 地址或序列号
+    :param serial_or_ip: IP address or serial number of Cozmars to connect
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
         Robot.__init__(self, serial_or_ip)
         self._mode = 'async'
-
-

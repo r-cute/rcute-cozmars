@@ -1,5 +1,5 @@
 import asyncio, inspect, functools, re, itertools
-from . import util
+from. import util
 from .sound_mixin import soundmixin
 import numpy as np
 from collections.abc import Iterable
@@ -10,7 +10,7 @@ from gpiozero.tones import Tone
 
 
 class Speaker(util.InputStreamComponent, soundmixin):
-    """扬声器"""
+    """speaker"""
 
     def __init__(self, robot):
         util.InputStreamComponent.__init__(self, robot)
@@ -25,11 +25,11 @@ class Speaker(util.InputStreamComponent, soundmixin):
 
     @util.mode()
     async def play(self, src, repeat=1, preload=5, **kw):
-        """播放
+        """Play
 
-        :param src: 要播放的声音资源（文件/网址/数据）
+        :param src: The sound resource to be played (file/URL/data)
         :type src: str/np.ndarray/bytes/iterable/file-like obj
-        :param repeat: 播放次数，默认为 1
+        :param repeat: play times, default is 1
         :type repeat: int, optional
         """
         sr = kw.get('sample_rate', self.sample_rate)
@@ -65,20 +65,20 @@ class Speaker(util.InputStreamComponent, soundmixin):
 
     @util.mode()
     async def say(self, txt, repeat=1, **options):
-        """说话
+        """speak
 
-        :param txt: 要说的字符串
+        :param txt: the string to say
         :type txt: str
-        :param repeat: 播放次数，默认为 1
+        :param repeat: play times, default is 1
         :type repeat: int, optional
         :param options:
-            * voice 语言
-            * volume 音量
-            * pitch 音调
-            * speed 语速
-            * word_gap 字间停顿
+            * voice language
+            * volume
+            * pitch
+            * speed
+            * word_gap pause between words
 
-            见 `py-espeak-ng <https://github.com/gooofy/py-espeak-ng>`_
+            See `py-espeak-ng <https://github.com/gooofy/py-espeak-ng>`_
         :type options: optional
         """
         if not hasattr(self, '_esng'):
@@ -94,20 +94,20 @@ class Speaker(util.InputStreamComponent, soundmixin):
 
     @util.mode()
     async def beep(self, tones, repeat=1, tempo=120, duty_cycle=.9):
-        """哼一段曲子
+        """Hum a piece of tune
 
-        :param tones: 一串音调组成的曲子
+        :param tones: a string of tones
         :type tones: collections.Iterable
-        :param tempo: 播放速度，BPM，默认是 `120` 拍/分钟
+        :param tempo: playback speed, BPM, default is `120` beats/minute
         :type tempo: int
-        :param duty_cycle: 占空比，即音节播放时间与整个音节的时间的比值，0~1，默认是 `0.9`
+        :param duty_cycle: duty cycle, that is, the ratio of the syllable playing time to the time of the entire syllable, 0~1, the default is 0.9
         :type duty_cycle: float
-        :param repeat: 播放次数，默认为 1
+        :param repeat: play times, default is 1
         :type repeat: int, optional
 
         .. note::
 
-            这个 API 将来可能会改变，我们还在探索更方便播放音调的 API
+            This API may change in the future, we are still exploring an API that is more convenient to play tones
 
         """
         if not 0< duty_cycle <=1:
@@ -170,7 +170,7 @@ def np_gen(data, dt, bs):
         dt = str(data.dtype)
     elif str(data.dtype)=='float64' and dt=='float32':
         data = data.astype('float32')
-    #     data = data.astype(dt) / np.iinfo(data.dtype).max
+    #   data = data.astype(dt) / np.iinfo(data.dtype).max
     # elif (int8 <--> int16 <--> int32 convertion, but int8/32 is very rarely used)
     return dt, raw_gen(data.tobytes(), dt, bs)
 
