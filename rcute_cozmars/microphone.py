@@ -16,7 +16,6 @@ class MicrophoneMultiplexOutputStream(util.MultiplexOutputStream):
         util.MultiplexOutputStream.force_put_nowait(self, o)
 
 class Microphone(util.MultiplexOutputStreamComponent, soundmixin):
-    """microphone"""
     def __init__(self, robot, q_size=1):
         util.MultiplexOutputStreamComponent.__init__(self, robot, q_size, MicrophoneMultiplexOutputStream(self))
         soundmixin.__init__(self, dtype='int16', sample_rate=16000, block_duration=.1, gain=25)

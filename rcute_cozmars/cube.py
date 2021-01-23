@@ -12,7 +12,7 @@ logger = logging.getLogger("rcute-cube")
 class AioCube:
     """Asynchronous (async/await) mode of Cube
 
-    :param serial_or_ip: The IP address or serial number of the Rubik's Cube to be connected
+    :param serial_or_ip: The IP address or serial number of the cube to be connected
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
@@ -22,43 +22,37 @@ class AioCube:
         self._connected = False
         self._dir2color = {'+X':'red', '-X':'green', '+Y':'blue', '-Y':'yellow', '+Z':'white', '-Z':'orange'}
         self.last_action = None
-        """The last action of the Rubik's Cube"""
+        """The last action of the cube"""
         self.when_flipped = None
-        """Callback function, called when the Rubik's Cube is flipped (with a direction parameter to indicate 90 degree flip or 180 degrees), the default is `None` """
-        self.when_shaked = None
-        """Callback function, called when the Rubik's Cube is shaken, the default is `None` """
+        """Callback function, called when the cube is flipped (with a parameter to indicate 90 degree flip or 180 degrees), the default is `None` """
+        self.when_shaken = None
+        """Callback function, called when the cube is shaken, the default is `None` """
         self.when_rotated = None
-        """Callback function, called when the cube is rotated horizontally (with a direction parameter indicating clockwise or counterclockwise), the default is `None` """
+        """Callback function, called when the cube is rotated horizontally (with a parameter indicating clockwise or counterclockwise), the default is `None` """
         self.when_pushed = None
-        """Callback function, called when the cube is translated (with a direction parameter to indicate the direction of movement), the default is `None` """
+        """Callback function, called when the cube is translated (with a parameter to indicate the direction of movement), the default is `None` """
         self.when_tilted = None
-        """Callback function, called when the cube is tilted (with a direction parameter to indicate the direction of movement), the default is `None` """
+        """Callback function, called when the cube is tilted (with a parameter to indicate the direction of movement), the default is `None` """
         self.when_tapped = None
-        """Callback function, called when tapping the Rubik's Cube, the default is `None` """
+        """Callback function, called when the cube is tapped, the default is `None` """
         self.when_fall = None
-        """Callback function, called when the Rubik's Cube loses weight/free fall, the default is `None` """
+        """Callback function, called when the cube free fall, the default is `None` """
         self.when_moved = None
-        """Callback function, called when the cube is moved (including the above actions), the default is `None` """
+        """Callback function, called when the cube is moved (including all the above actions), the default is `None` """
         self.when_static = None
-        """Callback function, called when the Rubik's Cube comes to rest, the default is `None` """
+        """Callback function, called when the cube comes to rest, the default is `None` """
 
 
     def _in_event_loop(self):
         return True
 
     async def connect(self):
-        """Establish a connection with the Rubik's Cube"""
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self._host}:81')
             if '-1' == await self._ws.recv():
-                raise RuntimeError("""Cannot connect to Rubik's Cube, please close other programs that are connecting Rubik's Cube""")
+                raise RuntimeError("""Cannot connect to cube, please close other programs that are connecting cube""")
             self._rpc = RPCClient(self._ws)
-            about = json.loads(await self._get('/about'))
-            self._ip = about['ip']
-            self._serial = about['serial']
-            self._firmware_version = about['version']
-            self._hostname = about['hostname']
-            self._mac = about['mac']
+            self._about = json.loads(await self._get('/about'))
             self._event_task = asyncio.create_task(self._get_event())
             self._connected = True
 
@@ -78,7 +72,7 @@ class AioCube:
                     self._state = event[0]
                 else:
                     self.last_action = event[0], arg
-                if event[0] in ('static', 'moved', 'fall', 'tapped', 'shaked'):
+                if event[0] in ('static', 'moved', 'fall', 'tapped', 'shaken'):
                     await self._call_callback(getattr(self, 'when_'+event[0]))
                 else:
                     await self._call_callback(getattr(self, 'when_'+event[0]), arg)
@@ -87,11 +81,9 @@ class AioCube:
 
     @property
     def connected(self):
-        """Whether connected to the Rubik's Cube"""
         return self._connected
 
     async def disconnect(self):
-        """Disconnect from Rubik's Cube"""
         if self._connected:
             self._event_rpc.cancel()
             await asyncio.gather(self._event_task, return_exceptions=True)
@@ -107,28 +99,28 @@ class AioCube:
 
     @property
     def ip(self):
-        """Magic's Cube's IP Address"""
-        return self._ip
+        """cube's IP Address"""
+        return self._about['ip']
 
     @property
     def hostname(self):
-        """The URL of the Rubik's Cube"""
-        return self._hostname
+        """The URL of the cube"""
+        return self._about['hostname']
 
     @property
     def firmware_version(self):
-        """The firmware version of the Rubik's Cube"""
-        return self._firmware_version
+        """The firmware version of the cube"""
+        return self._about['version']
 
     @property
     def mac(self):
-        """Magic's Cube's MAC Address"""
-        return self._mac
+        """cube's MAC Address"""
+        return self._about['mac']
 
     @property
     def serial(self):
-        """Serial Number of Rubik's Cube"""
-        return self._serial
+        """Serial Number of cube"""
+        return self._about['serial']
 
     async def _get(self, sub_url):
         async with aiohttp.ClientSession() as session:
@@ -137,7 +129,7 @@ class AioCube:
 
     @util.mode(property_type='setter')
     async def color(self, *args):
-        """BGR color of LED light"""
+        """BGR color of the builtin LED"""
         if args:
             await self._rpc.rgb(*(util.bgr(args[0]) if args[0] is not None else (0,0,0))[::-1])
         else:
@@ -145,7 +137,7 @@ class AioCube:
 
     @util.mode(property_type='getter')
     async def acc(self):
-        """Acceleration loss, when the Rubik's Cube is stationary, the acceleration is equal to the acceleration of gravity (but in fact there is an error)"""
+        """Acceleration, when the cube is stationary, the acceleration is equal to gravity (but in fact there is an error)"""
         return await self._rpc.mpu_acc()
 
     @util.mode(property_type='getter')
@@ -156,7 +148,7 @@ class AioCube:
 
     @util.mode(property_type='getter')
     async def top_face(self):
-        """Which side is up, when the Rubik’s Cube is stationary, it returns to the color of the QR code on the upside, and returns to `None` """
+        """Which side is on top, when the cube is stationary, it returns the color of the top side, and `None` cube is moving """
         if self._state != 'static':
             return None
         acc = await self._rpc.mpu_acc()
@@ -170,7 +162,7 @@ class AioCube:
 class Cube(AioCube):
     """Synchronous mode of Cube
 
-    :param serial_or_ip: The IP address or serial number of the Rubik's Cube to be connected
+    :param serial_or_ip: The IP address or serial number of the cube to be connected
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):
@@ -188,14 +180,12 @@ class Cube(AioCube):
         self.disconnect()
 
     def connect(self):
-        """Connect Rubik's Cube"""
         self._lo = asyncio.new_event_loop()
         self._event_thread = threading.Thread(target=self._run_loop, args=(self._lo,), daemon=True)
         self._event_thread.start()
         asyncio.run_coroutine_threadsafe(AioCube.connect(self), self._lo).result()
 
     def disconnect(self):
-        """Disconnect the Rubik's Cube"""
         asyncio.run_coroutine_threadsafe(AioCube.disconnect(self), self._lo).result()
         self._lo.call_soon_threadsafe(self._done_ev.set)
         self._event_thread.join(timeout=5)
@@ -214,9 +204,9 @@ class Cube(AioCube):
 
 
 class AsyncCube(Cube):
-    """Asynchronous (concurrent.futures.Future) mode of Rubik's Cube
+    """Asynchronous (concurrent.futures.Future) mode of cube
 
-    :param serial_or_ip: The IP address or serial number of the Rubik's Cube to be connected
+    :param serial_or_ip: The IP address or serial number of the cube to be connected
     :type serial_or_ip: str
     """
     def __init__(self, serial_or_ip):

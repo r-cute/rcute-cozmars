@@ -17,7 +17,7 @@ class Buzzer(util.InputStreamComponent):
 
         The `tone` mentioned here can be represented by different data types in the program.
 
-        For example, the do sound in C major do re me, the music symbol is `'C4'`, the frequency is 440.0 Hz, and the MIDI code is #69, then `'C4'`, `440.0` and `69` can all be used To represent this tone, you can also use the |Tone| object to represent
+        For example, the "do" sound in C major, its music symbol is `'C4'`, the frequency is 440.0 Hz, and the MIDI code is #69, so, `'C4'`, `440.0` and `69` can all be used To represent this tone, you can also use the |Tone| object.
 
         Use `None` or `0` to indicate mute
 
@@ -33,7 +33,7 @@ class Buzzer(util.InputStreamComponent):
 
     @util.mode(property_type='setter')
     async def tone(self, *args):
-        """The current `tone` of the buzzer
+        """The current `tone` the buzzer is playing
         """
         if args:
             await self.set_tone(args[0])
@@ -42,11 +42,11 @@ class Buzzer(util.InputStreamComponent):
 
     @util.mode(force_sync=False)
     async def set_tone(self, tone, duration=None):
-        """Set the `tone` of the buzzer
+        """
 
         :param tone: `tone`
         :type tone: str / int / |Tone|
-        :param duration: duration (seconds), default is `None`, which means infinite length, until :func:`quiet` is called
+        :param duration: duration (seconds), default is `None`, which means non-stop, until :func:`quiet` is called
         :type duration: float
 
         """
@@ -77,18 +77,18 @@ class Buzzer(util.InputStreamComponent):
 
     @util.mode(force_sync=False)
     async def play(self, song, tempo=120, duty_cycle=.9):
-        """Play a piece of music
+        """Play a sequence of tones
 
-        :param song: the music to be played
+        :param song: tones to be played
         :type song: collections.Iterable
         :param tempo: playback speed, BPM, default is `120` beats/minute
         :type tempo: int
-        :param duty_cycle: duty cycle, that is, the ratio of the syllable playing time to the time of the entire syllable, 0~1, the default is `0.9`
+        :param duty_cycle: ratio of the tone duration to the entire beat, 0~1, the default is `0.9`
         :type duty_cycle: float
 
-        .. warning::
+        .. note::
 
-            This API may change in the future, we are still exploring an API that is more convenient to play music
+            This API may change in the future when we come up with a more convenient API to play music
 
         """
 

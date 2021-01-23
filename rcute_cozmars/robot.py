@@ -1,11 +1,11 @@
 """
-The rcute_cozmars.robot module includes :class:`Robot`, :class:`AsyncRobot` and :class:`AioRobot` three classes for connecting and controlling Cozmars robots:
+Three different modes to connect and control the robot:
 
-:class:`Robot` will execute each instruction sequentially in a blocking manner;
+:class:`Robot` will execute each command sequentially in a blocking manner.
 
-:class:`AsyncRobot` will return a :class:`concurrent.futures.Future` object immediately when it encounters a time-consuming instruction in a non-blocking manner, and then immediately execute the next instruction;
+:class:`AsyncRobot` executes commands in non-blocking manner, :class:`concurrent.futures.Future` objects are returned for time-consuming commands.
 
-:class:`AioRobot` executes instructions asynchronously (async/await)
+:class:`AioRobot` works with asyncio, it executes commands asynchronously in async/await style.
 
 .. |Latest version on pypi| raw:: html
 
@@ -59,9 +59,9 @@ class AioRobot:
 
     @util.mode()
     async def animate(self, name, *args, **kwargs):
-        """Execute action
+        """perform animation
 
-        :param name: the name of the action
+        :param name: the name of the animation
         :type name: str
         """
         anim = animations[name]
@@ -70,12 +70,11 @@ class AioRobot:
 
     @property
     def animation_list(self):
-        """Action List"""
         return list(animations.keys())
 
     @property
     def eyes(self):
-        """eye"""
+        """eye animation on screen"""
         return self._eye_anim
 
     @property
@@ -85,7 +84,6 @@ class AioRobot:
 
     @property
     def button(self):
-        """Button"""
         return self._button
 
     @property
@@ -100,68 +98,53 @@ class AioRobot:
 
     @property
     def motor(self):
-        """motor"""
         return self._motor
 
     @property
     def head(self):
-        """head"""
         return self._head
 
     @property
     def lift(self):
-        """Arm"""
         return self._lift
 
     @property
     def buzzer(self):
-        """buzzer"""
         if self._firmware_version.startswith('2'):
             raise AttributeError('Cozmars V2 has no buzzer')
         return self._buzzer
 
     @property
     def speaker(self):
-        """speaker"""
         if self._firmware_version.startswith('1'):
             raise AttributeError('Cozmars V1 has no speaker')
         return self._speaker
 
     @property
     def screen(self):
-        """screen"""
         return self._screen
 
     @property
     def camera(self):
-        """camera"""
         return self._camera
 
     @property
     def microphone(self):
-        """microphone"""
         return self._microphone
 
     async def connect(self):
-        """Connect Cozmars"""
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self._host}/rpc')
             if '-1' == await self._ws.recv():
                 raise RuntimeError('Could not connect to Cozmars, please close other programs that are already connected to Cozmars')
             self._rpc = RPCClient(self._ws)
-            about = json.loads(await self._get('/about'))
-            self._ip = about['ip']
-            self._serial = about['serial']
-            self._firmware_version = about['version']
-            self._hostname = about['hostname']
-            self._mac = about['mac']
+            self._about = json.loads(await self._get('/about'))
             self._sensor_task = asyncio.create_task(self._get_sensor_data())
             self._eye_anim_task = asyncio.create_task(self._eye_anim.animate(self))
             self._connected = True
 
     @property
     def connected(self):
-        """Are robots connected?"""
         return self._connected
 
     async def _call_callback(self, cb, *args):
@@ -202,7 +185,6 @@ class AioRobot:
                 logger.exception(e)
 
     async def disconnect(self):
-        """Disconnect Cozmars"""
         if self._connected:
             self._sensor_task.cancel()
             self._eye_anim_task.cancel()
@@ -220,74 +202,72 @@ class AioRobot:
 
     @util.mode(force_sync=False)
     async def forward(self, duration=None):
-        """go ahead
+        """
 
-        :param duration: duration (seconds)
+        :param duration: duration (seconds), default is None for non-stop
         :type duration: float
         """
         await self._rpc.speed((1,1), duration)
 
     @util.mode(force_sync=False)
     async def backward(self, duration=None):
-        """Back
+        """
 
-        :param duration: duration (seconds)
+        :param duration: duration (seconds), default is None for non-stop
         :type duration: float
         """
         await self._rpc.speed((-1,-1), duration)
 
     @util.mode(force_sync=False)
     async def turn_left(self, duration=None):
-        """Zuo Zhuan
+        """
 
-        :param duration: duration (seconds)
+        :param duration: duration (seconds), default is None for non-stop
         :type duration: float
         """
         await self._rpc.speed((-1,1), duration)
 
     @util.mode(force_sync=False)
     async def turn_right(self, duration=None):
-        """Turn right
+        """
 
-        :param duration: duration (seconds)
+        :param duration: duration (seconds), default is None for non-stop
         :type duration: float
         """
         await self._rpc.speed((1,-1), duration)
 
     @util.mode()
     async def stop(self):
-        """stop"""
         await self._rpc.speed((0, 0))
 
     @property
     def hostname(self):
         """Cozmars URL"""
-        return self._hostname
+        return self._about['hostname']
 
     @property
     def ip(self):
         """Cozmars' IP address"""
-        return self._ip
+        return self._about['ip']
 
     @property
     def firmware_version(self):
         """Cozmars firmware version"""
-        return self._firmware_version
+        return self._about['version']
 
     @property
     def mac(self):
         """Cozmars MAC address"""
-        return self._mac
+        return self._about['mac']
 
 
     @property
     def serial(self):
         """Cozmars serial number"""
-        return self._serial
+        return self._about['serial']
 
     @util.mode()
     async def poweroff(self):
-        """Close Cozmars"""
         await AioRobot.disconnect(self)
         try:
             await self._get('/poweroff')
@@ -296,7 +276,6 @@ class AioRobot:
 
     @util.mode()
     async def reboot(self):
-        """Restart Cozmars"""
         await AioRobot.disconnect(self)
         try:
             await self._get('/reboot')
@@ -329,14 +308,12 @@ class Robot(AioRobot):
         self.disconnect()
 
     def connect(self):
-        """Connect Cozmars"""
         self._lo = asyncio.new_event_loop()
         self._event_thread = threading.Thread(target=self._run_loop, args=(self._lo,), daemon=True)
         self._event_thread.start()
         asyncio.run_coroutine_threadsafe(AioRobot.connect(self), self._lo).result()
 
     def disconnect(self):
-        """Disconnect Cozmars"""
         asyncio.run_coroutine_threadsafe(AioRobot.disconnect(self), self._lo).result()
         self._lo.call_soon_threadsafe(self._done_ev.set)
         self._event_thread.join(timeout=5)

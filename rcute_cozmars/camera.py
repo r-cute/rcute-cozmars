@@ -9,8 +9,6 @@ class CameraMultiplexOutputStream(util.MultiplexOutputStream):
         util.MultiplexOutputStream.force_put_nowait(self, o)
 
 class Camera(util.MultiplexOutputStreamComponent):
-    """camera
-    """
     def __init__(self, robot, resolution=(480,360), frame_rate=3, q_size=1):
         util.MultiplexOutputStreamComponent.__init__(self, robot, q_size, CameraMultiplexOutputStream(self))
         self._frame_rate = frame_rate
@@ -19,17 +17,17 @@ class Camera(util.MultiplexOutputStreamComponent):
 
     @property
     def resolution(self):
-        """The resolution of the camera, the default is `(480, 360)`
+        """the default is `(480, 360)`
 
-        The resolution cannot be modified after the camera has been opened, otherwise an exception will be thrown
+        Resolution cannot be modified after the camera has been opened, otherwise an exception will be thrown
         """
         return self._resolution
 
     @property
     def frame_rate(self):
-        """The frame rate of camera recording, namely FPS, default is `3`
+        """default is `3` FPS
 
-        The frame rate cannot be modified after the camera has been opened, otherwise an exception will be thrown
+        Frame rate cannot be modified after the camera has been opened, otherwise an exception will be thrown
         """
         return self._frame_rate
 
@@ -53,17 +51,17 @@ class Camera(util.MultiplexOutputStreamComponent):
 
     @util.mode()
     async def capture(self, output=None, **options):
-        """Photo
+        """Take a photo
 
-        :param output: Output, if it is a file path or an object with the :meth:`write` method, it will be saved to the specified location. Default is `None`
+        :param output: If it is a file path or an object with :meth:`write` method, it will be saved to the specified location. Default is `None`
         :type output: str/writable, optional
         :param options:
-            * delay - The default is 1, which means the camera is turned on for 1 second before taking pictures. Give the camera more time to warm up and focus, and the image quality may be better
-            * standby - the default is False, if it is set to True, the camera will not turn off after taking pictures, which is convenient for continuous taking pictures. When taking photos in standby mode continuously, delay defaults to 0
+            * delay - The default is 1 (second), which means the camera is turned on for 1 second before taking pictures. Give the camera more time to warm up and focus, and the image quality may be better
+            * standby - Default is False. If set to True, the camera will not close after taking a picture, which is convenient for continuous/time-lapse capture, and delay will defaults to 0 for consequent captures.
             * For other optional parameters, please refer to `PiCamera.capture() <https://picamera.readthedocs.io/en/release-1.13/api_camera.html#picamera.PiCamera.capture>`_
         :type options: optional
-        :return: If :data:`output` is None, return a numpy.ndarray object
-        :raises RuntimeError: When the camera is transmitting video, it can’t take pictures; it can’t transmit video when in standby mode.
+        :return: If :data:`output` is None, a numpy.ndarray of the photo is returned
+        :raises RuntimeError: When the camera is transmitting video, it can’t take pictures; and camera can’t transmit video when in standby mode.
         """
         if not self.closed:
             raise RuntimeError('Cannot capture image while camera is streaming video')
@@ -80,4 +78,3 @@ class Camera(util.MultiplexOutputStreamComponent):
                 file.write(data)
         else:
             output.write(data)
-    

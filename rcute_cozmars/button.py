@@ -1,8 +1,7 @@
 from . import util
 
 class Button(util.Component):
-    """ Button
-    """
+
     def __init__(self, robot):
         util.Component.__init__(self, robot)
         self.when_pressed = None
@@ -19,38 +18,32 @@ class Button(util.Component):
 
     @property
     def pressed(self):
-        """ Whether the button is pressed"""
         return self._pressed
 
 
     @property
     def double_pressed(self):
-        """ button is double clicked"""
         return self._double_pressed
 
     @util.mode(property_type='setter')
-    async def double_press_max_interval(self, *args):
-        """Maximum time between double-clicks (seconds), default is `0.3`
-
-        If the time of two clicks exceeds this time, it will not be recognized as double click """
+    async def double_press_shreshold(self, *args):
+        """Interval threshold between two clicks to be recognized as a double press, in seconds, default is `0.3`"""
         return await self._rpc.double_press_max_interval(*args)
 
 
     @property
     def held(self):
-        """Whether the button has been long pressed"""
+        """Whether the button is being long pressed"""
         return self._held
 
     @util.mode(property_type='setter')
-    async def hold_time(self, *args):
-        """The minimum time (seconds) required to press and hold the button, the default is `1.0`
-
-        If the button is held for longer than this time, it will call :data:`when_held` """
+    async def hold_tome(self, *args):
+        """The minimum time (in seconds) required to press and hold the button before :data:`when_held` is called, the default is `1.0` """
         return await self._rpc.hold_time(*args)
 
     @util.mode(property_type='setter')
     async def hold_repeat(self, *args):
-        """Whether to allow continuous continuous calling :data:`when_held`, the default is `False`
+        """Whether to allow repetitive call of :data:`when_held`, the default is `False`
 
-        If set to `True`, when the button is held down, it will be called every :data:`hold_time` time :data:`when_held` """
+        If set to `True`, when the button is held down, :data:`when_held` will be called every :data:`hold_time` """
         return await self._rpc.hold_repeat(*args)

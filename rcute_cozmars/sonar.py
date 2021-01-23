@@ -6,19 +6,19 @@ class Sonar(util.Component):
     def __init__(self, robot):
         util.Component.__init__(self, robot)
         self.when_in_range = None
-        """Callback function, called when the distance of detecting the obstacle ahead is less than the threshold distance :data:`threshold_distance`, the default is `None`
+        """Callback function, defalts to `None`. Called when the distance to detected obstacle is less than :data:`threshold_distance`.
 
-        The callback function accepts one parameter, which is the distance (meters) detected at this time """
+        The callback function accepts one parameter, which is the distance to detected object, in meters """
         self.when_out_of_range = None
-        """Callback function, which is called when the distance to the front obstacle is greater than the threshold distance :data:`threshold_distance`, the default is `None`
+        """Callback function, default to `None`. Called when the distance to the detected obstacle is greater than :data:`threshold_distance`.
 
-        The callback function accepts one parameter, which is the distance (meters) detected at this time """
+        The callback function accepts one parameter, which is the distance to detected object, in meters """
 
     @util.mode(property_type='getter')
     async def distance(self):
         """Distance to detect obstacles ahead (m)
 
-        When the distance exceeds :data:`max_distance`, it can only display :data:`max_distance` """
+        When the distance exceeds :data:`max_distance`, it will read :data:`max_distance` """
         return round(await self._rpc.distance(), 2)
 
     @util.mode(property_type='setter')
@@ -29,7 +29,5 @@ class Sonar(util.Component):
 
     @util.mode(property_type='setter')
     async def threshold_distance(self, *args):
-        """Threshold distance (m), default is `0.1`
-
-        Trigger when the distance to the front obstacle is less than the threshold distance :data:`when_in_range` time, trigger when the distance is greater than the threshold distance :data:`when_out_of_range` event """
+        """Threshold distance (m), default is `0.1`"""
         return await self._rpc.threshod_distance(*args)

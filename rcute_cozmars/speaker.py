@@ -10,7 +10,6 @@ from gpiozero.tones import Tone
 
 
 class Speaker(util.InputStreamComponent, soundmixin):
-    """speaker"""
 
     def __init__(self, robot):
         util.InputStreamComponent.__init__(self, robot)
@@ -25,7 +24,7 @@ class Speaker(util.InputStreamComponent, soundmixin):
 
     @util.mode()
     async def play(self, src, repeat=1, preload=5, **kw):
-        """Play
+        """Playback sound
 
         :param src: The sound resource to be played (file/URL/data)
         :type src: str/np.ndarray/bytes/iterable/file-like obj
@@ -65,18 +64,18 @@ class Speaker(util.InputStreamComponent, soundmixin):
 
     @util.mode()
     async def say(self, txt, repeat=1, **options):
-        """speak
+        """text to speach
 
-        :param txt: the string to say
+        :param txt: text to be said
         :type txt: str
         :param repeat: play times, default is 1
         :type repeat: int, optional
         :param options:
-            * voice language
+            * voice/lang
             * volume
             * pitch
             * speed
-            * word_gap pause between words
+            * word_gap
 
             See `py-espeak-ng <https://github.com/gooofy/py-espeak-ng>`_
         :type options: optional
@@ -84,6 +83,8 @@ class Speaker(util.InputStreamComponent, soundmixin):
         if not hasattr(self, '_esng'):
             from espeakng import ESpeakNG
             self._esng = ESpeakNG()
+        if 'lang' in options:
+            options['voice'] = options.pop('lang')
         op = {'voice': 'zh' if re.findall(r'[\u4e00-\u9fff]+', txt) else 'en'}
         op.update(options)
         for k, v in op.items():
@@ -94,20 +95,20 @@ class Speaker(util.InputStreamComponent, soundmixin):
 
     @util.mode()
     async def beep(self, tones, repeat=1, tempo=120, duty_cycle=.9):
-        """Hum a piece of tune
+        """play a sequence of tones
 
-        :param tones: a string of tones
+        :param tones: array of tones
         :type tones: collections.Iterable
-        :param tempo: playback speed, BPM, default is `120` beats/minute
+        :param tempo: playback speed, default is `120` BPM
         :type tempo: int
-        :param duty_cycle: duty cycle, that is, the ratio of the syllable playing time to the time of the entire syllable, 0~1, the default is 0.9
+        :param duty_cycle: ratio of the tone duration to the entire beat, 0~1, the default is `0.9`
         :type duty_cycle: float
         :param repeat: play times, default is 1
         :type repeat: int, optional
 
         .. note::
 
-            This API may change in the future, we are still exploring an API that is more convenient to play tones
+            This API may change in the future when we come up with a more convenient API to play tones
 
         """
         if not 0< duty_cycle <=1:

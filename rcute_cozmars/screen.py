@@ -5,7 +5,6 @@ import cv2
 from PIL import Image, ImageFont, ImageDraw
 
 class Screen(led.LED):
-    """Display"""
 
     def __init__(self, robot):
         led.LED.__init__(self, robot)
@@ -15,14 +14,14 @@ class Screen(led.LED):
 
     @property
     def resolution(self):
-        """Resolution, `(240, 135)`, read-only """
+        """ `(240, 135)`, read-only """
         return 240, 135
 
     @util.mode()
     async def fill(self, color, x=0, y=0, w=240, h=135, stop_eyes=True):
-        """Fill the screen
+        """Fill the screen in block
 
-        :param color: the color to be filled (bgr mode)
+        :param color: BGR mode
         :type color: str/tuple
         :param x: The x coordinate of the upper left corner of the filled square, the default is `0`
         :type x: int
@@ -42,15 +41,15 @@ class Screen(led.LED):
 
     @util.mode()
     async def set_pixel(self, x, y, color):
-        """Set the color of the pixel
+        """Set color of a pixel on screen.
 
         :param x: the x coordinate of the pixel to be set
         :type x: int
         :param y: the y coordinate of the pixel to be set
         :type y: int
-        :param color: color (bgr mode)
+        :param color: BGR mode
         :type color: str/tuple
-        :raises ValueError: An exception is thrown when the coordinates exceed the screen range
+        :raises ValueError: An exception is thrown when the coordinates exceed the screen area
         """
         if not self._in_range((x, y)):
             raise ValueError(f'Pixel must not exceed dimensions of screen {self.resolution}')
@@ -59,7 +58,7 @@ class Screen(led.LED):
 
     @util.mode()
     async def block_display(self, image, x, y):
-        """display the image on a on the screen from (x, y)
+        """display an image on the screen starting from (x, y)
 
         raises AssertionError: raise error when the area to display exceeds screen
         """
@@ -70,9 +69,9 @@ class Screen(led.LED):
 
     @util.mode()
     async def display(self, image, stop_eyes=True):
-        """Display image
+        """Display an image
 
-        :param image: the image to be displayed (bgr mode)
+        :param image: BGR image to be displayed. The image will be resized to fit the screen,
         :type image: PIL.Image/numpy.ndarray
         """
         if isinstance(image, Image.Image):
@@ -89,7 +88,7 @@ class Screen(led.LED):
     async def text(self, text, size=30, color='cyan', bg_color='black', font=None, stop_eyes=True):
         """Display simple text
 
-        :param text: the text to be displayed
+        :param text: text to be displayed
         :type text: str
         :param size: font size, default is 30
         :type size: int, optional
@@ -97,7 +96,7 @@ class Screen(led.LED):
         :type color: str/tuple, optional
         :param bg_color: background color, the default is black
         :type bg_color: str/tuple, optional
-        :param font: Font file, Microsoft Yahei is used by default (support Chinese/English)
+        :param font: Font file, Microsoft Yahei is used by default, it includes Chinese and English chars.
         :type font: str, optional
         """
         font = ImageFont.truetype(font or util.resource('msyh.ttc'), size)

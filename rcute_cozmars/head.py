@@ -8,11 +8,11 @@ class Head(util.Component):
         util.Component.__init__(self, robot)
         self._relax_timeout = None
         self.default_speed = 100
-        """The default head rotation angular velocity (degrees/second) when setting :data:`angle`, the default is `100`, if it is set to `None`, it means the fastest head turning"""
+        """The default head rotation angular velocity (degrees/second), the default is `100`, if set to `None`, it will rotate at fastest speed"""
         self.auto_relax_delay = 1
-        """If there is no action for a long time, it will automatically relax (seconds), the default is `1`, if it is set to `None`, it means that it will not automatically relax
+        """time delay to automatically relax servo after head rotates, default to 1 sec. If set to `None`, servo will not relax.
 
-        After the steering gear is moved to the target position, it can be relaxed to prevent damage caused by long-term force, and it can also save battery power
+        When head moves to target position, relaxing the servo can prevent damage and save battery power.
         """
 
     def _cancel_relax_timeout(self):
@@ -28,19 +28,19 @@ class Head(util.Component):
 
     @property
     def max_angle(self):
-        """Maximum angle, the highest elevation angle, `20` degrees, read only
+        """30 degrees, read only
         """
-        return 20
+        return 30
 
     @property
     def min_angle(self):
-        """Minimum angle, that is, the lowest overhead angle, `-20` degrees, read only
+        """-30 degrees, read only
         """
-        return -20
+        return -30
 
     @util.mode(property_type='setter')
     async def angle(self, *args):
-        """Angle of the head"""
+        """get/set target angle at :data:`default_speed`"""
         if len(args) > 1:
             raise TypeError('Angle accepts at most one parameter')
         if args:
@@ -55,13 +55,13 @@ class Head(util.Component):
     async def set_angle(self, angle, *, duration=None, speed=None):
         """Set the angle of the head
 
-        :param angle: head angle to be set
+        :param angle: target angle position
         :type angle: float
-        :param duration: the duration of turning the head (seconds), the default is `None`, which means turning at the fastest speed
+        :param duration: duration in seconds for the movement, default is `None` for fastest speed
         :type duration: float, optional
-        :param speed: the angular speed of turning the head (degrees/second), the default is `None`, which means to rotate at the fastest speed
+        :param speed: angular speed at which to move head, the default is `None` for fastest speed
         :type speed: float, optional
-        :raises TypeError: `duration` and `speed` cannot be set at the same time, otherwise an exception will be thrown
+        :raises TypeError: `duration` and `speed` cannot both be set, otherwise an exception will be thrown
         """
         if duration and speed:
             raise TypeError('Cannot set both duration and speed')

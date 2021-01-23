@@ -19,7 +19,7 @@ class EyeAnimation(util.Component):
 
     @util.mode(property_type='setter')
     async def color(self, color=None):
-        """The eye color (BGR mode), the default is cyan"""
+        """Eyes' color in BGR mode"""
         if color:
             color = util.bgr(color)
             if color != self._color:
@@ -41,12 +41,12 @@ class EyeAnimation(util.Component):
 
     @property
     def expression_list(self):
-        """Supported emoji list, `['auto', 'happy', 'sad', 'surprised', 'angry', 'neutral', 'focused', 'sleepy']`, read only """
+        """Supported expression list, `['auto', 'happy', 'sad', 'surprised', 'angry', 'neutral', 'focused', 'sleepy']`, read only """
         return list(self._exp_list)
 
     @util.mode(property_type='setter')
     async def expression(self, exp=None):
-        """Emotions, the default is `'auto'`, which means to randomly switch between all emoticons"""
+        """the default is `'auto'`, which means to randomly switch between supported expressions"""
         if exp:
             exp, color = exp if type(exp)==tuple else (exp, None)
             if exp not in self.expression_list:
@@ -62,7 +62,7 @@ class EyeAnimation(util.Component):
 
     @util.mode()
     async def hide(self):
-        """hide"""
+        """hide the eyes"""
         if self._expression != 'hidden':
             if self._expression != 'stopped':
                 self._exp_before = self._expression
@@ -77,7 +77,7 @@ class EyeAnimation(util.Component):
 
     @util.mode()
     async def resume(self):
-        """Continue to update dynamically"""
+        """Continue dynamic effects"""
         if self._expression == 'stopped':
             await self._set_exp(self._exp_before or 'auto')
             self._exp_before = None
@@ -91,9 +91,10 @@ class EyeAnimation(util.Component):
         else:
             self._expression = exp
         wait and self._ev and (await self._ev.wait()) and self._ev.clear()
+
     @util.mode()
     async def show(self, exp=None):
-        """display"""
+        """show the eyes"""
         await self._set_exp(exp or self._exp_before or 'auto')
         self._exp_before = None
 

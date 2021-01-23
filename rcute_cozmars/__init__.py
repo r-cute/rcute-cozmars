@@ -1,5 +1,6 @@
 """
-rcute-cozmars is the Python SDK of 3D printing educational robot Cozmars, which realizes basic control of the robot, and can be combined with |rcute-ai| to complete functions such as image/speech recognition
+rcute-cozmars is the Python SDK for Cozmars, the 3D printable educational robot.
+rcute-cozmars provides basic control over the robot, it can be used with |rcute-ai| for aimage/speech recognition and etc.
 
 .. |rcute-ai| raw:: html
 

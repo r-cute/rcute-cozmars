@@ -11,10 +11,7 @@ class soundmixin:
 
     @property
     def sample_rate(self):
-        """Sampling Rate
-
-        The device cannot be set after it has been turned on, otherwise an exception will be thrown
-        """
+        """cannot be set when device is running, otherwise an exception will be thrown"""
         return self._sample_rate
 
     @sample_rate.setter
@@ -25,9 +22,9 @@ class soundmixin:
 
     @property
     def dtype(self):
-        """Sampling data type, such as `'int8'` or `'float32'` etc. The default is `'int16'`, it is not recommended to modify
+        """Sampling data type, the default is `'int16'`.
 
-        The device cannot be set after it has been turned on, otherwise an exception will be thrown
+        Cannot be set when device is running, otherwise an exception will be thrown
         """
         return self._dtype
 
@@ -39,20 +36,20 @@ class soundmixin:
 
     @property
     def channels(self):
-        """Number of channels, default is `1`, read only
+        """Number of channels, which is `1` and read only
         """
         return 1
 
     @property
     def sample_width(self):
-        """A sample contains several bytes, corresponding to :data:`dtype`, read only """
+        """How many bytes does A sample contains, corresponding to :data:`dtype`, read only """
         return util.sample_width(self.dtype)
 
     @property
     def block_duration(self):
-        """The duration of each frame of sound clip in the stream (seconds), the default is `0.1`
+        """The duration (seconds) of each sound clip in the stream, the default is `0.1`
 
-        The device cannot be set after it has been turned on, otherwise an exception will be thrown
+        Cannot be set when device is running, otherwise an exception will be thrown
         """
         return self._block_duration
 
@@ -73,10 +70,10 @@ class soundmixin:
 
     @util.mode(property_type='setter')
     async def volume(self, *args):
-        """Volume level, 0~100, percentage system, the setting will be automatically saved after the setting, and it will still be valid after restarting
+        """Volume level, 0~100, in percentage. Modification is saved even after reboot.
 
-        The microphone volume is recommended to be set to 100%, and then it can be further increased by volume gain
+        It's recommanded to set 100 for microphone volume, and 50 for speaker.
 
-        The speaker volume is recommended to be set to 50%
+        Dynamic volume modification should be done via :data:`gain`
         """
         return await (self._volume()(*args))

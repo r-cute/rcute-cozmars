@@ -9,11 +9,11 @@ class Lift(util.Component):
         util.Component.__init__(self, robot)
         self._relax_timeout = None
         self.default_speed = 2
-        """The default arm moving speed (/sec) when setting :data:`height`, the default is `2`, if it is set to `None`, it means moving the arm at the fastest speed"""
+        """The default lift moving speed, the default is 2/s, if set to `None`, it will move at fastest speed"""
         self.auto_relax_delay = 1
-        """If there is no action for a long time, it will automatically relax (seconds), the default is `1`, if it is set to `None`, it means that it will not automatically relax
+        """time delay to automatically relax servo after lift moves, default to 1 sec. If set to `None`, servo will not relax.
 
-        After the steering gear is moved to the target position, it can be relaxed to prevent damage caused by long-term force, and it can also save battery power
+        When lift moves to target position, relaxing the servo can prevent damage and save battery power.
         """
 
     def _cancel_relax_timeout(self):
@@ -29,19 +29,19 @@ class Lift(util.Component):
 
     @property
     def max_height(self):
-        """Maximum height of moving arm, `1.0`, read only
+        """ `1.0`, read only
         """
         return 1.0
 
     @property
     def min_height(self):
-        """Minimum height of arm moving, `0.0`, read only
+        """ `0.0`, read only
         """
         return 0.0
 
     @util.mode(property_type='setter')
     async def height(self, *args):
-        """The height of the arm, 0.0~1.0"""
+        """get/set lift height at :data:`default_speed`, 0.0~1.0"""
         if len(args) > 1:
             raise TypeError('Height accepts at most one parameter')
         if args:
@@ -54,15 +54,15 @@ class Lift(util.Component):
 
     @util.mode(force_sync=False)
     async def set_height(self, height, *, duration=None, speed=None):
-        """Set the height of the arm
+        """
 
-        :param height: the height of the arm to be set
+        :param height: target height position
         :type height: float
-        :param duration: the duration of the moving arm (seconds), the default is `None`, which means to move at the fastest speed
+        :param duration: duration of movement, default is `None` for fastest speed
         :type duration: float, optional
-        :param speed: the speed of the moving arm (/s), the default is `None`, which means to move at the fastest speed
+        :param speed: (/s), default is `None` for fastest speed
         :type speed: float, optional
-        :raises TypeError: `duration` and `speed` cannot be set at the same time, otherwise an exception will be thrown
+        :raises TypeError: `duration` and `speed` cannot both be set, otherwise an exception will be thrown
         """
         if duration and speed:
             raise TypeError('Cannot set both duration and speed')
