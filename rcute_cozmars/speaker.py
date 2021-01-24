@@ -1,9 +1,9 @@
-import asyncio, inspect, functools, re, itertools
+import asyncio, inspect, functools, itertools
 from. import util
 from .sound_mixin import soundmixin
 import numpy as np
 from collections.abc import Iterable
-import soundfile as sf, wave, io
+import soundfile as sf, io
 from pydub import AudioSegment
 from pydub.generators import Sine
 from gpiozero.tones import Tone

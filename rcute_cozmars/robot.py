@@ -23,6 +23,9 @@ import websockets
 import threading
 import logging
 import json
+import io
+import functools
+import wave
 from wsmprpc import RPCClient, RPCStream
 from . import util, env, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, speaker, motor, eye_animation
 from .animation import animations
@@ -260,8 +263,8 @@ class AioRobot:
         """
         if not hasattr(self, '_tts'):
             from rcute_ai import TTS
-            self._tts = ai.TTS()
-        wav_data = await asyncio.get_running_loop().run_in_executor(None, self._tts.tts_wav, txt, options)
+            self._tts = TTS()
+        wav_data = await asyncio.get_running_loop().run_in_executor(None, functools.partial(self._tts.tts_wav, txt, **options))
         with wave.open(io.BytesIO(wav_data)) as f:
             await self.speaker.play(f.readframes(f.getnframes()), repeat=repeat, sample_rate=f.getframerate(), dtype='int16')
 

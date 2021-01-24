@@ -43,9 +43,9 @@ async def search_for_cube(robot, cam_buf=None, clockwise=True, reverse=2, rec=No
             if corner is not None:
                 return corner, id
             if count < reverse:
-                await robot.motor.set_speed((-.5, .5) if clockwise else (.5, -.5), 0.2)
+                await robot.motor.set_speed((-.5, .5) if clockwise else (.5, -.5), 0.1)
             else:
-                await robot.motor.set_speed((.5, -.5) if clockwise else (-.5, .5), 0.5 if count ==reverse else 0.2)
+                await robot.motor.set_speed((.5, -.5) if clockwise else (-.5, .5), 0.35 if count ==reverse else 0.1)
             count += 1
             await asyncio.sleep(.4)
     finally:
@@ -71,11 +71,11 @@ async def center_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_vie
                 e = np.average(rec.edges(corner))
                 if not -70 < x < 70:
                     sp = np.clip(.02*((x-50) if x >=50 else (50+x)), -.2, .2)
-                    await robot.motor.set_speed((sp, -sp), max((100-e)/100, .1))
+                    await robot.motor.set_speed((sp, -sp), max((100-e)/130, .1))
                 elif e < 50:
-                    await robot.forward(max(.7, (50-e)/15))
+                    await robot.forward(max(.35, (50-e)/20))
                 elif e > 60:
-                    await robot.backward(max(.7, (e-60)/15))
+                    await robot.backward(max(.35, (e-60)/25))
                 else:
                     return corner, id
                 await asyncio.sleep(.4)
@@ -91,12 +91,12 @@ async def aim_at_cube(robot, corner, rec=None):
     vertical = max(left, right)
     ratio = top / vertical
     if ratio < .9:
-        await getattr(robot, 'turn_left' if left<right else 'turn_right')(2*ratio*65/vertical)
+        await getattr(robot, 'turn_left' if left<right else 'turn_right')(1.5*ratio*65/vertical)
         await asyncio.sleep(.2)
-        a = max((100-vertical)*(1-ratio)*.8, 1)
+        a = max((100-vertical)*(1-ratio)*.4, .5)
         await robot.forward(a)
         await asyncio.sleep(.2)
-        await getattr(robot, 'turn_left' if left>=right else 'turn_right')(10*(1-ratio)*90/vertical)
+        await getattr(robot, 'turn_left' if left>=right else 'turn_right')(8*(1-ratio)*90/vertical)
         return left < right
 
 async def dock_with_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_view=False):
@@ -135,7 +135,7 @@ async def dock_with_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_
                     sp = tuple(s*dist/.1 for s in sp)
             elif dist < .1:
                 sp = dist/.1, dist/.1
-            await robot.motor.speed(sp)
+            await robot.motor.speed(tuple(a*.7 for a in sp))
     finally:
         not cam_buf and (await cam.close())
 
