@@ -1,11 +1,11 @@
 """
 Three different modes to connect and control the robot:
 
-:class:`Robot` executes each command sequentially in a blocking manner.
+* :class:`Robot` executes each command sequentially in a blocking manner.
 
-:class:`AsyncRobot` executes commands in non-blocking manner, :class:`concurrent.futures.Future` objects are returned for time-consuming commands.
+* :class:`AsyncRobot` executes commands in non-blocking manner, :class:`concurrent.futures.Future` objects are returned for time-consuming commands.
 
-:class:`AioRobot` works with asyncio, it executes commands asynchronously in async/await style.
+* :class:`AioRobot` works with asyncio, it executes commands asynchronously in async/await style.
 
 .. |Latest version on pypi| raw:: html
 
@@ -73,6 +73,7 @@ class AioRobot:
 
     @property
     def animation_list(self):
+        """ """
         return list(animations.keys())
 
     @property
@@ -87,6 +88,7 @@ class AioRobot:
 
     @property
     def button(self):
+        """ """
         return self._button
 
     @property
@@ -101,41 +103,50 @@ class AioRobot:
 
     @property
     def motor(self):
+        """ """
         return self._motor
 
     @property
     def head(self):
+        """ """
         return self._head
 
     @property
     def lift(self):
+        """ """
         return self._lift
 
     @property
     def buzzer(self):
+        """ """
         if self.firmware_version.startswith('2'):
             raise AttributeError('Cozmars V2 has no buzzer')
         return self._buzzer
 
     @property
     def speaker(self):
+        """ """
         if self.firmware_version.startswith('1'):
             raise AttributeError('Cozmars V1 has no speaker')
         return self._speaker
 
     @property
     def screen(self):
+        """ """
         return self._screen
 
     @property
     def camera(self):
+        """ """
         return self._camera
 
     @property
     def microphone(self):
+        """ """
         return self._microphone
 
     async def connect(self):
+        """ """
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self._host}/rpc')
             if '-1' == await self._ws.recv():
@@ -148,6 +159,7 @@ class AioRobot:
 
     @property
     def connected(self):
+        """ """
         return self._connected
 
     async def _call_callback(self, cb, *args):
@@ -188,6 +200,7 @@ class AioRobot:
                 logger.exception(e)
 
     async def disconnect(self):
+        """ """
         if self._connected:
             self._sensor_task.cancel()
             self._eye_anim_task.cancel()
@@ -241,6 +254,7 @@ class AioRobot:
 
     @util.mode()
     async def stop(self):
+        """ """
         await self._rpc.speed((0, 0))
 
     @util.mode()
@@ -296,6 +310,7 @@ class AioRobot:
 
     @util.mode()
     async def poweroff(self):
+        """ """
         await AioRobot.disconnect(self)
         try:
             await self._get('/poweroff')
@@ -304,6 +319,7 @@ class AioRobot:
 
     @util.mode()
     async def reboot(self):
+        """ """
         await AioRobot.disconnect(self)
         try:
             await self._get('/reboot')
@@ -336,12 +352,14 @@ class Robot(AioRobot):
         self.disconnect()
 
     def connect(self):
+        """ """
         self._lo = asyncio.new_event_loop()
         self._event_thread = threading.Thread(target=self._run_loop, args=(self._lo,), daemon=True)
         self._event_thread.start()
         asyncio.run_coroutine_threadsafe(AioRobot.connect(self), self._lo).result()
 
     def disconnect(self):
+        """ """
         asyncio.run_coroutine_threadsafe(AioRobot.disconnect(self), self._lo).result()
         self._lo.call_soon_threadsafe(self._done_ev.set)
         self._event_thread.join(timeout=5)

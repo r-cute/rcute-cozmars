@@ -2,7 +2,7 @@ import asyncio
 from . import util
 
 class Head(util.Component):
-    """head"""
+    """ """
 
     def __init__(self, robot):
         util.Component.__init__(self, robot)

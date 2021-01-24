@@ -47,6 +47,7 @@ class AioCube:
         return True
 
     async def connect(self):
+        """ """
         if not self._connected:
             self._ws = await websockets.connect(f'ws://{self._host}:81')
             if '-1' == await self._ws.recv():
@@ -81,9 +82,11 @@ class AioCube:
 
     @property
     def connected(self):
+        """ """
         return self._connected
 
     async def disconnect(self):
+        """ """
         if self._connected:
             self._event_rpc.cancel()
             await asyncio.gather(self._event_task, return_exceptions=True)
@@ -180,12 +183,14 @@ class Cube(AioCube):
         self.disconnect()
 
     def connect(self):
+        """ """
         self._lo = asyncio.new_event_loop()
         self._event_thread = threading.Thread(target=self._run_loop, args=(self._lo,), daemon=True)
         self._event_thread.start()
         asyncio.run_coroutine_threadsafe(AioCube.connect(self), self._lo).result()
 
     def disconnect(self):
+        """ """
         asyncio.run_coroutine_threadsafe(AioCube.disconnect(self), self._lo).result()
         self._lo.call_soon_threadsafe(self._done_ev.set)
         self._event_thread.join(timeout=5)

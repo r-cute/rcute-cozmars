@@ -1,6 +1,7 @@
 from . import util
 
 class Button(util.Component):
+    """ """
 
     def __init__(self, robot):
         util.Component.__init__(self, robot)
@@ -18,11 +19,13 @@ class Button(util.Component):
 
     @property
     def pressed(self):
+        """ """
         return self._pressed
 
 
     @property
     def double_pressed(self):
+        """ """
         return self._double_pressed
 
     @util.mode(property_type='setter')

@@ -1,7 +1,7 @@
 from . import util
 
 class Infrared(util.Component):
-    """Infrared Sensor
+    """Infrared Sensor at the bottom
     """
     def __init__(self, robot):
         util.Component.__init__(self, robot)

@@ -5,6 +5,7 @@ import cv2
 from PIL import Image, ImageFont, ImageDraw
 
 class Screen(led.LED):
+    """ """
 
     def __init__(self, robot):
         led.LED.__init__(self, robot)

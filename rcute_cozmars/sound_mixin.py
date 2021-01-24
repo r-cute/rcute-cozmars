@@ -1,6 +1,7 @@
 from . import util
 
 class soundmixin:
+    """ """
 
     def __init__(self, dtype, sample_rate, block_duration, gain):
         self._dtype = dtype

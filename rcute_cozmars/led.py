@@ -1,7 +1,7 @@
 from . import util
 
 class LED(util.Component):
-    """LED lights"""
+    """ """
 
     def __init__(self, robot):
         util.Component.__init__(self, robot)

@@ -28,4 +28,5 @@ class Motor(util.Component):
 
     @util.mode()
     async def stop(self):
+        """ """
         await self._rpc.speed(0)

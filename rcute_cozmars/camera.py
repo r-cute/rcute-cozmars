@@ -9,6 +9,7 @@ class CameraMultiplexOutputStream(util.MultiplexOutputStream):
         util.MultiplexOutputStream.force_put_nowait(self, o)
 
 class Camera(util.MultiplexOutputStreamComponent):
+    """ """
     def __init__(self, robot, resolution=(480,360), frame_rate=3, q_size=1):
         util.MultiplexOutputStreamComponent.__init__(self, robot, q_size, CameraMultiplexOutputStream(self))
         self._frame_rate = frame_rate
