@@ -4,8 +4,6 @@
 .. automodule:: rcute_cozmars
    :noindex:
 
-Docs in English: https://rcute-cozmars.readthedocs.io/en/latest/
-
 ---------
 
 .. toctree::
