@@ -1,7 +1,7 @@
 """
 Three different modes to connect and control the robot:
 
-:class:`Robot` will execute each command sequentially in a blocking manner.
+:class:`Robot` executes each command sequentially in a blocking manner.
 
 :class:`AsyncRobot` executes commands in non-blocking manner, :class:`concurrent.futures.Future` objects are returned for time-consuming commands.
 

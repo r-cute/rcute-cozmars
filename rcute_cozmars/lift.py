@@ -2,8 +2,6 @@ import asyncio
 from . import util
 
 class Lift(util.Component):
-    """Arm
-    """
 
     def __init__(self, robot):
         util.Component.__init__(self, robot)
