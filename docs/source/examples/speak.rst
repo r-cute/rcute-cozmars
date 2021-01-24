@@ -1,34 +1,16 @@
 能动手也要 bb
 ===============
 
-Cozmars V2 相较于 V1 的改进之一，是用扬声器取代了蜂鸣器。扬声器的频率响应更好，在音频功放驱动下，Cozmars 就可以说话、播放数字音乐了
+    >>> robot.speaker.beep([500, 500]) # 让机器人发出两个 500Hz 的音节
 
-好好说话
----------
+*程序出错？如果你使用的是 Cozmars V1 版本，请跳到* `这里 <../../v1/examples/bb.html>`_
 
-扬声器用 :data:`speaker` 属性表示。调用 :meth:`say` 函数，让 Cozmars 说人话：
-
-    >>> robot.speaker.say('不要睡，起来嗨')
-
-:meth:`say` 函数还可以指定 :data:`voice`、:data:`pitch`、:data:`volume`、:data:`speed` 参数来改变语言、音调、音量和语速
-
-.. note::
-
-    代码出错？如果你使用的是 Cozmars V1 版，请跳转 `这里 <../../v1/examples/bb.html>`_
-
-Rock n roll
----------------
-
-:data:`speaker` 的 :meth:`play` 函数能很方便地播放多种声音格式，只要把声音的文件路径、网址或 wav 数据作为 :meth:`play` 的参数即可
-
-    >>> robot.speaker.play('./waiting_for_the_end.mp3')
-
-各种歌曲顺手拈来，缓则“乐以教和”，躁可“动次打次”，取决于你喜欢怎样的 Cozmars
+Cozmars V2 相较于 V1 的改进之一，是用扬声器取代了蜂鸣器。扬声器的频率响应更好，在音频功放驱动下，Cozmars 就可以说话、播放数字音乐了。还是让我们从最简单音调的说起吧
 
 哼小曲
 --------
 
-:meth:`beep` 函数通过播放不同频率的正弦波形，使扬声器可以模仿蜂鸣器，发出不同的 *音调*
+扬声器用 :data:`speaker` 属性表示。它的 :meth:`beep` 函数通过播放不同频率的正弦波形，使扬声器可以模仿蜂鸣器，发出不同的 *音调*
 
 .. |Tone| raw:: html
 
@@ -56,7 +38,27 @@ Rock n roll
     with Robot('0a3c') as robot:
         robot.speaker.beep(tones, tempo=120, repeat=2)
 
+Rock n roll
+---------------
+
+:data:`speaker` 的 :meth:`play` 函数能很方便地播放多种声音格式，只要把声音的文件路径、网址或 wav 数据作为 :meth:`play` 的参数即可
+
+    >>> robot.speaker.play('./waiting_for_the_end.mp3')
+
+各类歌曲顺手拈来，缓则“乐以教和”，躁可“动次打次”，取决于你喜欢怎样的 Cozmars
+
+好好说话
+---------
+
+要让 Cozmars 说人话，先要安装 `rcute-ai <https://rcute-ai.readthedocs.io/>`_
+
+:class:`Robot` 的 :meth:`say` 函数能把 rcute-ai 的合成语音通过扬声器播放出来：
+
+    >>> robot.say('不要睡，起来嗨')
+
+:meth:`say` 函数还可以指定 :data:`voice`、:data:`pitch`、:data:`volume`、:data:`speed` 参数来改变语言、音调、音量和语速
 
 .. seealso::
 
-    `rcute_cozmars.speaker <../api/speaker.html>`_
+    `rcute_cozmars.speaker <../api/speaker.html>`_ ，`rcute_cozmars.Robot.say <../api/robot.html#rcute_cozmars.robot.Robot.say>`_ ，
+

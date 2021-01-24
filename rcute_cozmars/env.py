@@ -3,7 +3,8 @@ from . import util
 class Env(util.Component):
     """
     Helper class to set/get env-vars on server side.
-    These env-vars are different from conf-vars(saved in /home/pi/.cozmars.conf.json) in that env-vars are specific to individual servers, but are used on client side.
+
+    These env-vars are different from conf-vars(saved in /home/pi/.cozmars.conf.json) in that env-vars are specific to individual servers, but are used on client side,
     while conf-vars are unknown to client.
     """
     def __init__(self, robot):
@@ -11,7 +12,6 @@ class Env(util.Component):
 
     @util.mode()
     async def get(self, name):
-        """get"""
         return await self._rpc.get_env(name)
 
     @util.mode()
@@ -21,7 +21,6 @@ class Env(util.Component):
 
     @util.mode()
     async def set(self, name, value):
-        """set"""
         return await self._rpc.set_env(name, value)
 
     @util.mode()

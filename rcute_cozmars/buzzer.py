@@ -5,9 +5,9 @@ from gpiozero.tones import Tone
 
 
 class Buzzer(util.InputStreamComponent):
-    """buzzer
+    """Buzzer is only for Cozmars v1
 
-    The buzzer can vibrate at different frequencies to emit different `tones`.
+    The buzzer vibrates at different frequencies to emit different `tones`.
 
     .. |Tone| raw:: html
 
@@ -15,7 +15,7 @@ class Buzzer(util.InputStreamComponent):
 
     .. note::
 
-        The `tone` mentioned here can be represented by different data types in the program.
+        A `tone` is represented by different data types in program.
 
         For example, the "do" sound in C major, its music symbol is `'C4'`, the frequency is 440.0 Hz, and the MIDI code is #69, so, `'C4'`, `440.0` and `69` can all be used To represent this tone, you can also use the |Tone| object.
 

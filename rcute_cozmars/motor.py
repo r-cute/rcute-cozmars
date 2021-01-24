@@ -6,7 +6,7 @@ class Motor(util.Component):
 
     .. warning::
 
-        Please be careful not to let the robot fall off the table when it moves!
+        Be careful not to drop thr robot off table when it moves!
 
     """
 

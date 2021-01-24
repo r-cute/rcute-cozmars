@@ -13,7 +13,7 @@ Three different modes to connect and control the robot:
 
 .. warning::
 
-    Cozmars robots can only be controlled by one program at the same time. If Scratch is being used to control Cozmars, the Python program will not be able to connect, and vice versa
+    The robot accepts only one connection the same time. If Scratch is controlling Cozmars, the Python program will not be able to connect, and vice versa
 
 """
 
@@ -110,13 +110,13 @@ class AioRobot:
 
     @property
     def buzzer(self):
-        if self._firmware_version.startswith('2'):
+        if self.firmware_version.startswith('2'):
             raise AttributeError('Cozmars V2 has no buzzer')
         return self._buzzer
 
     @property
     def speaker(self):
-        if self._firmware_version.startswith('1'):
+        if self.firmware_version.startswith('1'):
             raise AttributeError('Cozmars V1 has no speaker')
         return self._speaker
 
@@ -239,6 +239,31 @@ class AioRobot:
     @util.mode()
     async def stop(self):
         await self._rpc.speed((0, 0))
+
+    @util.mode()
+    async def say(self, txt, repeat=1, **options):
+        """text to speach
+
+        :param txt: text to be said
+        :type txt: str
+        :param repeat: playback times, default is 1
+        :type repeat: int, optional
+        :param options:
+            * voice/lang
+            * volume
+            * pitch
+            * speed
+            * word_gap
+
+            See `rcute_ai.tts <https://rcute-ai.readthedocs.io/zh_CN/latest/api/tts.html#rcute_ai.tts.TTS.tts_wav/>`_
+        :type options: optional
+        """
+        if not hasattr(self, '_tts'):
+            from rcute_ai import TTS
+            self._tts = ai.TTS()
+        wav_data = await asyncio.get_running_loop().run_in_executor(None, self._tts.tts_wav, txt, options)
+        with wave.open(io.BytesIO(wav_data)) as f:
+            await self.speaker.play(f.readframes(f.getnframes()), repeat=repeat, sample_rate=f.getframerate(), dtype='int16')
 
     @property
     def hostname(self):

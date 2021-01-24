@@ -5,7 +5,7 @@ import cv2
 from .aruco import ArucoDetector
 
 def cube_id(id):
-    return 1<= id<= 6
+    return 0<= id<= 6
 
 def charger_id(id):
     return id == 0

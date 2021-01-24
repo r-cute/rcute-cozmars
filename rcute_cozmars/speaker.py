@@ -10,7 +10,7 @@ from gpiozero.tones import Tone
 
 
 class Speaker(util.InputStreamComponent, soundmixin):
-
+    """Speaker is only for Cozmars v2"""
     def __init__(self, robot):
         util.InputStreamComponent.__init__(self, robot)
         soundmixin.__init__(self, dtype='int16', sample_rate=22050, block_duration=.1, gain=25)
@@ -62,36 +62,6 @@ class Speaker(util.InputStreamComponent, soundmixin):
         else:
             raise TypeError(f'Unable to open {src}')
 
-    @util.mode()
-    async def say(self, txt, repeat=1, **options):
-        """text to speach
-
-        :param txt: text to be said
-        :type txt: str
-        :param repeat: play times, default is 1
-        :type repeat: int, optional
-        :param options:
-            * voice/lang
-            * volume
-            * pitch
-            * speed
-            * word_gap
-
-            See `py-espeak-ng <https://github.com/gooofy/py-espeak-ng>`_
-        :type options: optional
-        """
-        if not hasattr(self, '_esng'):
-            from espeakng import ESpeakNG
-            self._esng = ESpeakNG()
-        if 'lang' in options:
-            options['voice'] = options.pop('lang')
-        op = {'voice': 'zh' if re.findall(r'[\u4e00-\u9fff]+', txt) else 'en'}
-        op.update(options)
-        for k, v in op.items():
-            setattr(self._esng, k, v)
-        wav_data = await asyncio.get_running_loop().run_in_executor(None, self._esng.synth_wav, txt)
-        with wave.open(io.BytesIO(wav_data)) as f:
-            await self.play(f.readframes(f.getnframes()), repeat=repeat, sample_rate=f.getframerate(), dtype='int16')
 
     @util.mode()
     async def beep(self, tones, repeat=1, tempo=120, duty_cycle=.9):
