@@ -40,7 +40,7 @@ class Button(util.Component):
         return self._held
 
     @util.mode(property_type='setter')
-    async def hold_tome(self, *args):
+    async def hold_time(self, *args):
         """The minimum time (in seconds) required to press and hold the button before :data:`when_held` is called, the default is `1.0` """
         return await self._rpc.hold_time(*args)
 
@@ -48,5 +48,5 @@ class Button(util.Component):
     async def hold_repeat(self, *args):
         """Whether to allow repetitive call of :data:`when_held`, the default is `False`
 
-        If set to `True`, when the button is held down, :data:`when_held` will be called every :data:`hold_time` """
+        If set to `True`, while the button is held down, :data:`when_held` will be called every :data:`hold_time` """
         return await self._rpc.hold_repeat(*args)

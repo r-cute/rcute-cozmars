@@ -1,9 +1,8 @@
-import asyncio, inspect, functools, itertools
+import asyncio, functools, itertools, io
 from. import util
 from .sound_mixin import soundmixin
 import numpy as np
 from collections.abc import Iterable
-import soundfile as sf, io
 from pydub import AudioSegment
 from pydub.generators import Sine
 from gpiozero.tones import Tone
@@ -113,6 +112,7 @@ def file_sr_bs_gen(src, sr, dt, block_duration):
         import io
         src = io.BytesIO(urlopen(src).read())
 
+    import soundfile as sf
     try:
         file = sf.SoundFile(src)
         assert file.samplerate <= sr

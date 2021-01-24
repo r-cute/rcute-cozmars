@@ -1,5 +1,5 @@
 """
-Three different modes to connect and control the robot:
+There are three different modes to connect and control the robot:
 
 * :class:`Robot` executes each command sequentially in a blocking manner.
 
@@ -93,7 +93,7 @@ class AioRobot:
 
     @property
     def infrared(self):
-        """Infrared sensor on the bottom of the robot"""
+        """Infrared sensor at the bottom of the robot"""
         return self._infrared
 
     @property
@@ -118,14 +118,14 @@ class AioRobot:
 
     @property
     def buzzer(self):
-        """ """
+        """only for v1"""
         if self.firmware_version.startswith('2'):
             raise AttributeError('Cozmars V2 has no buzzer')
         return self._buzzer
 
     @property
     def speaker(self):
-        """ """
+        """only for v2"""
         if self.firmware_version.startswith('1'):
             raise AttributeError('Cozmars V1 has no speaker')
         return self._speaker

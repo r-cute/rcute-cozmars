@@ -5,6 +5,8 @@ from wsmprpc import RPCStream
 from PIL import ImageColor
 from os import path
 
+BUILDING_RTD = environ.get("RCUTE_COZMARS_RTD") == "1"
+
 PKG = path.dirname(__file__)
 RESOURCE = path.join(PKG, 'resources')
 
