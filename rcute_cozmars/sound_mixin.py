@@ -12,7 +12,7 @@ class soundmixin:
 
     @property
     def sample_rate(self):
-        """cannot be set when device is running, otherwise an exception will be thrown"""
+        """Cannot be set when device is running, otherwise an exception will be thrown"""
         return self._sample_rate
 
     @sample_rate.setter
@@ -23,7 +23,7 @@ class soundmixin:
 
     @property
     def dtype(self):
-        """Sampling data type, the default is `'int16'`.
+        """Sampling data type, the default is `'int16'`（str）.
 
         Cannot be set when device is running, otherwise an exception will be thrown
         """
@@ -43,7 +43,7 @@ class soundmixin:
 
     @property
     def sample_width(self):
-        """How many bytes does A sample contains, corresponding to :data:`dtype`, read only """
+        """How many bytes does a sample contains, corresponding to :data:`dtype`, read only """
         return util.sample_width(self.dtype)
 
     @property
@@ -62,7 +62,7 @@ class soundmixin:
 
     @property
     def gain(self):
-        """Volume Gain (dBFS)"""
+        """Volume gain (dBFS)"""
         return self._gain
 
     @gain.setter

@@ -152,9 +152,9 @@ class AioRobot:
             if '-1' == await self._ws.recv():
                 raise RuntimeError('Could not connect to Cozmars, please close other programs that are already connected to Cozmars')
             self._rpc = RPCClient(self._ws)
+            self._eye_anim_task = asyncio.create_task(self._eye_anim.animate(self))
             self._about = json.loads(await self._get('/about'))
             self._sensor_task = asyncio.create_task(self._get_sensor_data())
-            self._eye_anim_task = asyncio.create_task(self._eye_anim.animate(self))
             self._connected = True
 
     @property

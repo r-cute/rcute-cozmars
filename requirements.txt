@@ -1,5 +1,4 @@
 aiohttp
-gpiozero
 opencv-python
 opencv-contrib-python
 numpy
@@ -9,4 +8,3 @@ librosa
 websockets
 wsmprpc>=1.1.1
 Pillow
-# apt install ffmpeg

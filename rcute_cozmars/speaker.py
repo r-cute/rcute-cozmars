@@ -5,8 +5,10 @@ import numpy as np
 from collections.abc import Iterable
 from pydub import AudioSegment
 from pydub.generators import Sine
-from gpiozero.tones import Tone
+import librosa
 
+import warnings
+warnings.filterwarnings('ignore', message='PySoundFile failed. Trying audioread instead.') # librosa
 
 class Speaker(util.InputStreamComponent, soundmixin):
     """Speaker is only for Cozmars v2"""
@@ -95,13 +97,13 @@ class Speaker(util.InputStreamComponent, soundmixin):
 
 
 def max_freq(tones):
-    return functools.reduce(lambda r,e: max(r, max_freq(e) if isinstance(e, (list, tuple)) else Tone(e).frequency), tones, 0)
+    return functools.reduce(lambda r,e: max(r, max_freq(e) if isinstance(e, (list, tuple)) else util.freq(e)), tones, 0)
 
 def tone2audio(tones, base_beat_ms, duty_cycle, sr):
     duty = base_beat_ms * duty_cycle
     empty = base_beat_ms - duty
     return functools.reduce(lambda r,e: r+(tone2audio(e, base_beat_ms/2, duty_cycle, sr) if isinstance(e, (list, tuple)) else \
-            (Sine(Tone(e).frequency, sample_rate=sr).to_audio_segment(duration=duty).append(AudioSegment.silent(duration=empty, frame_rate=sr), crossfade=empty)) if e else AudioSegment.silent(duration=base_beat_ms, frame_rate=sr)), \
+            (Sine(util.freq(e), sample_rate=sr).to_audio_segment(duration=duty).append(AudioSegment.silent(duration=empty, frame_rate=sr), crossfade=empty)) if e else AudioSegment.silent(duration=base_beat_ms, frame_rate=sr)), \
         tones, AudioSegment.empty())
 
 def file_sr_bs_gen(src, sr, dt, block_duration):
@@ -121,7 +123,7 @@ def file_sr_bs_gen(src, sr, dt, block_duration):
             file.blocks(dtype=dt, blocksize=bs, fill_value=0))
 
     except (AssertionError, RuntimeError):
-        import functools, librosa # librosa supports more formats than soundfile
+        # librosa supports more formats than soundfile
         # down-sample if needed
         if librosa.get_samplerate(src) < sr:
             sr = None

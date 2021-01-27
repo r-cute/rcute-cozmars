@@ -1,6 +1,5 @@
 import asyncio
 from . import util
-from gpiozero.tones import Tone
 # from wsmprpc import RPCStream
 
 
@@ -9,15 +8,11 @@ class Buzzer(util.InputStreamComponent):
 
     The buzzer vibrates at different frequencies to emit different `tones`.
 
-    .. |Tone| raw:: html
-
-        <a href='https://gpiozero.readthedocs.io/en/stable/api_tones.html' target='blank'>gpiozero.tones.Tone</a>
-
     .. note::
 
         A `tone` is represented by different data types in program.
 
-        For example, the "do" sound in C major, its music symbol is `'C4'`, the frequency is 440.0 Hz, and the MIDI code is #69, so, `'C4'`, `440.0` and `69` can all be used To represent this tone, you can also use the |Tone| object.
+        For example, the A4 key has a frequency of 440 Hz, and its MIDI code is 69, so, `'A4'`, `440.0` and `69` can all be used To represent this `tone`.
 
         Use `None` or `0` to indicate mute
 
@@ -45,14 +40,14 @@ class Buzzer(util.InputStreamComponent):
         """
 
         :param tone: `tone`
-        :type tone: str / int / |Tone|
+        :type tone: str / int / float
         :param duration: duration (seconds), default is `None`, which means non-stop, until :func:`quiet` is called
         :type duration: float
 
         """
         if self.closed:
-            self._tone, freq = self._encode(tone)
-            await self._rpc.tone(freq, duration)
+            self._tone = util.freq(tone)
+            await self._rpc.tone(self._tone, duration)
         else:
             raise RuntimeError('Cannot set tone while buzzer is playing')
 
@@ -68,8 +63,8 @@ class Buzzer(util.InputStreamComponent):
             for t in tone:
                 await self._play_one_tone(t, delay/2, duty_cycle)
         else:
-            self._tone, freq = self._encode(tone)
-            await self._input_stream.put(freq)
+            self._tone = util.freq(tone)
+            await self._input_stream.put(self._tone)
             await asyncio.sleep(delay* duty_cycle)
             if duty_cycle != 1:
                 await self._input_stream.put(None)
@@ -116,10 +111,3 @@ class Buzzer(util.InputStreamComponent):
     def raw_input_stream(self):
         return self.input_stream._raw_stream
     '''
-
-
-
-    def _encode(self, obj):
-        t = Tone(obj) if obj else None
-        freq = t.frequency if t else None
-        return t, freq

@@ -3,24 +3,20 @@
 
     >>> robot.speaker.beep([500, 500]) # 让机器人发出两个 500Hz 的音节
 
-*程序出错？如果你使用的是 Cozmars V1 版本，请跳到* `这里 <../../v1/examples/bb.html>`_
+*程序出错？如果你使用的是 Cozmars V1 版本，请跳到* `这里 <bb.html>`_
 
-Cozmars V2 相较于 V1 的改进之一，是用扬声器取代了蜂鸣器。扬声器的频率响应更好，在音频功放驱动下，Cozmars 就可以说话、播放数字音乐了。还是让我们从最简单音调的说起吧
+Cozmars V2 相较于 V1 的改进之一，是用扬声器取代了蜂鸣器。扬声器的频率响应更好，在音频功放驱动下，Cozmars 就可以说话、播放数字音乐了。还是让我们从最简单的音调说起吧
 
 哼小曲
 --------
 
-扬声器用 :data:`speaker` 属性表示。它的 :meth:`beep` 函数通过播放不同频率的正弦波形，使扬声器可以模仿蜂鸣器，发出不同的 *音调*
-
-.. |Tone| raw:: html
-
-    <a href='https://gpiozero.readthedocs.io/en/stable/api_tones.html' target='blank'>gpiozero.tones.Tone</a>
+扬声器用 :data:`speaker` 属性表示。它的 :meth:`beep` 函数通过播放不同频率的正弦波形，使扬声器可以模仿蜂鸣器，发出不同的 `音调 <http://www.vibrationdata.com/tutorials2/piano.pdf>`_
 
 .. note::
 
-    这里所说的 *音调* ，在程序中可以用多种的数据类型表示。
+    这里所说的 *音调* ，在程序中可以用不同的数据类型表示。
 
-    比如 C 大调 do re me fa so la si 中的 do 音，音乐记号是 `C4` ，频率是 261.63 Hz，MIDI 代码是 #60，那么，在代码中，`'C4'` 、 `261.63` 和 `60` 都可以用来表示这个音调，也可以用 |Tone| 对象来表示
+    比如 C 大调 “do re me fa so la si” 中的 “la” 音，音乐记号是 A4，频率是 440 Hz，MIDI 代码是 69，那么 `'A4'` 、 `440.0` 和 `69` 都可以用来表示这个 *音调*
 
     用 `None` 或 `0` 表示静音（休止符）
 

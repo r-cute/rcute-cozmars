@@ -24,13 +24,14 @@ setuptools.setup(
     license="MIT",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/hyansuper/rcute-cozmars",
+    url="https://github.com/r-cute/rcute-cozmars",
     packages=['rcute_cozmars'],
     install_requires=requirements,
+    extras_require={'ai':['rcute-ai'], 'win64':['ffmpeg-win64']},
     include_package_data=True,
-    classifiers=(
+    classifiers=[
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-    ),
+    ],
 )

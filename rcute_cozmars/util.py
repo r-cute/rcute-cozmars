@@ -4,6 +4,7 @@ from concurrent import futures
 from wsmprpc import RPCStream
 from PIL import ImageColor
 from os import path
+import librosa
 
 # from os import environ
 # BUILDING_RTD = environ.get("RCUTE_COZMARS_RTD") == "1"
@@ -22,6 +23,17 @@ def bgr(color):
         return ImageColor.getrgb(color)[::-1]
     else:
         return color
+
+def freq(tone):
+    # convert midi/note to hz.
+    # see https://github.com/gpiozero/gpiozero/blob/master/gpiozero/tones.py#L114
+    # 0 is treated as None, not midi 8.1hz
+    if isinstance(tone, str):
+        return librosa.note_to_hz(tone)
+    elif isinstance(tone, int) and 0< tone<128:
+        return librosa.midi_to_hz(tone)
+    else:
+        tone
 
 def sample_width(dtype):
     return {'int16':2, 'float32':4, 'float64':8, 'int8':1, 'int32':4}[dtype]

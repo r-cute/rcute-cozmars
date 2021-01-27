@@ -3,22 +3,18 @@
 
     >>> robot.buzzer.play([500, 500]) # 让机器人发出两个 500Hz 的音节
 
-*程序出错？如果你使用的是 Cozmars V2 版本，请跳到* `这里 <../../v2/examples/speak.html>`_
+*程序出错？如果你使用的是 Cozmars V2 版本，请跳到* `这里 <speak.html>`_
 
 音调
 -----------
 
-:class:`Robot` 的 :data:`buzzer` 属性代表机器人内部的一个蜂鸣器，蜂鸣器能以不同的频率振动，从而发出不同的 *音调*。
-
-.. |Tone| raw:: html
-
-    <a href='https://gpiozero.readthedocs.io/en/stable/api_tones.html' target='blank'>gpiozero.tones.Tone</a>
+:class:`Robot` 的 :data:`buzzer` 属性代表机器人内部的一个蜂鸣器，蜂鸣器能以不同的频率振动，从而发出不同的 `音调 <http://www.vibrationdata.com/tutorials2/piano.pdf>`_
 
 .. note::
 
     这里所说的 *音调* ，在程序中可以用不同的数据类型表示。
 
-    比如 C 大调 do re me fa so la si 中的 do 音，音乐记号是 `'C4'` ，频率是 261.63 Hz，MIDI 代码是 #60，那么，`'C4'` 、 `261.63` 和 `60` 都可以用来表示这个音调，也可以用 |Tone| 对象来表示
+    比如 C 大调 do re me fa so la si 中的 la 音，音乐记号是 `'A4'` ，频率是 440 Hz，MIDI 代码是 69，那么 `'A4'` 、 `440.0` 和 `69` 都可以用来表示这个 *音调*
 
     用 `None` 或 `0` 表示静音
 
@@ -26,10 +22,9 @@
 
     >>> from gpiozero.tones import Tone
     >>> # 以下四句代码效果是相同的，所以你不会听到音调的变化。尝试改变频率或音乐记号再听听：
-    >>> robot.buzzer.tone = 261.63
-    >>> robot.buzzer.tone = 'C4'
-    >>> robot.buzzer.tone = 60
-    >>> robot.buzzer.tone = Tone('C4')
+    >>> robot.buzzer.tone = 'A4'
+    >>> robot.buzzer.tone = 440.
+    >>> robot.buzzer.tone = 69
     >>> # 静音：
     >>> robot.buzzer.quiet()  # 或者:
     >>> robot.buzzer.tone = 0
