@@ -27,7 +27,7 @@ setuptools.setup(
     url="https://github.com/r-cute/rcute-cozmars",
     packages=['rcute_cozmars'],
     install_requires=requirements,
-    extras_require={'ai':['rcute-ai'], 'win64':['ffmpeg-win64']},
+    extras_require={'win64':['ffmpeg-win64']},
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3.7",
