@@ -33,7 +33,7 @@ def freq(tone):
     elif isinstance(tone, int) and 0< tone<128:
         return librosa.midi_to_hz(tone)
     else:
-        tone
+        return tone
 
 def sample_width(dtype):
     return {'int16':2, 'float32':4, 'float64':8, 'int8':1, 'int32':4}[dtype]

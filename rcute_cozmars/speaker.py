@@ -6,6 +6,7 @@ from collections.abc import Iterable
 from pydub import AudioSegment
 from pydub.generators import Sine
 import librosa
+from pydub.playback import play
 
 import warnings
 warnings.filterwarnings('ignore', message='PySoundFile failed. Trying audioread instead.') # librosa
@@ -65,15 +66,15 @@ class Speaker(util.InputStreamComponent, soundmixin):
 
 
     @util.mode()
-    async def beep(self, tones, repeat=1, tempo=120, duty_cycle=.9):
+    async def beep(self, tones, repeat=1, tempo=120, fade=.1):
         """play a sequence of tones
 
         :param tones: array of tones
         :type tones: collections.Iterable
         :param tempo: playback speed, default is `120` BPM
         :type tempo: int
-        :param duty_cycle: ratio of the tone duration to the entire beat, 0~1, the default is `0.9`
-        :type duty_cycle: float
+        :param fade: ratio of fade duration to the entire beat, 0~1, the default is 0.1
+        :type fade: float
         :param repeat: play times, default is 1
         :type repeat: int, optional
 
@@ -82,8 +83,8 @@ class Speaker(util.InputStreamComponent, soundmixin):
             This API may change in the future when we come up with a more convenient API to play tones
 
         """
-        if not 0< duty_cycle <=1:
-            raise ValueError('duty_cycle out of range (0, 1]')
+        if not 0<= fade <1:
+            raise ValueError('fade out of range [0, 1)')
         # find min freq required to save bandwidth
         sr = max_freq(tones)
         if sr > 11025:
@@ -92,18 +93,17 @@ class Speaker(util.InputStreamComponent, soundmixin):
             sr = 22050
         else:
             sr = 16000
-        aud = await asyncio.get_running_loop().run_in_executor(None, tone2audio, tones, 60000.0/tempo, duty_cycle, sr)
-        await self.play(aud.raw_data, repeat=repeat, sample_rate=sr, dtype='int16')
+        aud = await asyncio.get_running_loop().run_in_executor(None, tone2audio, tones, 60000.0/tempo, fade, sr)
+        await self.play(aud.raw_data+ b'\x00'*int(sr*.1), repeat=repeat, sample_rate=sr, dtype='int16')
 
 
 def max_freq(tones):
     return functools.reduce(lambda r,e: max(r, max_freq(e) if isinstance(e, (list, tuple)) else util.freq(e)), tones, 0)
 
-def tone2audio(tones, base_beat_ms, duty_cycle, sr):
-    duty = base_beat_ms * duty_cycle
-    empty = base_beat_ms - duty
-    return functools.reduce(lambda r,e: r+(tone2audio(e, base_beat_ms/2, duty_cycle, sr) if isinstance(e, (list, tuple)) else \
-            (Sine(util.freq(e), sample_rate=sr).to_audio_segment(duration=duty).append(AudioSegment.silent(duration=empty, frame_rate=sr), crossfade=empty)) if e else AudioSegment.silent(duration=base_beat_ms, frame_rate=sr)), \
+def tone2audio(tones, base_beat_ms, fade, sr):
+    fade *= base_beat_ms
+    return functools.reduce(lambda r,e: r+(tone2audio(e, base_beat_ms/2, fade, sr) if isinstance(e, (list, tuple)) else \
+            (Sine(util.freq(e), sample_rate=sr).to_audio_segment(duration=base_beat_ms).append(AudioSegment.silent(duration=fade, frame_rate=sr), crossfade=fade)) if e else AudioSegment.silent(duration=base_beat_ms, frame_rate=sr)), \
         tones, AudioSegment.empty())
 
 def file_sr_bs_gen(src, sr, dt, block_duration):
@@ -148,7 +148,7 @@ def np_gen(data, dt, bs):
     return dt, raw_gen(data.tobytes(), dt, bs)
 
 def raw_gen(data, dt, bs):
-    bs = bs* util.sample_width(dt)
+    bs *= util.sample_width(dt)
     for i in range(0, len(data), bs):
         b = data[i: i+ bs]
         if len(b) < bs:

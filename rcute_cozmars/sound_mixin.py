@@ -23,7 +23,7 @@ class soundmixin:
 
     @property
     def dtype(self):
-        """Sampling data type, the default is `'int16'`（str）.
+        """Sampling data type, the default is 'int16'（str）.
 
         Cannot be set when device is running, otherwise an exception will be thrown
         """

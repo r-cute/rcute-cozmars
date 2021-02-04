@@ -5,7 +5,7 @@ import numpy as np
 class ArucoDetector:
 
     def __init__(self):
-        self.aruco_dict = aruco.Dictionary_get(aruco.DICT_5X5_250)
+        self.aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_50)
         self.parameters = aruco.DetectorParameters_create()
 
     def angle_between(self, v1, v2):

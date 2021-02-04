@@ -41,8 +41,3 @@ Linux
 
    sudo apt install ffmpeg libsndfile1
    python3 -m pip install rcute-cozmars
-
-
-
-
-

@@ -1,0 +1,6 @@
+aiohttp
+opencv-python
+opencv-contrib-python
+numpy
+websockets
+wsmprpc>=1.1.1
