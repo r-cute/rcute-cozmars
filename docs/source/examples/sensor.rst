@@ -27,7 +27,7 @@
     from rcute_cozmars import Robot
     import time
 
-    with Robot('0a3c') as robot:
+    with Robot() as robot:
         while True:
             print('按钮状态：', '按下' if robot.button.pressed else '松开')
             print('红外传感器状态：', robot.infrared.state)
@@ -42,7 +42,7 @@
     from rcute_cozmars import Robot
     import time
 
-    with Robot('0a3c') as robot:
+    with Robot() as robot:
 
         while True: # 不断循环，按 Ctrl + C 退出
 
@@ -63,7 +63,7 @@
     from rcute_cozmars import Robot
     from signal import pause
 
-    with Robot('0a3c') as robot:
+    with Robot() as robot:
 
         def ring(dist):
             robot.buzzer.set_tone('C4', 1)
@@ -87,7 +87,7 @@
     from rcute_cozmars import Robot
     from signal import pause
 
-    with Robot('0a3c') as robot:
+    with Robot() as robot:
 
         def steer(state):
             robot.motor.speed = state

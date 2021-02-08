@@ -12,15 +12,15 @@ logger = logging.getLogger("rcute-cube")
 class AioCube:
     """Asynchronous (async/await) mode of Cube
 
-    :param serial_or_ip: The IP address or serial number of the cube to be connected
+    :param serial_or_ip: The IP address or serial number of the cube to be connected. Default to None, in which case the program will automatically detect the cube on connection if there's only one found.
     :type serial_or_ip: str
     """
-    def __init__(self, serial_or_ip):
-        self._host = 'rcute-cube-' + serial_or_ip + '.local' if len(serial_or_ip) == 4 else serial_or_ip
+    def __init__(self, serial_or_ip=None):
+        if serial_or_ip:
+            self._host = 'rcute-cube-' + serial_or_ip + '.local' if len(serial_or_ip) == 4 else serial_or_ip
         self._mode = 'aio'
         self._state = 'moved'
         self._connected = False
-        self._dir2color = {'+X':'red', '-X':'green', '+Y':'blue', '-Y':'yellow', '+Z':'white', '-Z':'orange'}
         self.last_action = None
         """The last action of the cube"""
         self.when_flipped = None
@@ -42,6 +42,15 @@ class AioCube:
         self.when_static = None
         """Callback function, called when the cube comes to rest, the default is `None` """
 
+    _directions = ['+x', '-x', '+y', '-y', '+z', '-z']
+    @staticmethod
+    def dir2num(dir):
+        """Convert direction to number"""
+        return AioCube._directions.index(dir)+1
+    @staticmethod
+    def num2dir(num):
+        """Convert number to direction"""
+        return AioCube._directions[num-1]
 
     def _in_event_loop(self):
         return True
@@ -49,6 +58,10 @@ class AioCube:
     async def connect(self):
         """ """
         if not self._connected:
+            if not hasattr(self, '_host'):
+                found = await util.find_service('rcute-cube-????', '_ws._tcp.local.')
+                assert len(found)==1, "More than one cube found." if found else "No cube found."
+                self._host = found[0].server
             self._ws = await websockets.connect(f'ws://{self._host}:81')
             if '-1' == await self._ws.recv():
                 raise RuntimeError("""Cannot connect to cube, please close other programs that are connecting cube""")
@@ -68,7 +81,7 @@ class AioCube:
         self._event_rpc = self._rpc.mpu_event()
         async for event in self._event_rpc:
             try:
-                arg = self._dir2color.get(event[1], event[1])
+                arg = event[1]
                 if event[0] in ('static', 'moved'):
                     self._state = event[0]
                 else:
@@ -78,6 +91,7 @@ class AioCube:
                 else:
                     await self._call_callback(getattr(self, 'when_'+event[0]), arg)
             except Exception as e:
+                print(e)
                 logger.exception(e)
 
     @property
@@ -131,7 +145,7 @@ class AioCube:
                 return await resp.text()
 
     @util.mode(property_type='setter')
-    async def color(self, *args):
+    async def led(self, *args):
         """BGR color of the builtin LED"""
         if args:
             await self._rpc.rgb(*(util.bgr(args[0]) if args[0] is not None else (0,0,0))[::-1])
@@ -151,7 +165,7 @@ class AioCube:
 
     @util.mode(property_type='getter')
     async def top_face(self):
-        """Which side is on top, when the cube is stationary, it returns the color of the top side, and `None` cube is moving """
+        """Which side is on top, when the cube is stationary, it returns the direction of the top side, and `None` cube is moving """
         if self._state != 'static':
             return None
         acc = await self._rpc.mpu_acc()
@@ -159,16 +173,16 @@ class AioCube:
         for i in range(1, 3):
             if comp < abs(acc[i]):
                 comp, j = abs(acc[i]), i
-        return self._dir2color[('-' if acc[j]>0 else '+') + chr(88+j)]
+        return ('-' if acc[j]>0 else '+') + chr(120+j)
 
 
 class Cube(AioCube):
     """Synchronous mode of Cube
 
-    :param serial_or_ip: The IP address or serial number of the cube to be connected
+    :param serial_or_ip: The IP address or serial number of the cube to be connected. Default to None, in which case the program will automatically detect the cube on connection if there's only one found.
     :type serial_or_ip: str
     """
-    def __init__(self, serial_or_ip):
+    def __init__(self, serial_or_ip=None):
         super(Cube, self).__init__(serial_or_ip)
         self._mode = 'sync'
 
@@ -211,9 +225,9 @@ class Cube(AioCube):
 class AsyncCube(Cube):
     """Asynchronous (concurrent.futures.Future) mode of cube
 
-    :param serial_or_ip: The IP address or serial number of the cube to be connected
+    :param serial_or_ip: The IP address or serial number of the cube to be connected. Default to None, in which case the program will automatically detect the cube on connection if there's only one found.
     :type serial_or_ip: str
     """
-    def __init__(self, serial_or_ip):
+    def __init__(self, serial_or_ip=None):
         super(AsyncCube, self).__init__(serial_or_ip)
         self._mode = 'async'

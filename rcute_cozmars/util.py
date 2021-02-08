@@ -5,7 +5,8 @@ from wsmprpc import RPCStream
 from PIL import ImageColor
 from os import path
 import librosa
-
+from zeroconf import ServiceBrowser, Zeroconf
+import fnmatch
 # from os import environ
 # BUILDING_RTD = environ.get("RCUTE_COZMARS_RTD") == "1"
 
@@ -34,6 +35,21 @@ def freq(tone):
         return librosa.midi_to_hz(tone)
     else:
         return tone
+
+async def find_service(service, type, wait=2):
+    found = []
+    class ServiceListener:
+        def add_service(self, zeroconf, type, name):
+            info = zeroconf.get_service_info(type, name)
+            if fnmatch.fnmatch(name, f"{service}.{type}"):
+                found.append(info)
+    try:
+        zeroconf = Zeroconf()
+        browser = ServiceBrowser(zeroconf, type, ServiceListener())
+        await asyncio.sleep(wait)
+        return found
+    finally:
+        zeroconf.close()
 
 def sample_width(dtype):
     return {'int16':2, 'float32':4, 'float64':8, 'int8':1, 'int32':4}[dtype]

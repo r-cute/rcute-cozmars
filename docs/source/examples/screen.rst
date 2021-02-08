@@ -37,7 +37,7 @@
     from rcute_cozmars import Robot
     import cv2
 
-    with Robot('0a3c') as robot:
+    with Robot() as robot:
 
         # 读取一幅 ❤❤ 图片
         heart = cv2.imread('./heart.png')
@@ -67,7 +67,7 @@
     from rcute_cozmars import Robot
     from time import sleep
 
-    with Robot('0a3c') as robot:
+    with Robot() as robot:
         robot.screen.text('I am...')
         sleep(2)
         robot.screen.text('COZMARS!', size=35, color='black', bg_color='cyan')

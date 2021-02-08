@@ -25,7 +25,7 @@
     import cv2
 
     # 把以下序列号换成你的 Cozmars 的序列号
-    with Robot('0a3c') as robot:
+    with Robot() as robot:
 
         with robot.camera.get_buffer() as cam_buf:
             print('按下任意键退出')
@@ -55,7 +55,7 @@
     import wave
 
     # 把以下序列号换成你的 Cozmars 的序列号
-    with Robot('0a3c') as robot:
+    with Robot() as robot:
         mic = robot.microphone
 
         with mic.get_buffer() as mic_buf, wave.open('record.wav', 'wb') as file:

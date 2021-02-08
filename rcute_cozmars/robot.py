@@ -36,11 +36,12 @@ logger = logging.getLogger("rcute-cozmars")
 class AioRobot:
     """Async/await mode of Cozmars robot
 
-    :param serial_or_ip: IP address or serial number of Cozmars to connect
+    :param serial_or_ip: IP address or serial number of Cozmars to connect. Default to None, in which case the program will automatically detect the robot on connection if there's only one found.
     :type serial_or_ip: str
     """
-    def __init__(self, serial_or_ip):
-        self._host = 'rcute-cozmars-' + serial_or_ip + '.local' if len(serial_or_ip) == 4 else serial_or_ip
+    def __init__(self, serial_or_ip=None):
+        if serial_or_ip:
+            self._host = 'rcute-cozmars-' + serial_or_ip + '.local' if len(serial_or_ip) == 4 else serial_or_ip
         self._mode = 'aio'
         self._connected = False
         self._env = env.Env(self)
@@ -148,6 +149,10 @@ class AioRobot:
     async def connect(self):
         """ """
         if not self._connected:
+            if not hasattr(self, '_host'):
+                found = await util.find_service('rcute-cozmars-????', '_ws._tcp.local.')
+                assert len(found)==1, "More than one cozmars found." if found else "No cozmars found."
+                self._host = found[0].server
             self._ws = await websockets.connect(f'ws://{self._host}/rpc')
             if '-1' == await self._ws.recv():
                 raise RuntimeError('Could not connect to Cozmars, please close other programs that are already connected to Cozmars')
@@ -334,10 +339,10 @@ class AioRobot:
 class Robot(AioRobot):
     """Cozmars robot synchronization mode
 
-    :param serial_or_ip: IP address or serial number of Cozmars to connect
+    :param serial_or_ip: IP address or serial number of Cozmars to connect. Default to None, in which case the program will automatically detect the robot on connection if there's only one found.
     :type serial_or_ip: str
     """
-    def __init__(self, serial_or_ip):
+    def __init__(self, serial_or_ip=None):
         AioRobot.__init__(self, serial_or_ip)
         self._mode = 'sync'
 
@@ -379,9 +384,9 @@ class Robot(AioRobot):
 class AsyncRobot(Robot):
     """Asynchronous (concurrent.futures.Future) mode of the Cozmars robot
 
-    :param serial_or_ip: IP address or serial number of Cozmars to connect
+    :param serial_or_ip: IP address or serial number of Cozmars to connect. Default to None, in which case the program will automatically detect the robot on connection if there's only one found.
     :type serial_or_ip: str
     """
-    def __init__(self, serial_or_ip):
+    def __init__(self, serial_or_ip=None):
         Robot.__init__(self, serial_or_ip)
         self._mode = 'async'

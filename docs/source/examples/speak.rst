@@ -31,7 +31,7 @@ Cozmars V2 相较于 V1 的改进之一，是用扬声器取代了蜂鸣器。�
     tones = ['D4', 'G4', 'G4', 'B4', 'C5', 'B4', 'A4',
             ('G4', 'A4'), 'B4', 'B4', 'B4', 'B4', ('A4', 'B4'), 'A4', 'G4', 0]
 
-    with Robot('0a3c') as robot:
+    with Robot() as robot:
         robot.speaker.beep(tones, tempo=120, repeat=2)
 
 Rock n roll

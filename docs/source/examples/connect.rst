@@ -13,7 +13,7 @@
 
     from rcute_cozmars import Robot
 
-然后以机器人的 序列号 或 IP 地址为参数新建一个 :class:`Robot` 对象，并连接机器人。
+然后以机器人的 序列号 或 IP 地址为参数新建一个 :class:`Robot` 对象，并连接机器人。也可以不指定 序列号 或 IP 地址，程序再连接时会自动搜索网络中 Cozmars 机器人，如果搜索不到或者发现有多个机器人，则会抛出异常。
 
 有两种连接方法：
 
@@ -43,7 +43,7 @@
 2. 显式地调用 :meth:`connect` 和 :meth:`disconnect` 方法来建立和断开连接，这种方法适合在终端窗口里用交互的方式控制机器人：
 
     >>> from rcute_cozmars import Robot
-    >>> robot = Robot('0a3c')
+    >>> robot = Robot() # 如果局域网中只有一个机器人，也可以不指定序列号
     >>> robot.connet()
     >>> robot.forward(2)
     >>> robot.disconnect()  # 最后记得断开连接
