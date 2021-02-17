@@ -10,8 +10,8 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
+import os, sys, re
+
 sys.path.insert(0, os.path.abspath('../../'))
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -36,6 +36,9 @@ with open(os.path.join(pkg_base_dir, 'rcute_cozmars', 'version.py')) as f:
     exec(f.read(), ns)
     version = ns['__version__']
 
+module2import={'Pillow':'PIL', 'opencv-contrib-python':'cv2', 'opencv-python':'cv2'}
+with open(os.path.join(pkg_base_dir, 'requirements.txt')) as f:
+    depends = list(set(module2import.get(b,b).replace('-','_') for b in re.findall(r'^([\w-]*)[\s\[<>=]?', f.read(), flags=re.ASCII+re.MULTILINE)))
 
 # -- Project information -----------------------------------------------------
 
@@ -80,11 +83,8 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
-autodoc_mock_imports = ['Pillow',
-                        'pydub',
-                        'librosa',
-                        'soundfile',
-                        'zeroconf']
+depends.remove('wsmprpc')
+autodoc_mock_imports = depends
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".

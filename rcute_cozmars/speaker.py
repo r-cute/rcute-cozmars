@@ -19,7 +19,7 @@ class Speaker(util.InputStreamComponent, soundmixin):
         self._lock = asyncio.Lock()
 
     def _get_rpc(self):
-        return self._rpc.speaker(self._t_sr, self._t_dt, self._t_bs, request_stream=self._input_stream)
+        return self._rpc.speaker(self._t_sr, self._t_dt, self._t_bs, self._t_vol, request_stream=self._input_stream)
 
     def _volume(self):
         return self._rpc.speaker_volume
@@ -36,6 +36,7 @@ class Speaker(util.InputStreamComponent, soundmixin):
         sr = kw.get('sample_rate', self.sample_rate)
         dt = kw.get('dtype', self.dtype)
         bd = kw.get('block_duration', self.block_duration)
+        vol = kw.get('volume', None)
         bs = int(bd * sr)
         if isinstance(src, str) or hasattr(src, 'read'): # for file-like obj
             sr, dt, bs, src = await asyncio.get_running_loop().run_in_executor(None, file_sr_bs_gen, src, sr, dt, bd)
@@ -52,6 +53,7 @@ class Speaker(util.InputStreamComponent, soundmixin):
                 self._t_sr = sr # temp
                 self._t_dt = dt
                 self._t_bs = bs
+                self._t_vol = vol
                 async with self:
                     count = 0
                     for raw in repeat_gen(src, repeat):

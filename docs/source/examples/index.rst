@@ -9,6 +9,7 @@
    speak
    sensor
    video_audio
+   ai
    screen
    animation
    cube

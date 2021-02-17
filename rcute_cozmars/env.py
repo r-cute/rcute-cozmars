@@ -1,4 +1,5 @@
 from . import util
+import json
 
 class Env(util.Component):
     """
@@ -16,14 +17,21 @@ class Env(util.Component):
         return await self._rpc.get_env(name)
 
     @util.mode()
+    async def load(self):
+        """ """
+        self.vars = json.loads(await self._robot._get('/env'))
+
+    @util.mode()
     async def rm(self, name):
         """remove"""
-        return await self._rpc.del_env(name)
+        await self._rpc.del_env(name)
+        self.vars.pop(name)
 
     @util.mode()
     async def set(self, name, value):
         """ """
-        return await self._rpc.set_env(name, value)
+        await self._rpc.set_env(name, value)
+        self.vars[name] = value
 
     @util.mode()
     async def save(self):

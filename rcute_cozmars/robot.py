@@ -16,12 +16,11 @@ There are three different modes to connect and control the robot:
     The robot accepts only one connection the same time. If Scratch is controlling Cozmars, the Python program will not be able to connect, and vice versa
 
 """
-
+import sys
 import asyncio
 import aiohttp
 import websockets
 import threading
-import logging
 import json
 import io
 import functools
@@ -29,9 +28,7 @@ import wave
 from wsmprpc import RPCClient, RPCStream
 from . import util, env, screen, camera, microphone, button, sonar, infrared, lift, head, buzzer, speaker, motor, eye_animation
 from .animation import animations
-
-logger = logging.getLogger("rcute-cozmars")
-
+from .util import logger
 
 class AioRobot:
     """Async/await mode of Cozmars robot
@@ -119,14 +116,14 @@ class AioRobot:
 
     @property
     def buzzer(self):
-        """only for v1"""
+        """only for Cozmars V1"""
         if self.firmware_version.startswith('2'):
             raise AttributeError('Cozmars V2 has no buzzer')
         return self._buzzer
 
     @property
     def speaker(self):
-        """only for v2"""
+        """only for Cozmars V2"""
         if self.firmware_version.startswith('1'):
             raise AttributeError('Cozmars V1 has no speaker')
         return self._speaker
@@ -159,6 +156,7 @@ class AioRobot:
             self._rpc = RPCClient(self._ws)
             self._eye_anim_task = asyncio.create_task(self._eye_anim.animate(self))
             self._about = json.loads(await self._get('/about'))
+            await self._env.load()
             self._sensor_task = asyncio.create_task(self._get_sensor_data())
             self._connected = True
 
@@ -207,6 +205,7 @@ class AioRobot:
     async def disconnect(self):
         """ """
         if self._connected:
+            await self.when_called(None)
             self._sensor_task.cancel()
             self._eye_anim_task.cancel()
             self._sensor_data_rpc.cancel()
@@ -264,7 +263,9 @@ class AioRobot:
 
     @util.mode()
     async def say(self, txt, repeat=1, **options):
-        """text to speach
+        """Text to speach for Cozmars V2.
+
+        `rcute-ai <https://rcute-ai.readthedocs.io/>`_ must be installed to support this function.
 
         :param txt: text to be said
         :type txt: str
@@ -281,11 +282,65 @@ class AioRobot:
         :type options: optional
         """
         if not hasattr(self, '_tts'):
-            from rcute_ai import TTS
-            self._tts = TTS()
-        wav_data = await asyncio.get_running_loop().run_in_executor(None, functools.partial(self._tts.tts_wav, txt, **options))
+            import rcute_ai as ai
+            self._tts = ai.TTS()
+        op = self.env.vars.get('say', {}).get(sys.platform, {}).copy()
+        op.update(options)
+        wav_data = await self._lo.run_in_executor(None, functools.partial(self._tts.tts_wav, txt, **op))
         with wave.open(io.BytesIO(wav_data)) as f:
-            await self.speaker.play(f.readframes(f.getnframes()), repeat=repeat, sample_rate=f.getframerate(), dtype='int16')
+            await self.speaker.play(f.readframes(f.getnframes()), repeat=repeat, volume=self.env.vars.get('say_vol'), sample_rate=f.getframerate(), dtype='int16')
+
+    @util.mode(property_type='setter')
+    async def when_called(self, *args):
+        """Callback function, called when the wake word 'R-Cute' or Chinese '阿Q' is detected.
+
+        When set, a thread will be running in background using the robot's microphone. If set to `None`, the background thread will stop.
+
+        `rcute-ai <https://rcute-ai.readthedocs.io/>`_ must be installed to support this function.
+
+        See `rcute_ai.WakeWordDetector <https://rcute-ai.readthedocs.io/zh_CN/latest/api/WakeWordDetector.html>`_"""
+        if not args:
+            return getattr(self, '_when_called', None)
+        cb = self._when_called = args[0]
+        if cb:
+            def wwd_run():
+                if not hasattr(self, '_wwd'):
+                    import rcute_ai as ai
+                    self._wwd = ai.WakeWordDetector()
+                logger.info('Start wake word detection.')
+                with self.microphone.get_buffer() as buf:
+                    while self._when_called:
+                        self._wwd.detect(buf) and cb()
+                logger.info('Stop wake word detection.')
+            self._wwd_thread = threading.Thread(target=wwd_run, daemon=True)
+            self._wwd_thread.start()
+        else:
+            hasattr(self, '_wwd') and self._wwd.cancel()
+            hasattr(self, '_wwd_thread') and self._wwd_thread.is_alive() and await self._lo.run_in_executor(None, self._wwd_thread.join)
+
+    @util.mode()
+    async def listen(self, **kw):
+        """Speech recognition.
+
+        :param lang: language, default to `'en'`
+        :type lang: str
+        :return: recognized string
+        :rtype: str
+
+        other paramters are the same as `rcute_ai.STT.stt <https://rcute-ai.readthedocs.io/zh_CN/latest/api/STT.html#rcute_ai.STT.stt>`_ 's keyword arguments.
+
+        `rcute-ai <https://rcute-ai.readthedocs.io/>`_ must be installed to support this function.
+        """
+        if not hasattr(self, '_stts'):
+            self._stts = {}
+        lang = kw.pop('lang', 'en')
+        def stt_run():
+            if not self._stts.get(lang):
+                import rcute_ai as ai
+                self._stts[lang] = ai.STT(lang=lang)
+            with self.microphone.get_buffer() as buf:
+                return self._stts[lang].stt(buf, **kw)
+        return await self._lo.run_in_executor(None, stt_run)
 
     @property
     def hostname(self):

@@ -24,7 +24,6 @@
     from rcute_cozmars import Robot
     import cv2
 
-    # 把以下序列号换成你的 Cozmars 的序列号
     with Robot() as robot:
 
         with robot.camera.get_buffer() as cam_buf:
@@ -46,15 +45,13 @@
 读取麦克风
 --------------
 
-用 :red:`with` 和 :red:`for ... in ...` 语法来演示一下如何获取麦克风数据，下面的程序从麦克风数据流中读取数据并保存成一段 5 秒的录音文件。
-
+用 :red:`with` 和 :red:`for ... in ...` 语法来演示一下如何获取麦克风数据，下面的程序从麦克风数据流中读取 5 秒的数据，并借助 wave 模块保存录音文件。
 
 .. code:: python
 
     from rcute_cozmars import Robot
     import wave
 
-    # 把以下序列号换成你的 Cozmars 的序列号
     with Robot() as robot:
         mic = robot.microphone
 
@@ -74,12 +71,10 @@
 
 :data:`microphone` 还有几个属性： :data:`volume` 和 :data:`gain` 用来调节麦克风的音量大小， :data:`sample_rate` 、 :data:`dtype` 和 :data:`block_duration` 分别是麦克风的采样率、数据类型和每次从输出流中读取的数据块的时长。除了音量增益 :data:`gain` 以外，这些属性通常不需要修改。
 
+以上演示了从麦克风和摄像头中读取数据的基本操作。有了图像和声音数据，我们就可以实现诸如图像识别、语音识别等好玩的应用了。别急，下一节见...
+
+
 .. seealso::
 
-	`rcute_cozmars.camera <../api/camera.html>`_ ， `rcute_cozmars.microphone <../api/microphone.html>`_
+    `rcute_cozmars.camera <../api/camera.html>`_ ， `rcute_cozmars.microphone <../api/microphone.html>`_
 
-以上演示了如何从麦克风和摄像头中读取数据，有了图像和声音数据，我们就可以做诸如图像识别、语音识别这样更好玩的实验，有兴趣的请参考 |rcute-ai|
-
-.. |rcute-ai| raw:: html
-
-   <a href='https://rcute-ai.readthedocs.io' target='blank'>rcute-ai</a>

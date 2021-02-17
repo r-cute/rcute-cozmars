@@ -103,7 +103,7 @@ async def dock_with_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_
     if type(show_view) != str:
         show_view = show_view and 'dock_with_cube'
     await robot.lift.height(0)
-    offset = await robot.env.get('cube_center_offset')
+    offset = robot.env.vars.get('cube_center_offset', 0)
     rec = rec or ArucoDetector()
     mid = robot.camera.resolution[0] /2 + offset
     delay = 1 / robot.camera.frame_rate

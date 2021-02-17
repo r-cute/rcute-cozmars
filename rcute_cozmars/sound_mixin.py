@@ -71,7 +71,7 @@ class soundmixin:
 
     @util.mode(property_type='setter')
     async def volume(self, *args):
-        """Volume level, 0~100, in percentage. Modification is saved even after reboot.
+        """Volume level, 0~100, in percentage.
 
         It's recommanded to set 100 for microphone volume, and 50 for speaker.
 

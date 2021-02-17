@@ -7,6 +7,10 @@ from os import path
 import librosa
 from zeroconf import ServiceBrowser, Zeroconf
 import fnmatch
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("rcute-cozmars")
 # from os import environ
 # BUILDING_RTD = environ.get("RCUTE_COZMARS_RTD") == "1"
 

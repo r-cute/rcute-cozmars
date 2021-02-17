@@ -19,7 +19,7 @@ class Microphone(util.MultiplexOutputStreamComponent, soundmixin):
     """ """
     def __init__(self, robot, q_size=1):
         util.MultiplexOutputStreamComponent.__init__(self, robot, q_size, MicrophoneMultiplexOutputStream(self))
-        soundmixin.__init__(self, dtype='int16', sample_rate=16000, block_duration=.1, gain=25)
+        soundmixin.__init__(self, dtype='int16', sample_rate=16000, block_duration=.1, gain=27)
 
     def _get_rpc(self):
         self._multiplex_output_stream._dtype = self._dtype

@@ -51,12 +51,12 @@ class EyeAnimation(util.Component):
             exp, color = exp if type(exp)==tuple else (exp, None)
             if exp not in self.expression_list:
                 raise TypeError(f'Unknown expression not in {self.expression_list}')
-            if color:
-                color = util.bgr(color)
-                if color != self._color:
+            color = color and util.bgr(color)
+            if exp!=self._expression or color and color!=self._color:
+                if color and color != self._color:
                     self._color = color
                     self._create_eye()
-            await self._set_exp(exp)
+                await self._exp_q.put(exp)
         else:
             return self._expression.split('.')[0]
 
@@ -100,7 +100,7 @@ class EyeAnimation(util.Component):
 
     # very urgly coded eye animation
     async def animate(self, robot, start_exp=None):
-        self._color = util.bgr(await self._robot.env.get('eye_color') or 'cyan')
+        self._color = util.bgr(self._robot.env.vars.get('eye_color', 'cyan'))
         self._canvas = np.zeros((134, 240, 3), np.uint8)
         self._ev = asyncio.Event()
         self._exp_q = asyncio.Queue(1)

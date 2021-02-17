@@ -75,9 +75,9 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 
     >>> robot.motor.set_speed((1, -1), duration=5)
 
+.. note::
 
-
-
+    前面提到的 :meth:`robot.forward`、:meth:`robot.backward`、:meth:`robot.turn_left` 和 :meth:`robot.turn_right` 都是驱动马达的简便方法
 
 最后，不要忘记断开程序与机器人的连接：
 
