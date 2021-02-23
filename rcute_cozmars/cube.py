@@ -91,8 +91,8 @@ class AioCube:
                 else:
                     await self._call_callback(getattr(self, 'when_'+event[0]), arg)
             except Exception as e:
-                print(e)
                 logger.exception(e)
+
 
     @property
     def connected(self):
@@ -166,8 +166,10 @@ class AioCube:
     @util.mode(property_type='getter')
     async def top_face(self):
         """Which side is on top, when the cube is stationary, it returns the direction of the top side, and `None` cube is moving """
-        if self._state != 'static':
-            return None
+        return await self.guess_top_face() if self._state== 'static' else None
+
+    @util.mode()
+    async def guess_top_face(self):
         acc = await self._rpc.mpu_acc()
         comp, j = abs(acc[0]), 0
         for i in range(1, 3):

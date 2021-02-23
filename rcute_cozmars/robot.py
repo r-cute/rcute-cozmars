@@ -54,6 +54,8 @@ class AioRobot:
         self._speaker = speaker.Speaker(self)
         self._motor = motor.Motor(self)
         self._eye_anim = eye_animation.EyeAnimation(self)
+        self.on_camera_image = None
+        """Callback funciton. After :meth:`show_camera_view` is called, :data:`on_camera_image` will be called every time camera feed receives an new image. The callback must take the captured image as input and return processd image."""
 
     def _in_event_loop(self):
         return True
@@ -154,10 +156,10 @@ class AioRobot:
             if '-1' == await self._ws.recv():
                 raise RuntimeError('Could not connect to Cozmars, please close other programs that are already connected to Cozmars')
             self._rpc = RPCClient(self._ws)
-            self._eye_anim_task = asyncio.create_task(self._eye_anim.animate(self))
             self._about = json.loads(await self._get('/about'))
             await self._env.load()
-            self._sensor_task = asyncio.create_task(self._get_sensor_data())
+            self._eye_anim_task = asyncio.create_task(self._eye_anim.animate(self))
+            self._event_task = asyncio.create_task(self._get_event())
             self._connected = True
 
     @property
@@ -172,18 +174,18 @@ class AioRobot:
             else:
                 self._lo.run_in_executor(None, cb, *args)
 
-    async def _get_sensor_data(self):
-        self._sensor_data_rpc = self._rpc.sensor_data()
-        async for event, data in self._sensor_data_rpc:
+    async def _get_event(self):
+        self._event_rpc = self._rpc.sensor_data()
+        async for event, data in self._event_rpc:
             try:
                 if event == 'pressed':
                     if not data:
-                        self.button._held = self.button._double_pressed = False
+                        self.button._long_pressed = self.button._double_pressed = False
                     self.button._pressed = data
                     await self._call_callback(self.button.when_pressed if data else self.button.when_released)
-                elif event == 'held':
-                    self.button._held = data
-                    await self._call_callback(self.button.when_held)
+                elif event == 'long_pressed':
+                    self.button._long_pressed = data
+                    await self._call_callback(self.button.when_long_pressed)
                 elif event == 'double_pressed':
                     self.button._pressed = data
                     self.button._double_pressed = data
@@ -205,10 +207,10 @@ class AioRobot:
     async def disconnect(self):
         """ """
         if self._connected:
-            await self.when_called(None)
-            self._sensor_task.cancel()
+            self._event_task.cancel()
             self._eye_anim_task.cancel()
-            self._sensor_data_rpc.cancel()
+            self._event_rpc.cancel()
+            await asyncio.gather(self.when_called(None), self.close_camera_view(), return_exceptions=True)
             await asyncio.gather(self.camera.close(), self.microphone.close(), self.speaker.close(), return_exceptions=True)
             await self._ws.close()
             self._connected = False
@@ -306,7 +308,7 @@ class AioRobot:
             def wwd_run():
                 if not hasattr(self, '_wwd'):
                     import rcute_ai as ai
-                    self._wwd = ai.WakeWordDetector()
+                    self._wwd = ai.WakeWordDetection()
                 logger.info('Start wake word detection.')
                 with self.microphone.get_buffer() as buf:
                     while self._when_called:
@@ -342,6 +344,35 @@ class AioRobot:
                 return self._stts[lang].stt(buf, **kw)
         return await self._lo.run_in_executor(None, stt_run)
 
+    @util.mode()
+    async def show_camera_view(self):
+        """Open camera and run a background thread showing the camera view or processed camera images if :data:`on_camera_image` is set"""
+        def cam_run():
+            import cv2
+            self._stop_cam_view = False
+            with self.camera.get_buffer() as buf:
+                for im in buf:
+                    if self._stop_cam_view:
+                        cv2.destroyWindow(self.serial)
+                        break
+                    self._latest_camera_view = im
+                    self.on_camera_image and self.on_camera_image(im)
+                    cv2.imshow(self.serial, im)
+                    cv2.waitKey(10)
+        self._cam_view_thread = threading.Thread(target=cam_run, daemon=True)
+        self._cam_view_thread.start()
+
+    @property
+    def latest_camera_view(self):
+        """latest image from :meth:`show_camera_view` """
+        return getattr(self, '_latest_camera_view', None)
+
+    @util.mode()
+    async def close_camera_view(self):
+        """Stop the background thread created in :meth:`show_camera_view`"""
+        self._stop_cam_view = True
+        hasattr(self, '_cam_view_thread') and self._cam_view_thread.is_alive() and await self._lo.run_in_executor(None, self._cam_view_thread.join)
+
     @property
     def hostname(self):
         """Cozmars URL"""
@@ -376,6 +407,8 @@ class AioRobot:
             await self._get('/poweroff')
         except Exception as e:
             pass
+        finally:
+            self._connected = False
 
     @util.mode()
     async def reboot(self):
@@ -385,6 +418,8 @@ class AioRobot:
             await self._get('/reboot')
         except Exception as e:
             pass
+        finally:
+            self._connected = False
 
     async def _get(self, sub_url):
         async with aiohttp.ClientSession() as session:

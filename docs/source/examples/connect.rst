@@ -40,7 +40,7 @@
             robot.forward(2)    # 让机器人前进 2 秒
 
 
-2. 显式地调用 :meth:`connect` 和 :meth:`disconnect` 方法来建立和断开连接，这种方法适合在终端窗口里用交互的方式控制机器人：
+2. 显式地调用 :meth:`connect` 和 :meth:`disconnect` 方法来建立和断开连接，这种方法适合在终端窗口里用交互模式控制机器人：
 
     >>> from rcute_cozmars import Robot
     >>> robot = Robot() # 如果局域网中只有一个机器人，也可以不指定序列号

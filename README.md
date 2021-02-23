@@ -4,7 +4,7 @@ Python SDK for Cozmars, the 3d printable educational robot.
 
 中文文档: https://rcute-cozmars.readthedocs.io/
 
-js SDK: https://github.com/r-cute/rcute-cozmars-server/blob/master/rcute_cozmars_server/static/cozmars.js
+js SDK (incomplete): https://github.com/r-cute/rcute-cozmars-server/blob/master/rcute_cozmars_server/static/cozmars.js
 
 ## install
 

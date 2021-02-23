@@ -31,7 +31,7 @@ class ArucoDetector:
 
     def detect(self, img):
         # mean_c =  cv2.adaptiveThreshold(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY),255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,65,2)
-        return aruco.detectMarkers(mean_c, self.aruco_dict, parameters=self.parameters)[:2]
+        return aruco.detectMarkers(img, self.aruco_dict, parameters=self.parameters)[:2]
 
     def draw_labels(self, img, corners, ids):
         aruco.drawDetectedMarkers(img, corners, ids)

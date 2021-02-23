@@ -35,9 +35,38 @@ Cozmars 的唤醒词是 “R-Cute” 或 “阿Q”。当回调函数 :data:`whe
 
 如果要关闭麦克风和后台监听，只要把 :data:`when_called` 设置回 None
 
-图像识别
+人脸识别
 ---------
 
-（...todo...）
+Cozmars 的 :meth:`show_camera_view` 方法会启动一个后台线程打开摄像头并显示实时画面。这个方法可以和 :data:`on_camera_image` 回调函数配合使用，在每一帧画面显示之前对图像进行预处理。
 
-以上的功能只是对 rcute-ai 的封装，更多图像/语音识别的例子，请参考 `rcute-ai <https://rcute-ai.readthedocs.io>`_
+另外，:data:`lastest_camera_view` 属性用来获取最新一帧的摄像头图像，:meth:`close_camera_view` 方法用来关闭摄像头画面。
+
+下面的程序利用 rcute_ai 模块进行人脸识别。运行程序，让不同的人在摄像头前输入各自的名字，这样程序就能识别不同的人脸。
+
+.. code:: python
+
+    from rcute_cozmars import Robot
+    import rcute_ai as ai
+
+    # 使用 rcute_ai 的人脸识别类 FaceRecognizer
+    fr = ai.FaceRecognizer()
+
+    # 定义预处理回调函数，对图像进行人脸识别和标注
+    def annotate_face(img):
+        positions, names = fr.recognize(img)   # 识别图像中人脸的位置和名字，
+        fr.annotate(img, positions, names)     # 并在图像中标注
+
+    with Robot() as robot:
+        robot.show_camera_view()              # 显示摄像头图像
+        robot.on_camera_image = annotate_face # 设置图像预处理的回调函数
+
+        while True:
+            i = input('输入画面中人物的名字（输入 q 结束程序）：')
+            if i == 'q':
+                break
+            fr.memorize(name, robot.latest_camera_view)
+
+其实，:meth:`show_camera_view` 方法在私底下所做和上一节 `获取摄像头图像 <video_audio.html#id2>`_ 里面用 :meth:`robot.camera.get_buffer` 读取摄像头数据流的办法差不多，但命令行的交互模式下直接调用 :meth:`show_camera_view` 则方便得多。
+
+除了识别人脸，rcute_ai 模块还可以识别图像中的二维码等物品。更多图像/语音识别的例子，请参考 `rcute-ai <https://rcute-ai.readthedocs.io>`_

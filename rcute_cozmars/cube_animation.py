@@ -15,7 +15,7 @@ def exe(rec, image, id_filter, win):
     if win:
         rec.draw_labels(image, corners, ids)
         cv2.imshow(win, image)
-        cv2.waitKey(1)
+        cv2.waitKey(10)
     if ids is not None:
         for corner, id in zip(corners, ids):
             if id_filter(id[0]):

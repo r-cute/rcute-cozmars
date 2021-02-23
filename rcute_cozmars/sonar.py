@@ -28,6 +28,6 @@ class Sonar(util.Component):
 
 
     @util.mode(property_type='setter')
-    async def threshold_distance(self, *args):
+    async def distance_threshold(self, *args):
         """Threshold distance (m), default is `0.1`"""
-        return await self._rpc.threshod_distance(*args)
+        return await self._rpc.distance_threshold(*args)

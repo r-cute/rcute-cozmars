@@ -68,7 +68,7 @@ Cozmars 的玩伴——魔方
 - :data:`when_flipped` 在魔方被翻转90度或180度时调用（带有角度参数）
 - :data:`when_pushed` 在魔方被平移时调用（带有方向参数，用坐标轴方向表示）
 - :data:`when_rotated` 在魔方被顺/逆时针旋转时调用（带有方向参数）
-- :data:`when_shaked` 在魔方被摇晃时调用
+- :data:`when_shaken` 在魔方被摇晃时调用
 - :data:`when_tilted` 在魔方倾斜时调用（带有方向参数，用坐标轴方向表示）
 - :data:`when_tapped` 在轻敲魔方时调用
 - :data:`when_fall` 在魔方失重/自由落体时调用

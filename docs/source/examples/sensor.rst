@@ -8,7 +8,7 @@
 
 这三个传感器各有一些属性用来查询其状态：
 
-- 按钮 :data:`button` 有 :data:`pressed` ， :data:`held` ， :data:`double_pressed` 三个属性，分别表示按钮是否被按下、被长按和被双击
+- 按钮 :data:`button` 有 :data:`pressed` ， :data:`long_pressed` ， :data:`double_pressed` 三个属性，分别表示按钮是否被按下、被长按和被双击
 - 声纳 :data:`sonar` 通过超声波反射来判断前方障碍物的距离，其 :data:`distance` 属性用来查询前方障碍物的距离（米）
 - 红外传感器 :data:`infrared` 自身能发出的红外光，并感应的红外反射的强弱。:data:`state` 属性是一个两元素组成的元组，分别表示左右两个传感器是否接收到红外反射，0 表示没有或反射很弱，1 表示有较强的反射
 
@@ -56,7 +56,7 @@
 
 但上面的程序需要一遍遍地查询状态数据，显得很“费劲”
 
-更好的办法是利用 :data:`sonar` 的 :data:`when_in_range` 属性设置一个回调函数，当前方有障碍物进入 :data:`threshold_distance` 范围内时，该函数就会被自动调用：
+更好的办法是利用 :data:`sonar` 的 :data:`when_in_range` 属性设置一个回调函数，当前方有障碍物进入 :data:`distance_threshold` 范围内时，该函数就会被自动调用：
 
 .. code:: python
 
@@ -68,7 +68,7 @@
         def ring(dist):
             robot.buzzer.set_tone('C4', 1)
 
-        robot.sonar.threshold_distance = 0.05
+        robot.sonar.distance_threshold = 0.05
         robot.sonar.when_in_range = ring
 
         pause() # 让程序在此暂停，按 Ctrl + C 退出
@@ -78,7 +78,7 @@
     回调函数是事先指定的对某事件进行相应的函数，当相关事件发生时该函数就会自动被调用
 
 
-顾名思义，:data:`sonar.when_out_of_range` 是当前方有障碍物离开 :data:`threshold_distance` 范围时会被调用的函数
+顾名思义，:data:`sonar.when_out_of_range` 是当前方有障碍物离开 :data:`distance_threshold` 范围时会被调用的函数
 
 而通过 :data:`infrared.when_state_changed` 属性可以设置当红外传感器状态变换时被调用的函数，可以用来做经（无）典（聊）的寻迹小车实验：
 
@@ -98,7 +98,7 @@
 
 
 
-:data:`button` 的回调函数就更丰富了，有 :data:`when_pressed` 、:data:`when_released`、 :data:`when_held` 和 :data:`when_double_pressed` ，分别是当按钮被按下、被释放、被长按、被双击时的回调函数，这里就不一一演示了，请试着阅读以下相关的 API，自己测试一下！
+:data:`button` 的回调函数就更丰富了，有 :data:`when_pressed` 、:data:`when_released`、 :data:`when_long_pressed` 和 :data:`when_double_pressed` ，分别是当按钮被按下、被释放、被长按、被双击时的回调函数，这里就不一一演示了，请试着阅读以下相关的 API，自己测试一下！
 
 .. seealso::
 
