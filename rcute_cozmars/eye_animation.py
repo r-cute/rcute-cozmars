@@ -8,7 +8,6 @@ class EyeAnimation(util.Component):
     """Eye animation on screen"""
     def __init__(self, robot):
         util.Component.__init__(self, robot)
-        self._exp_list = ['auto', 'happy', 'sad', 'surprised', 'angry', 'neutral', 'focused', 'sleepy']
         self._size = 80
         self._radius = self._size // 4
         self._eye = np.zeros((self._size, self._size, 3), np.uint8)
@@ -39,18 +38,19 @@ class EyeAnimation(util.Component):
         cv2.rectangle(self._eye, (self._radius, 0), (sr, self._size-1), color, -1)
         cv2.rectangle(self._eye, (0, self._radius), (self._size-1, sr), color, -1)
 
-    @property
-    def expression_list(self):
+    _exp_list = ['auto', 'happy', 'sad', 'surprised', 'angry', 'neutral', 'focused', 'sleepy']
+    @classmethod
+    def get_expression_list(cl):
         """Supported expression list, `['auto', 'happy', 'sad', 'surprised', 'angry', 'neutral', 'focused', 'sleepy']`, read only """
-        return list(self._exp_list)
+        return list(cl._exp_list)
 
     @util.mode(property_type='setter')
     async def expression(self, exp=None):
         """the default is `'auto'`, which means to randomly switch between supported expressions"""
         if exp:
             exp, color = exp if type(exp)==tuple else (exp, None)
-            if exp not in self.expression_list:
-                raise TypeError(f'Unknown expression not in {self.expression_list}')
+            if exp not in self._exp_list:
+                raise TypeError(f'Unknown expression not in {self._exp_list}')
             color = color and util.bgr(color)
             if exp!=self._expression or color and color!=self._color:
                 if color and color != self._color:

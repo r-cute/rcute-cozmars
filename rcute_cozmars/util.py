@@ -98,7 +98,7 @@ class withmixin:
         await self.close()
 
     def __enter__(self):
-        if self._mode == 'aio':
+        if self._in_event_loop():
             raise AttributeError('__enter__')
         self.open()
         return self
@@ -196,7 +196,7 @@ class OutputStream(RPCStream, withmixin):
         return await self.__anext__()
 
     def __iter__(self):
-        if self._mode == 'aio':
+        if self._in_event_loop():
             raise AttributeError('__iter__')
         return self
 

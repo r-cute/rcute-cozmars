@@ -53,11 +53,14 @@ class AioCube:
         return AioCube._directions[num-1]
 
     def _in_event_loop(self):
-        return True
+        return self._event_thread == threading.current_thread()
 
     async def connect(self):
         """ """
         if not self._connected:
+            self._lo = asyncio.get_running_loop()
+            if not hasattr(self, '_event_thread'):
+                self._event_thread = threading.current_thread()
             if not hasattr(self, '_host'):
                 found = await util.find_service('rcute-cube-????', '_ws._tcp.local.')
                 assert len(found)==1, "More than one cube found." if found else "No cube found."
@@ -187,9 +190,6 @@ class Cube(AioCube):
     def __init__(self, serial_or_ip=None):
         super(Cube, self).__init__(serial_or_ip)
         self._mode = 'sync'
-
-    def _in_event_loop(self):
-        return self._event_thread == threading.current_thread()
 
     def __enter__(self):
         self.connect()

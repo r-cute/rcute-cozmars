@@ -245,11 +245,12 @@ async def drive_on_charger(robot, show_view=False):
             return await animations['dock_with_charger'](robot, corner, rec=rec)
 '''
 
-animations = {'search_for_cube': search_for_cube,
-    'center_cube': center_cube,
-    'aim_at_cube': aim_at_cube,
-    'dock_with_cube': dock_with_cube,
-    'pick_up_cube': pick_up_cube,
+animations = {
+    # 'search for cube': search_for_cube,
+    # 'center cube': center_cube,
+    # 'aim at cube': aim_at_cube,
+    # 'dock with cube': dock_with_cube,
+    'pick up cube': pick_up_cube,
     # 'search_for_charger': search_for_charger,
     # 'approach_charger': approach_charger,
     # 'drive_on_charger': drive_on_charger,

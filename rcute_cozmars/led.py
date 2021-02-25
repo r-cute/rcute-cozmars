@@ -5,8 +5,8 @@ class LED(util.Component):
 
     def __init__(self, robot):
         util.Component.__init__(self, robot)
-        self.default_fade_speed = 2
-        """The default fade speed when setting :data:`brightness`, the default is 2/s. If set to `None`, there will be no fade effect"""
+        self.default_fade_speed = 1
+        """The default fade speed when setting :data:`brightness`, the default is 1/s. If set to `None`, there will be no fade effect"""
 
     def _light_rpc(self):
         return self._rpc.led

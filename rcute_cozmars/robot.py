@@ -58,7 +58,7 @@ class AioRobot:
         """Callback funciton. After :meth:`show_camera_view` is called, :data:`on_camera_image` will be called every time camera feed receives an new image. The callback must take the captured image as input and return processd image."""
 
     def _in_event_loop(self):
-        return True
+        return self._event_thread == threading.current_thread()
 
     @util.mode()
     async def animate(self, name, *args, **kwargs):
@@ -71,8 +71,8 @@ class AioRobot:
         anim = getattr(anim, 'animate', anim)
         await anim(self, *args, **kwargs)
 
-    @property
-    def animation_list(self):
+    @classmethod
+    def get_animation_list(cl):
         """ """
         return list(animations.keys())
 
@@ -148,6 +148,9 @@ class AioRobot:
     async def connect(self):
         """ """
         if not self._connected:
+            self._lo = asyncio.get_running_loop()
+            if not hasattr(self, '_event_thread'):
+                self._event_thread = threading.current_thread()
             if not hasattr(self, '_host'):
                 found = await util.find_service('rcute-cozmars-????', '_ws._tcp.local.')
                 assert len(found)==1, "More than one cozmars found." if found else "No cozmars found."
@@ -436,9 +439,6 @@ class Robot(AioRobot):
         AioRobot.__init__(self, serial_or_ip)
         self._mode = 'sync'
 
-    def _in_event_loop(self):
-        return self._event_thread == threading.current_thread()
-
     def __enter__(self):
         self.connect()
         return self
@@ -448,10 +448,10 @@ class Robot(AioRobot):
 
     def connect(self):
         """ """
-        self._lo = asyncio.new_event_loop()
-        self._event_thread = threading.Thread(target=self._run_loop, args=(self._lo,), daemon=True)
+        loop = asyncio.new_event_loop()
+        self._event_thread = threading.Thread(target=self._run_loop, args=(loop,), daemon=True)
         self._event_thread.start()
-        asyncio.run_coroutine_threadsafe(AioRobot.connect(self), self._lo).result()
+        asyncio.run_coroutine_threadsafe(AioRobot.connect(self), loop).result()
 
     def disconnect(self):
         """ """
