@@ -18,13 +18,15 @@ Windows 64-bit
 
 .. code::
 
-    python -m pip install rcute-cozmars[win64]
+    python -m pip install rcute-cozmars
 
 国内的小伙伴通过国内镜像服务器安装，速度更快。打开命令窗口或 PowerShell，输入下面命令：
 
 .. code::
 
-    python -m pip install rcute-cozmars[win64] -i https://pypi.tuna.tsinghua.edu.cn/simple
+    python -m pip install rcute-cozmars -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+另外须 `下载 windows 64位 ffmpeg <https://ffmpeg.org/download.html#build-windows>`_ 并将路径加入 Path 环境变量，该路径下应包含 "ffprobe.exe"、"ffplay.exe"、"ffmpeg.exe" 三个文件
 
 Mac OS X
 ++++++++++

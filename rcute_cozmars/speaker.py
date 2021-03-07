@@ -3,6 +3,7 @@ from. import util
 from .sound_mixin import soundmixin
 import numpy as np
 from collections.abc import Iterable
+from inspect import isasyncgen
 from pydub import AudioSegment
 from pydub.generators import Sine
 import librosa
@@ -47,15 +48,22 @@ class Speaker(util.InputStreamComponent, soundmixin):
         elif isinstance(src, bytes):
             src = raw_gen(src, dt, bs)
 
-        # if inspect.isasyncgen(src):
-        if isinstance(src, Iterable):
-            async with self._lock:
-                self._t_sr = sr # temp
-                self._t_dt = dt
-                self._t_bs = bs
-                self._t_vol = vol
-                async with self:
-                    count = 0
+        # elif isinstance(src, Iterable) or isasyncgen(src):
+            # if src is a sync/async iterable,
+            # it must yield data blocks of length=samplerate*bypedepth
+            # pass
+
+        # else:
+        #     raise TypeError(f'Unable to open {src}')
+
+        async with self._lock:
+            self._t_sr = sr # temp
+            self._t_dt = dt
+            self._t_bs = bs
+            self._t_vol = vol
+            async with self:
+                count = 0
+                if isinstance(src, Iterable):
                     for raw in repeat_gen(src, repeat):
                         await self._input_stream.put(raw)
                         if count < preload:
@@ -63,9 +71,15 @@ class Speaker(util.InputStreamComponent, soundmixin):
                             count += bd
                         else:
                             await asyncio.sleep(bd * .95)
-        else:
-            raise TypeError(f'Unable to open {src}')
-
+                # elif isasyncgen(src):
+                else:
+                    async for raw in src: # no repeat
+                        await self._input_stream.put(raw)
+                        if count < preload:
+                            await asyncio.sleep(bd * .5)
+                            count += bd
+                        else:
+                            await asyncio.sleep(bd * .95)
 
     @util.mode()
     async def beep(self, tones, repeat=1, tempo=120, fade=.1):

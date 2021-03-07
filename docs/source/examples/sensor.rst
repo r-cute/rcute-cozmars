@@ -47,7 +47,7 @@
         while True: # 不断循环，按 Ctrl + C 退出
 
             if robot.sonar.distance < 0.05:
-                robot.buzzer.set_tone('C4', 1)
+                robot.speaker.beep([500, 500])
 
             time.sleep(.3)
 
@@ -66,7 +66,7 @@
     with Robot() as robot:
 
         def ring(dist):
-            robot.buzzer.set_tone('C4', 1)
+            robot.speaker.beep([500, 500])
 
         robot.sonar.distance_threshold = 0.05
         robot.sonar.when_in_range = ring

@@ -14,7 +14,9 @@ rcute-cozmars requires Python 3.7 or higher.
 
 For Windows, only Python 64 bit is supported. If you also want to install [rcute-ai](https://github.com/r-cute/rcute-ai) on Windows, then you must use Python 3.7 or 3.8 version.
 
-`python3 -m pip install rcute-cozmars[win64]`
+[download ffmpeg for windows 64bit exe files](https://ffmpeg.org/download.html#build-windows), add the extracted folder to "Path" environment variable, the extracted folder should contain 3 files named "ffprobe.exe", "ffplay.exe", and "ffmpeg.exe"
+
+`python3 -m pip install rcute-cozmars`
 
 ### Mac OS X
 

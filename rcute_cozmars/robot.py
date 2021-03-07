@@ -16,7 +16,7 @@ There are three different modes to connect and control the robot:
     The robot accepts only one connection the same time. If Scratch is controlling Cozmars, the Python program will not be able to connect, and vice versa
 
 """
-import sys
+from platform import system
 import asyncio
 import aiohttp
 import websockets
@@ -289,7 +289,7 @@ class AioRobot:
         if not hasattr(self, '_tts'):
             import rcute_ai as ai
             self._tts = ai.TTS()
-        op = self.env.vars.get('say', {}).get(sys.platform, {}).copy()
+        op = self.env.vars.get('say', {}).get(system(), {}).copy()
         op.update(options)
         wav_data = await self._lo.run_in_executor(None, functools.partial(self._tts.tts_wav, txt, **op))
         with wave.open(io.BytesIO(wav_data)) as f:

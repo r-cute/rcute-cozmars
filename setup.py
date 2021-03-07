@@ -27,10 +27,10 @@ setuptools.setup(
     url="https://github.com/r-cute/rcute-cozmars",
     packages=['rcute_cozmars'],
     install_requires=requirements,
-    extras_require={'win64':['ffmpeg-win64']},
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
