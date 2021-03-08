@@ -29,7 +29,7 @@ async def detect_and_imshow(cam_buf, rec, id_filter, win=None):
 async def search_for_cube(robot, cam_buf=None, clockwise=True, reverse=2, rec=None, id_filter=cube_id, show_view=False):
     rec = rec or ArucoDetector()
     if type(show_view) != str:
-        show_view = show_view and 'search_for_cube'
+        show_view = show_view and 'search for cube'
     await robot.lift.height(0)
     await robot.head.angle(-15)
     try:
@@ -54,7 +54,7 @@ async def search_for_cube(robot, cam_buf=None, clockwise=True, reverse=2, rec=No
 async def center_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_view=False):
     rec = rec or ArucoDetector()
     if type(show_view) != str:
-        show_view = show_view and 'center_cube'
+        show_view = show_view and 'center cube'
     mid = [a/2 for a in robot.camera.resolution]
     # mid[0] += 40#offset
     try:
@@ -70,15 +70,15 @@ async def center_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_vie
                 x, y = [av[i] - mid[i] for i in range(2)]
                 e = np.average(rec.edges(corner))
                 if not -70 < x < 70:
-                    sp = np.clip(.02*((x-50) if x >=50 else (50+x)), -.2, .2)
-                    await robot.motor.set_speed((sp, -sp), max((100-e)/130, .1))
+                    sp = np.clip(.1*((x-50) if x >=50 else (50+x)), -.05, .05)
+                    await robot.motor.set_speed((sp, -sp), max((100-e)/130, .05))
                 elif e < 50:
-                    await robot.forward(max(.35, (50-e)/20))
+                    await robot.motor.set_speed((.3,.3),max(.3, (50-e)/20))
                 elif e > 60:
-                    await robot.backward(max(.35, (e-60)/25))
+                    await robot.motor.set_speed((-.3,-.3),max(.3, (e-60)/25))
                 else:
                     return corner, id
-                await asyncio.sleep(.4)
+                await asyncio.sleep(.35)
     finally:
         not cam_buf and (await cam.close())
 
@@ -91,17 +91,17 @@ async def aim_at_cube(robot, corner, rec=None):
     vertical = max(left, right)
     ratio = top / vertical
     if ratio < .9:
-        await getattr(robot, 'turn_left' if left<right else 'turn_right')(1.5*ratio*65/vertical)
-        await asyncio.sleep(.2)
+        await robot.motor.set_speed((-.5,.5) if left<right else (.5,-.5), (ratio*65/vertical))
+        await asyncio.sleep(.1)
         a = max((100-vertical)*(1-ratio)*.4, .5)
-        await robot.forward(a)
-        await asyncio.sleep(.2)
-        await getattr(robot, 'turn_left' if left>=right else 'turn_right')(8*(1-ratio)*90/vertical)
+        await robot.motor.set_speed((.5,.5), a*.6)
+        await asyncio.sleep(.1)
+        await robot.motor.set_speed((-.5,.5) if left>right else (.5,-.5), (4*(1-ratio)*90/vertical))
         return left < right
 
 async def dock_with_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_view=False):
     if type(show_view) != str:
-        show_view = show_view and 'dock_with_cube'
+        show_view = show_view and 'dock with cube'
     await robot.lift.height(0)
     offset = robot.env.vars.get('cube_center_offset', 0)
     rec = rec or ArucoDetector()
@@ -112,7 +112,7 @@ async def dock_with_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_
         cam = cam_buf or robot.camera.get_buffer()
         not cam_buf and (await cam.open())
 
-        sp = 1, 1
+        sp = .5,.5
         while True:
             corner, id = await detect_and_imshow(cam, rec, id_filter, show_view)
             dist = await robot.sonar.distance()
@@ -135,7 +135,7 @@ async def dock_with_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_
                     sp = tuple(s*dist/.1 for s in sp)
             elif dist < .1:
                 sp = dist/.1, dist/.1
-            await robot.motor.speed(tuple(a*.7 for a in sp))
+            await robot.motor.speed(tuple(a*.4 for a in sp))
     finally:
         not cam_buf and (await cam.close())
 
@@ -145,18 +145,18 @@ async def pick_up_cube(robot, height=1, retry=3, id_filter=cube_id, show_view=Fa
     async with robot.camera.get_buffer() as buf:
         clockwise, reverse = True, 2
         while True:
-            corner, id = await animations['search_for_cube'](robot, buf, clockwise=clockwise, reverse=reverse, rec=rec, id_filter=id_filter, show_view=show_view)
+            corner, id = await animations['search for cube'](robot, buf, clockwise=clockwise, reverse=reverse, rec=rec, id_filter=id_filter, show_view=show_view)
             if corner is None:
                 return
-            corner, id = await animations['center_cube'](robot, buf, rec=rec, id_filter=id_filter, show_view=show_view)
+            corner, id = await animations['center cube'](robot, buf, rec=rec, id_filter=id_filter, show_view=show_view)
             if corner is None:
                 reverse = 2
                 continue
-            clockwise = await animations['aim_at_cube'](robot, corner, rec=rec)
+            clockwise = await animations['aim at cube'](robot, corner, rec=rec)
             if clockwise is not None:
                 reverse = 0
                 continue
-            await animations['dock_with_cube'](robot, buf, rec=rec, id_filter=id_filter, show_view=show_view)
+            await animations['dock with cube'](robot, buf, rec=rec, id_filter=id_filter, show_view=show_view)
             await robot.lift.height(height)
             await asyncio.sleep(.5)
             if (await robot.sonar.distance()) > .06:
@@ -230,14 +230,14 @@ async def drive_on_charger(robot, show_view=False):
     async with robot.camera.get_buffer() as buf:
         clockwise, reverse = True, 2
         while True:
-            corner, id = await animations['search_for_cube'](robot, buf, clockwise=clockwise, reverse=reverse, rec=rec, id_filter=charger_id, show_view=show_view)
+            corner, id = await animations['search for cube'](robot, buf, clockwise=clockwise, reverse=reverse, rec=rec, id_filter=charger_id, show_view=show_view)
             if corner is None:
                 return
-            corner, id = await animations['center_cube'](robot, buf, rec=rec, id_filter=charger_id, show_view=show_view)
+            corner, id = await animations['center cube'](robot, buf, rec=rec, id_filter=charger_id, show_view=show_view)
             if corner is None:
                 reverse = 2
                 continue
-            clockwise = await animations['aim_at_cube'](robot, corner, rec=rec)
+            clockwise = await animations['aim at cube'](robot, corner, rec=rec)
             if clockwise is not None:
                 reverse = 0
                 continue
@@ -246,10 +246,10 @@ async def drive_on_charger(robot, show_view=False):
 '''
 
 animations = {
-    # 'search for cube': search_for_cube,
-    # 'center cube': center_cube,
-    # 'aim at cube': aim_at_cube,
-    # 'dock with cube': dock_with_cube,
+    'search for cube': search_for_cube,
+    'center cube': center_cube,
+    'aim at cube': aim_at_cube,
+    'dock with cube': dock_with_cube,
     'pick up cube': pick_up_cube,
     # 'search_for_charger': search_for_charger,
     # 'approach_charger': approach_charger,
