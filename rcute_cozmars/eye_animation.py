@@ -181,7 +181,7 @@ class EyeAnimation(util.Component):
             elif 'happy' in self._expression:
                 x, y = random.randint(-3, 3)*5, random.randint(-3, -2)*9
                 lpos, rpos = (LX+x, Y+y), (RX+x, Y+y)
-                llbrow = rlbrow = (self._size//4)*random.randint(1,2)
+                llbrow = rlbrow = (self._size//4)*random.randint(2, 3)
                 if 'auto.' in self._expression and random.random() >.6:
                     self._expression = 'auto'
 

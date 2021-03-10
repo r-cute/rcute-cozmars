@@ -69,15 +69,17 @@ class Screen(led.LED):
         await self._rpc.display(image_to_data(np.rot90(image)), x, y, x+h-1, y+w-1)
 
     @util.mode()
-    async def display(self, image, stop_eyes=True):
-        """Display an image
+    async def display(self, image, fill_type='stretch', stop_eyes=True):
+        """Display image on screen
 
         :param image: BGR image to be displayed. The image will be resized to fit the screen,
         :type image: PIL.Image/numpy.ndarray
+        :param fill_type: must be one of 'stretch'/'crop'/'adapt', default to 'stretch'
+        :type fill_type: str, optional
         """
         if isinstance(image, Image.Image):
             image = np.array(image)
-        x, y, image = self._resize_to_screen(image)
+        x, y, image = self._resize_to_screen(image, fill_type)
         W, H = self.resolution
         filled_img = np.zeros((H, W, 3), np.uint8)
         h, w = image.shape[:2]
@@ -110,15 +112,28 @@ class Screen(led.LED):
         # image = cv2.putText(image, text, ((W-20*len(text))//2, 75), cv2.FONT_HERSHEY_SIMPLEX, 1.5, util.bgr(color), 2)
         return await self.display(np.array(image), stop_eyes=stop_eyes)
 
-    def _resize_to_screen(self, img):
+    _fill_types = ['stretch', 'crop', 'adapt']
+    def _resize_to_screen(self, img, fill_type):
+        assert fill_type in self._fill_types, f'fill_type {fill_type} must be one of {self._fill_types}'
         h, w = img.shape[:2]
         W, H = self.resolution
-        if W/H > w/h:
-            f = int(w/h*H)
-            return (W-f)//2, 0, cv2.resize(img, (f, H))
-        else:
-            f = int(h/w*W)
-            return 0, (H-f)//2, cv2.resize(img, (W, f))
+        if fill_type == 'adapt':
+            if W/H > w/h:
+                f = int(w/h*H)
+                return (W-f)//2, 0, cv2.resize(img, (f, H))
+            else:
+                f = int(h/w*W)
+                return 0, (H-f)//2, cv2.resize(img, (W, f))
+        elif fill_type == 'stretch':
+            return 0, 0, cv2.resize(img, self.resolution)
+        elif fill_type == 'crop':
+            if W/H > w/h:
+                b = int((h-h*H/W)/2)
+                return 0, 0, cv2.resize(img[b:h-b,:], self.resolution)
+            else:
+                b = int((w-w*W/H)/2)
+                return 0, 0, cv2.resize(img[:,b:w-b], self.resolution)
+
 
     def _in_range(self, *points):
         w, h = self.resolution
