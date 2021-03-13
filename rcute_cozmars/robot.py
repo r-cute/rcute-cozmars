@@ -306,12 +306,18 @@ class AioRobot:
         See `rcute_ai.WakeWordDetector <https://rcute-ai.readthedocs.io/zh_CN/latest/api/WakeWordDetector.html>`_"""
         if not args:
             return getattr(self, '_when_called', None)
-        cb = self._when_called = args[0]
+        cb = args[0]
+        if cb is None or getattr(self, '_wwd_thread', None):
+            self._when_called = None
+            getattr(self, '_wwd', None) and self._wwd.cancel()
+            getattr(self, '_wwd_thread', None) and self._wwd_thread.is_alive() and await self._lo.run_in_executor(None, self._wwd_thread.join)
+            self._wwd_thread = None
         if cb:
+            self._when_called = cb
             def wwd_run():
                 if not hasattr(self, '_wwd'):
                     import rcute_ai as ai
-                    self._wwd = ai.WakeWordDetection()
+                    self._wwd = ai.WakeWordDetector()
                 logger.info('Start wake word detection.')
                 with self.microphone.get_buffer() as buf:
                     while self._when_called:
@@ -319,9 +325,6 @@ class AioRobot:
                 logger.info('Stop wake word detection.')
             self._wwd_thread = threading.Thread(target=wwd_run, daemon=True)
             self._wwd_thread.start()
-        else:
-            hasattr(self, '_wwd') and self._wwd.cancel()
-            hasattr(self, '_wwd_thread') and self._wwd_thread.is_alive() and await self._lo.run_in_executor(None, self._wwd_thread.join)
 
     @util.mode()
     async def listen(self, **kw):

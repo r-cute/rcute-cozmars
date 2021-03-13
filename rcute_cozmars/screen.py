@@ -88,12 +88,12 @@ class Screen(led.LED):
         await self._rpc.display(image_to_data(np.rot90(filled_img)), 0, 0, H-1, W-1)
 
     @util.mode()
-    async def text(self, text, size=30, color='cyan', bg_color='black', font=None, stop_eyes=True):
+    async def text(self, text, size=35, color='cyan', bg_color='black', font=None, stop_eyes=True):
         """Display simple text
 
         :param text: text to be displayed
         :type text: str
-        :param size: font size, default is 30
+        :param size: font size, default is 35
         :type size: int, optional
         :param color: text color, default is cyan
         :type color: str/tuple, optional

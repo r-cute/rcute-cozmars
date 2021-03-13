@@ -78,7 +78,7 @@ async def center_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_vie
                     await robot.motor.set_speed((-.3,-.3),max(.3, (e-60)/25))
                 else:
                     return corner, id
-                await asyncio.sleep(.35)
+                await asyncio.sleep(.4)
     finally:
         not cam_buf and (await cam.close())
 
@@ -135,7 +135,7 @@ async def dock_with_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_
                     sp = tuple(s*dist/.1 for s in sp)
             elif dist < .1:
                 sp = dist/.1, dist/.1
-            await robot.motor.speed(tuple(a*.4 for a in sp))
+            await robot.motor.speed(tuple(a*.2 for a in sp))
     finally:
         not cam_buf and (await cam.close())
 
