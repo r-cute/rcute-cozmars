@@ -69,10 +69,10 @@ async 异步模式
 
     比如一条抬头的指令还未执行完，就立刻执行另一条低头的指令，这可能会损坏舵机
 
+..
+    .. note::
 
-.. note::
-
-    对应地，魔方也同样有三个类 :data:`Cube` , :data:`AsyncCube` 和 :data:`AioCube` 分别实现三种不同的控制方式
+        对应地，魔方也同样有三个类 :data:`Cube` , :data:`AsyncCube` 和 :data:`AioCube` 分别实现三种不同的控制方式
 
 .. seealso::
 
