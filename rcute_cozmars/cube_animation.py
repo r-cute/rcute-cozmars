@@ -43,9 +43,9 @@ async def search_for_cube(robot, cam_buf=None, clockwise=True, reverse=2, rec=No
             if corner is not None:
                 return corner, id
             if count < reverse:
-                await robot.motor.set_speed((-.5, .5) if clockwise else (.5, -.5), 0.1)
+                await robot.motors.set_speed((-.5, .5) if clockwise else (.5, -.5), 0.1)
             else:
-                await robot.motor.set_speed((.5, -.5) if clockwise else (-.5, .5), 0.35 if count ==reverse else 0.1)
+                await robot.motors.set_speed((.5, -.5) if clockwise else (-.5, .5), 0.35 if count ==reverse else 0.1)
             count += 1
             await asyncio.sleep(.4)
     finally:
@@ -71,11 +71,11 @@ async def center_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_vie
                 e = np.average(rec.edges(corner))
                 if not -70 < x < 70:
                     sp = np.clip(.1*((x-50) if x >=50 else (50+x)), -.05, .05)
-                    await robot.motor.set_speed((sp, -sp), max((100-e)/130, .05))
+                    await robot.motors.set_speed((sp, -sp), max((100-e)/130, .05))
                 elif e < 50:
-                    await robot.motor.set_speed((.3,.3),max(.3, (50-e)/20))
+                    await robot.motors.set_speed((.3,.3),max(.3, (50-e)/20))
                 elif e > 60:
-                    await robot.motor.set_speed((-.3,-.3),max(.3, (e-60)/25))
+                    await robot.motors.set_speed((-.3,-.3),max(.3, (e-60)/25))
                 else:
                     return corner, id
                 await asyncio.sleep(.4)
@@ -91,12 +91,12 @@ async def aim_at_cube(robot, corner, rec=None):
     vertical = max(left, right)
     ratio = top / vertical
     if ratio < .9:
-        await robot.motor.set_speed((-.5,.5) if left<right else (.5,-.5), (ratio*65/vertical))
+        await robot.motors.set_speed((-.5,.5) if left<right else (.5,-.5), (ratio*65/vertical))
         await asyncio.sleep(.1)
         a = max((100-vertical)*(1-ratio)*.4, .5)
-        await robot.motor.set_speed((.5,.5), a*.6)
+        await robot.motors.set_speed((.5,.5), a*.6)
         await asyncio.sleep(.1)
-        await robot.motor.set_speed((-.5,.5) if left>right else (.5,-.5), (4*(1-ratio)*90/vertical))
+        await robot.motors.set_speed((-.5,.5) if left>right else (.5,-.5), (4*(1-ratio)*90/vertical))
         return left < right
 
 async def dock_with_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_view=False):
@@ -121,7 +121,7 @@ async def dock_with_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_
             else:
                 count = 0
             if count > 2:
-                await robot.motor.stop()
+                await robot.motors.stop()
                 break
             if corner is not None:
                 x = np.average(corner, axis=0)[0] - mid
@@ -135,7 +135,7 @@ async def dock_with_cube(robot, cam_buf=None, rec=None, id_filter=cube_id, show_
                     sp = tuple(s*dist/.1 for s in sp)
             elif dist < .1:
                 sp = dist/.1, dist/.1
-            await robot.motor.speed(tuple(a*.2 for a in sp))
+            await robot.motors.speed(tuple(a*.2 for a in sp))
     finally:
         not cam_buf and (await cam.close())
 
@@ -189,7 +189,7 @@ async def approach_charger(robot, cam_buf=None, rec=None, id_filter=charger_id, 
             if corner is not None:
                 e = np.average(rec.edges(corner))
                 if e >72:
-                    await robot.motor.speed(0)
+                    await robot.motors.speed(0)
                     return corner
                 x = np.average(corner, axis=0)[0] - mid
                 if x > 10:
@@ -198,7 +198,7 @@ async def approach_charger(robot, cam_buf=None, rec=None, id_filter=charger_id, 
                     sp = max(1-(-x-10)/10, 0.1), 1
                 else:
                     sp = .5, .5
-            await robot.motor.speed(sp)
+            await robot.motors.speed(sp)
     finally:
         not cam_buf and (await cam.close())
 
@@ -212,16 +212,16 @@ async def dock_with_charger(robot, corner, rec=None):
         await robot.turn_left(5 + 5*(ratio-1))
     else:
         await robot.turn_right(5 + 5*(1-ratio))
-    await robot.motor.speed(-.5)
+    await robot.motors.speed(-.5)
     count = 0
     while True:
         await asyncio.sleep(1)
         count += 1
         if 0 in robot.infrared.state:# == (0, 0):
-            await robot.motor.set_speed(.5, .1)
+            await robot.motors.set_speed(.5, .1)
             return True
         if count >5:
-            await robot.motor.speed(0)
+            await robot.motors.speed(0)
             return False
 
 async def drive_on_charger(robot, show_view=False):

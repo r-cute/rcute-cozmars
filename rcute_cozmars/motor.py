@@ -1,19 +1,12 @@
 from . import util
+from . import pair
 
-class Motor(util.Component):
-    """
-
-
-    .. warning::
-
-        Be careful not to drop the robot off table when it moves!
-
-    """
+class _Motor(util.Component):
 
     @util.mode(property_type='setter')
     async def speed(self, value=None):
         """get/set speed of the motor, the tuple composed of two numbers -1~1 represents the speed of the left and right motors."""
-        return await (self._rpc.speed() if value is None else self._rpc.speed(value))
+        return self.extract(await self._rpc.speed()) if value is None else (await self._rpc.speed(self.extend(value)))
 
     @util.mode(force_sync=False)
     async def set_speed(self, value, duration=None):
@@ -24,9 +17,26 @@ class Motor(util.Component):
         :param duration: duration in seconds of movement. default is `None` for non-stop until :func:`stop` is called or the speed is set to `0`
         :type duration: float
         """
-        await self._rpc.speed(value, duration)
+        await self._rpc.speed(self.extend(value), duration)
 
     @util.mode()
     async def stop(self):
         """ """
-        await self._rpc.speed(0)
+        await self._rpc.speed(self.extend(0))
+
+class Motor(_Motor, pair.Child):
+    def __init__(self, i, robot):
+        _Motor.__init__(self, robot)
+        pair.ChildComponent.__init__(i)
+
+class Motors(_Motor, pair.Parent):
+    """
+
+    .. warning::
+
+        Be careful not to drop the robot off table when it moves!
+
+    """
+    def __init__(self, robot):
+        _Motor.__init__(self, robot)
+        pair.ParentComponent.__init__(self, Motor, robot)

@@ -1,10 +1,22 @@
 from . import util
+from . import pair
 
-class Infrared(util.Component):
-    """Infrared Sensor at the bottom
+class IRSensor(pair.Child):
+    def __init__(self, i, p):
+        pair.Child.__init__(self, i)
+        self._parent_ref = weakref.ref(p)
+
+    @property
+    def state(self):
+        return self.extract(self._parent_ref().state)
+
+
+class IRSensors(util.Component, pair.Parent):
+    """Infrared Sensors at the bottom
     """
     def __init__(self, robot):
         util.Component.__init__(self, robot)
+        pair.Parent.__init__(self, IRSensor, self)
         self.when_state_changed = None
         """Callback function, called when the value of any infrared sensor at the bottom changes, the default is `None`
 

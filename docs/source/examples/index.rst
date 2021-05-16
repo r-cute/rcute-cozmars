@@ -7,6 +7,7 @@
    connect
    move
    speak
+   light
    sensor
    video_audio
    ai

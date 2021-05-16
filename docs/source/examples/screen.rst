@@ -23,7 +23,7 @@
 背光亮度
 ----------
 
-:data:`screen` 的 :data:`brightness` 属性可以用来设置显示屏的背光亮度，1 表示最亮，0 表示全暗，为了省电和护眼，默认显示亮度只有 0.01； 如果要在改变亮度时有渐变效果，可以通过设置 :data:`default_fade_speed` 属性，或者调用 :meth:`set_brightness` 方法时指定 :data:`fade_duration` 或 :data:`fade_speed` 参数来实现。
+和 :data:`lights` 控制亮度的方法相同，:data:`screen` 的 :data:`brightness` 属性可以用来设置显示屏的背光亮度，1 表示最亮，0 表示全暗，为了省电和护眼，默认显示亮度只有 0.01； 如果要在改变亮度时有渐变效果，可以通过设置 :data:`default_fade_speed` 属性，或者调用 :meth:`set_brightness` 方法时指定 :data:`fade_duration` 或 :data:`fade_speed` 参数来实现。
 
 显示图片
 ------------

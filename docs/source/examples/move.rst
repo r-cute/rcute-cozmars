@@ -48,11 +48,7 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 向前进
 --------------
 
-下面我们来操作机器人的马达 :data:`motor` ，从而控制机器人的移动
-
-.. note::
-
-    实际上机器人左右各有一个马达，从语法的角度讲应该用复数“motors”，但我们暂且在逻辑上把它们看成一个整体吧，因为我们也是以整体的方式来设置马达速度的 :)
+下面我们来操作机器人的两个马达 :data:`motors` ，从而控制机器人的移动
 
 
 .. warning::
@@ -62,18 +58,25 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 
 马达的速度 :data:`speed` 可以是 -1~1 之间数，0 表示停止，1 是全速前进，那负数当然就是后退喽：
 
-    >>> robot.motor.speed = 1
-    >>> robot.motor.speed = -1
-    >>> robot.motor.speed = 0
+    >>> robot.motors.speed = 1
+    >>> robot.motors.speed = -1
+    >>> robot.motors.speed = 0
 
 马达的速度也可以是由两元素组成的元组( `tuple` )，两个元素分别表示左右马达的速度。比如，通过让两个马达转向相反，可以让机器人原地转圈：
 
-    >>> robot.motor.speed = (1, -1)
-    >>> robot.motor.stop()  # 效果等同于 robot.motor.speed=0
+    >>> robot.motors.speed = (1, -1)
+    >>> robot.motors.stop()  # 效果等同于 robot.motors.speed=0
 
-:data:`motor` 还有一个 :meth:`set_speed` 方法，用来设置速度和持续时间。比如，要机器人转圈 5 秒：
+:data:`motors` 还有一个 :meth:`set_speed` 方法，用来设置速度和持续时间。比如，要机器人转圈 5 秒：
 
-    >>> robot.motor.set_speed((1, -1), duration=5)
+    >>> robot.motors.set_speed((1, -1), duration=5)
+
+更酷的是，:data:`motors`还允许你像数组那样，通过引索来控制单个马达，而不改变另一个马达的状态：
+
+    >>> robot.motors[0].speed = 1    # motors[0] 表示左边马达
+    >>> robot.motors['left'].stop()  # motors['left'] 也可以
+
+同理，data:`motors[1]` 或 :data:`motors['right']` 都表示右边的马达
 
 .. note::
 
@@ -109,7 +112,7 @@ Cozmars 机器人身上能动的部件是头部、手臂和轮子。这一节课
 
 .. seealso::
 
-    `rcute_cozmars.lift <../api/lift.html>`_ ，`rcute_cozmars.head <../api/head.html>`_ ，`rcute_cozmars.motor <../api/motor.html>`_
+    `rcute_cozmars.lift <../api/lift.html>`_ ，`rcute_cozmars.head <../api/head.html>`_ ，`rcute_cozmars.motors <../api/motors.html>`_
 
 
     `rcute_cozmars.Robot.forward <../api/robot.html#rcute_cozmars.robot.Robot.forward>`_ ，`rcute_cozmars.Robot.backward <../api/robot.html#rcute_cozmars.robot.Robot.backward>`_ ， `rcute_cozmars.Robot.turn_left <../api/robot.html#rcute_cozmars.robot.Robot.turn_left>`_ ， `rcute_cozmars.Robot.turn_right <../api/robot.html#rcute_cozmars.robot.Robot.turn_right>`_

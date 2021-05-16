@@ -3,19 +3,19 @@
 
 机器人需要能感知周围的环境，光会动的只是机器
 
-这一节先介绍 Cozmars 身上的三个简单的传感器：顶上的按钮 :data:`button` 、前头的声纳 :data:`sonar` （超声波距离传感器），和底部的两个红外传感器 :data:`infrared`
+这一节先介绍 Cozmars 身上的三个简单的传感器：顶上的触摸传感器 :data:`touch_sensor` 、前头的声纳（超声波距离传感器）:data:`sonar` ，和底部的两个红外传感器 :data:`ir_sensors`
 
 
 这三个传感器各有一些属性用来查询其状态：
 
-- 按钮 :data:`button` 有 :data:`pressed` ， :data:`long_pressed` ， :data:`double_pressed` 三个属性，分别表示按钮是否被按下、被长按和被双击
+- 按钮 :data:`touch_sensor` 有 :data:`touched` ， :data:`long_touched` ， :data:`double_touched` 三个属性，分别表示按钮是否被按下、被长按和被双击
 - 声纳 :data:`sonar` 通过超声波反射来判断前方障碍物的距离，其 :data:`distance` 属性用来查询前方障碍物的距离（米）
-- 红外传感器 :data:`infrared` 自身能发出的红外光，并感应的红外反射的强弱。:data:`state` 属性是一个两元素组成的元组，分别表示左右两个传感器是否接收到红外反射，0 表示没有或反射很弱，1 表示有较强的反射
+- 红外传感器 :data:`ir_sensors` 自身能发出的红外光，并感应的红外反射的强弱。:data:`state` 属性是一个两元素组成的元组，分别表示左右两个传感器是否接收到红外反射，0 表示没有接收到反射，1 表示有较强的反射
 
 
 .. note::
 
-    同马达 :data:`motor` 一样，两个红外传感器也在逻辑上被看成一个整体
+    同马达 :data:`motors` 一样，两个红外传感器 :data:`ir_sensors` 也可以像数组那样使用
 
 查询传感器状态
 ----------------
@@ -29,8 +29,8 @@
 
     with Robot() as robot:
         while True:
-            print('按钮状态：', '按下' if robot.button.pressed else '松开')
-            print('红外传感器状态：', robot.infrared.state)
+            print('按钮状态：', '按下' if robot.touch_sensor.touched else '松开')
+            print('红外传感器状态：', robot.ir_sensors.state)
             print('前方障碍物距离：', robot.sonar.distance, '米')
             print('............................')
             time.sleep(.3)
@@ -80,7 +80,7 @@
 
 顾名思义，:data:`sonar.when_out_of_range` 是当前方有障碍物离开 :data:`distance_threshold` 范围时会被调用的函数
 
-而通过 :data:`infrared.when_state_changed` 属性可以设置当红外传感器状态变换时被调用的函数，可以用来做经（无）典（聊）的寻迹小车实验：
+而通过 :data:`ir_sensors.when_state_changed` 属性可以设置当红外传感器状态变换时被调用的函数，可以用来做经（无）典（聊）的寻迹小车实验：
 
 .. code:: python
 
@@ -92,16 +92,16 @@
         def steer(state):
             robot.motor.speed = state
 
-        robot.infrared.when_state_changed = steer
+        robot.ir_sensors.when_state_changed = steer
 
         pause()
 
 
 
-:data:`button` 的回调函数就更丰富了，有 :data:`when_pressed` 、:data:`when_released`、 :data:`when_long_pressed` 和 :data:`when_double_pressed` ，分别是当按钮被按下、被释放、被长按、被双击时的回调函数，这里就不一一演示了，请试着阅读以下相关的 API，自己测试一下！
+:data:`touch_sensor` 的回调函数就更丰富了，有 :data:`when_touched` 、:data:`when_released`、 :data:`when_long_touched` 和 :data:`when_double_touched` ，分别是当按钮被按下、被释放、被长按、被双击时的回调函数，这里就不一一演示了，请试着阅读以下相关的 API，自己测试一下！
 
 .. seealso::
 
-    `rcute_cozmars.button <../api/button.html>`_ ， `rcute_cozmars.sonar <../api/sonar.html>`_  ， `rcute_cozmars.infrared <../api/infrared.html>`_
+    `rcute_cozmars.touch_sensor <../api/touch_sensor.html>`_ ， `rcute_cozmars.sonar <../api/sonar.html>`_  ， `rcute_cozmars.ir_sensors <../api/ir_sensors.html>`_
 
 后面还会介绍另外两个传感器：摄像头和麦克风。别急，休息，休息一会儿 ...

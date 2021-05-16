@@ -6,9 +6,10 @@ API
 .. toctree::
 
    robot
-   button
-   infrared
+   touch_sensor
+   ir_sensor
    sonar
+   light
    motor
    lift
    head
