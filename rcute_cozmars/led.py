@@ -28,7 +28,7 @@ class LED(util.Component):
         if args:
             await self._light_rpc()(args[0], None, self.default_fade_speed)
         else:
-            return round(await self._light_rpc()(), 2)
+            return await self._light_rpc()()
 
     @util.mode(force_sync=False)
     async def set_brightness(self, brightness, *, fade_duration=None, fade_speed=None):

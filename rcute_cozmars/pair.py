@@ -15,7 +15,7 @@ class Parent:
         self._children = (child_class(0, *args), child_class(1, *args))
 
     def extend(self, v):
-        return v if isinstance(v, Iterable) and len(v)==2 else v
+        return v if isinstance(v, Iterable) and len(v)==2 else (v,v)
 
     def extract(self, v):
         return v

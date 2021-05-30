@@ -195,11 +195,11 @@ class AioRobot:
                 elif event == 'in_range':
                     await self._call_callback(self.sonar.when_in_range, data)
                 elif event == 'lir':
-                    self.infrared._state = data, self.infrared._state[1]
-                    await self._call_callback(self.infrared.when_state_changed, self.infrared._state)
+                    self._ir_sensors._state = data, self._ir_sensors._state[1]
+                    await self._call_callback(self._ir_sensors.when_state_changed, self._ir_sensors._state)
                 elif event == 'rir':
-                    self.infrared._state = self.infrared._state[0], data
-                    await self._call_callback(self.infrared.when_state_changed, self.infrared._state)
+                    self._ir_sensors._state = self._ir_sensors._state[0], data
+                    await self._call_callback(self._ir_sensors.when_state_changed, self._ir_sensors._state)
             except Exception as e:
                 logger.exception(e)
 

@@ -27,7 +27,7 @@ class _Motor(util.Component):
 class Motor(_Motor, pair.Child):
     def __init__(self, i, robot):
         _Motor.__init__(self, robot)
-        pair.ChildComponent.__init__(i)
+        pair.Child.__init__(self, i)
 
 class Motors(_Motor, pair.Parent):
     """
@@ -39,4 +39,4 @@ class Motors(_Motor, pair.Parent):
     """
     def __init__(self, robot):
         _Motor.__init__(self, robot)
-        pair.ParentComponent.__init__(self, Motor, robot)
+        pair.Parent.__init__(self, Motor, robot)

@@ -1,5 +1,6 @@
 from . import util
 from . import pair
+import weakref
 
 class IRSensor(pair.Child):
     def __init__(self, i, p):
