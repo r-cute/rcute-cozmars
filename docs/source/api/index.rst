@@ -13,7 +13,6 @@ API
    motor
    lift
    head
-   buzzer
    speaker
    screen
    camera
@@ -22,3 +21,4 @@ API
 
 ..
    cube
+   buzzer

@@ -17,7 +17,7 @@ Cozmars 的唤醒词是 “R-Cute” 或 “阿Q”。当回调函数 :data:`whe
 .. code:: python
 
     from rcute_cozmars import Robot
-    with Robot() as robot:
+    with Robot('xxxx') as robot:
 
         def cb():
             robot.say('我在')
@@ -57,7 +57,7 @@ Cozmars 的 :meth:`show_camera_view` 方法会启动一个后台线程打开摄�
         positions, names = fr.recognize(img)   # 识别图像中人脸的位置和名字，
         fr.annotate(img, positions, names)     # 并在图像中标注
 
-    with Robot() as robot:
+    with Robot('xxxx') as robot:
         robot.show_camera_view()              # 显示摄像头图像
         robot.on_camera_image = annotate_face # 设置图像预处理的回调函数
 

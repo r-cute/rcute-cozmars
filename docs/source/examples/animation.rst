@@ -31,7 +31,7 @@ Animation 好玩的地方在于它是可以自定义的，类似于事先定义�
     animations.update({'put down cube', put_down_cube})
 
     # 然后就可以使用这个动作了
-    with Robot() as robot:
+    with Robot('xxxx') as robot:
         robot.animate('pick up cube')
         robot.animate('put down cube')
 
@@ -75,5 +75,5 @@ Animation 好玩的地方在于它是可以自定义的，类似于事先定义�
     import bian_lian_animation
     from rcute_cozmars import Robot
 
-    with Robot() as robot:
+    with Robot('xxxx') as robot:
         robot.animate('bian lian')

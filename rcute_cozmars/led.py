@@ -13,12 +13,12 @@ class LED(util.Component):
 
     @property
     def max_brightness(self):
-        """ `1.0`, read only """
+        """1.0, read only """
         return 1.0
 
     @property
     def min_brightness(self):
-        """Minimum brightness, `0.0`, that is, totally dark, read only"""
+        """Minimum brightness, 0, that is, totally dark, read only"""
         return .0
 
     @util.mode(property_type='setter')

@@ -7,8 +7,8 @@ class Lift(util.Component):
     def __init__(self, robot):
         util.Component.__init__(self, robot)
         self._relax_timeout = None
-        self.default_speed = 2
-        """The default lift moving speed, the default is 2/s, if set to `None`, it will move at fastest speed"""
+        self.default_speed = 3
+        """The default lift moving speed, the default is 3/s, if set to `None`, it will move at fastest speed"""
         self.auto_relax_delay = 1
         """time delay to automatically relax servo after lift moves, default to 1 sec. If set to `None`, servo will not relax.
 

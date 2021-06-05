@@ -1,7 +1,7 @@
 连接
 ==============
 
-`rcute_cozmars` 是用来控制 Cozmars 机器人和 Cube 魔方的 Python 模块，要使用该模块，只要在程序的开头导入它：
+`rcute_cozmars` 是用来控制 Cozmars 机器人的 Python 模块，要使用该模块，只要在程序的开头导入它：
 
 .. code:: python
 
@@ -35,8 +35,8 @@
 
         from rcute_cozmars import Robot
 
-        # 以后均假设机器人的序列号是 '0a3c', 你需要把它换成你的 Cozmars 的序列号！
-        with Robot('0a3c') as robot:
+        # 以后均假设机器人的序列号是 'xxxx', 你需要把它换成你的 Cozmars 的序列号！
+        with Robot('xxxx') as robot:
             robot.forward(2)    # 让机器人前进 2 秒
 
 

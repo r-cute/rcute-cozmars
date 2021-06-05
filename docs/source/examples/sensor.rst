@@ -1,9 +1,9 @@
 传感器与回调函数
 =================
 
-机器人需要能感知周围的环境，光会动的只是机器
+机器人还应该能感知周围的环境，如果会动的那叫机器
 
-这一节先介绍 Cozmars 身上的三个简单的传感器：顶上的触摸传感器 :data:`touch_sensor` 、前头的声纳（超声波距离传感器）:data:`sonar` ，和底部的两个红外传感器 :data:`ir_sensors`
+这一节先介绍 Cozmars 身上的三个简单的传感器：背上的触摸传感器 :data:`touch_sensor` 、前头的声纳（超声波距离传感器）:data:`sonar` ，和底部的两个红外传感器 :data:`ir_sensors`
 
 
 这三个传感器各有一些属性用来查询其状态：
@@ -27,7 +27,7 @@
     from rcute_cozmars import Robot
     import time
 
-    with Robot() as robot:
+    with Robot('xxxx') as robot:
         while True:
             print('按钮状态：', '按下' if robot.touch_sensor.touched else '松开')
             print('红外传感器状态：', robot.ir_sensors.state)
@@ -42,7 +42,7 @@
     from rcute_cozmars import Robot
     import time
 
-    with Robot() as robot:
+    with Robot('xxxx') as robot:
 
         while True: # 不断循环，按 Ctrl + C 退出
 
@@ -63,7 +63,7 @@
     from rcute_cozmars import Robot
     from signal import pause
 
-    with Robot() as robot:
+    with Robot('xxxx') as robot:
 
         def ring(dist):
             robot.speaker.beep([500, 500])
@@ -87,7 +87,7 @@
     from rcute_cozmars import Robot
     from signal import pause
 
-    with Robot() as robot:
+    with Robot('xxxx') as robot:
 
         def steer(state):
             robot.motor.speed = state
@@ -98,7 +98,7 @@
 
 
 
-:data:`touch_sensor` 的回调函数就更丰富了，有 :data:`when_touched` 、:data:`when_released`、 :data:`when_long_touched` 和 :data:`when_double_touched` ，分别是当按钮被按下、被释放、被长按、被双击时的回调函数，这里就不一一演示了，请试着阅读以下相关的 API，自己测试一下！
+:data:`touch_sensor` 的回调函数就更丰富了，有 :data:`when_touched` 、:data:`when_released`、 :data:`when_long_touched` 和 :data:`when_double_touched` ，分别是当按钮被触摸、被释放、被长按、被双击时的回调函数，这里就不一一演示了，请试着阅读以下相关的 API，自己测试一下！
 
 .. seealso::
 

@@ -28,15 +28,15 @@ class Head(util.Component):
 
     @property
     def max_angle(self):
-        """30 degrees, read only
+        """head's maximum angle in degrees, read only
         """
         return 30
 
     @property
     def min_angle(self):
-        """-30 degrees, read only
+        """head's minimum angle in degrees, read only
         """
-        return -30
+        return -20
 
     @util.mode(property_type='setter')
     async def angle(self, *args):

@@ -3,9 +3,7 @@
 
     >>> robot.speaker.beep([500, 500]) # 让机器人发出两个 500Hz 的音节
 
-*程序出错？如果你使用的是 Cozmars V1 版本，请跳到* `这里 <bb.html>`_
-
-Cozmars V2 相较于 V1 的改进之一，是用扬声器取代了蜂鸣器。扬声器的频率响应更好，在音频功放驱动下，Cozmars 就可以说话、播放数字音乐了。还是让我们从最简单的音调说起吧
+:data:`speaker` 表示机器人内置的一个扬声器。有了它，Cozmars 就可以说话、播放数字音乐了。还是让我们从最简单的音调说起吧
 
 哼小曲
 --------
@@ -31,7 +29,7 @@ Cozmars V2 相较于 V1 的改进之一，是用扬声器取代了蜂鸣器。�
     tones = ['D4', 'G4', 'G4', 'B4', 'C5', 'B4', 'A4',
             ('G4', 'A4'), 'B4', 'B4', 'B4', 'B4', ('A4', 'B4'), 'A4', 'G4', 0]
 
-    with Robot() as robot:
+    with Robot('xxxx') as robot:
         robot.speaker.beep(tones, tempo=120, repeat=2)
 
 Rock n roll
