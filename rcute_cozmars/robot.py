@@ -150,7 +150,7 @@ class AioRobot:
             if not hasattr(self, '_host'):
                 found = await util.find_service('rcute-cozmars-????', '_ws._tcp.local.')
                 assert len(found)==1, f"More than one cozmars found {[a.server.split('-')[-1].split('.')[0] for a in found]}." if found else "No cozmars found."
-                self._host = found[0].server
+                self._host = found[0].server[:-1]
             self._ws = await websockets.connect(f'ws://{self._host}/rpc')
             if '-1' == await self._ws.recv():
                 raise RuntimeError('Could not connect to Cozmars, please close other programs that are already connected to Cozmars')

@@ -49,13 +49,12 @@ Cozmars 的 :meth:`show_camera_view` 方法会启动一个后台线程打开摄�
     from rcute_cozmars import Robot
     import rcute_ai as ai
 
-    # 使用 rcute_ai 的人脸识别类 FaceRecognizer
-    fr = ai.FaceRecognizer()
+    # 使用 rcute_ai 的人脸识别类 FaceDetector
+    face = ai.FaceDetector()
 
     # 定义预处理回调函数，对图像进行人脸识别和标注
     def annotate_face(img):
-        positions, names = fr.recognize(img)   # 识别图像中人脸的位置和名字，
-        fr.annotate(img, positions, names)     # 并在图像中标注
+        fr.detect(img, annotate=True)   # 识别图像中人脸的位置和名字，并在图像中标注
 
     with Robot('xxxx') as robot:
         robot.show_camera_view()              # 显示摄像头图像
@@ -69,4 +68,4 @@ Cozmars 的 :meth:`show_camera_view` 方法会启动一个后台线程打开摄�
 
 其实，:meth:`show_camera_view` 方法在私底下所做和上一节 `获取摄像头图像 <video_audio.html#id2>`_ 里面用 :meth:`robot.camera.get_buffer` 读取摄像头数据流的办法差不多，但命令行的交互模式下直接调用 :meth:`show_camera_view` 则方便得多。
 
-除了识别人脸，rcute_ai 模块还可以识别图像中的二维码等物品。更多图像/语音识别的例子，请参考 `rcute-ai <https://rcute-ai.readthedocs.io>`_
+除了识别人脸，rcute_ai 模块还可以识别物品、二维码、人体姿态、手势等。更多图像/语音识别的例子，请参考 `rcute-ai <https://rcute-ai.readthedocs.io>`_
