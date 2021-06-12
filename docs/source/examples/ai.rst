@@ -68,4 +68,4 @@ Cozmars 的 :meth:`show_camera_view` 方法会启动一个后台线程打开摄�
 
 其实，:meth:`show_camera_view` 方法在私底下所做和上一节 `获取摄像头图像 <video_audio.html#id2>`_ 里面用 :meth:`robot.camera.get_buffer` 读取摄像头数据流的办法差不多，但命令行的交互模式下直接调用 :meth:`show_camera_view` 则方便得多。
 
-除了识别人脸，rcute_ai 模块还可以识别物品、二维码、人体姿态、手势等。更多图像/语音识别的例子，请参考 `rcute-ai <https://rcute-ai.readthedocs.io>`_
+除了识别人脸，rcute_ai 模块还可以识别文字、物品、二维码、人体姿态、手势等。更多图像/语音识别的例子，请参考 `rcute-ai <https://rcute-ai.readthedocs.io>`_

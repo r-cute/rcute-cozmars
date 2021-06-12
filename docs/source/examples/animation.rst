@@ -3,9 +3,9 @@ Animation
 
 一个 Animation 就是一组事先定义好的动作，例如自带的 animation :data:`'pick up cube'` ，可以通过 Cozmars 的 :data:`animation_list` 属性查看，通过 :meth:`animate` 方法调用。
 
-Cozmars 的 :meth:`animate` 方法的第一参数是动作的名称，还可以接受其他的可选参数。比如拾取魔方的动作 :data:`'pick up cube'` ，就带有一个 :data:`show_view` 参数用来指定是否显示摄像头画面。把魔方摆放在 Cozmars 附近，然后试试：
+Cozmars 的 :meth:`animate` 方法的第一参数是动作的名称，还可以接受其他的可选参数。比如拾取魔方的动作 :data:`'pick up cube'` ，就带有一个 :data:`show_camera_view` 参数用来指定是否显示摄像头画面。把魔方摆放在 Cozmars 附近，然后试试：
 
-    >>> robot.animate('pick up cube', show_view=True)
+    >>> robot.animate('pick up cube', show_camera_view=True)
 
 接下来的内容对 Python 初学者来说有点“超纲”，抓稳扶好了哦。。。
 

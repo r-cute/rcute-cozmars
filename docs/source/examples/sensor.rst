@@ -10,12 +10,8 @@
 
 - 按钮 :data:`touch_sensor` 有 :data:`touched` ， :data:`long_touched` ， :data:`double_touched` 三个属性，分别表示按钮是否被按下、被长按和被双击
 - 声纳 :data:`sonar` 通过超声波反射来判断前方障碍物的距离，其 :data:`distance` 属性用来查询前方障碍物的距离（米）
-- 红外传感器 :data:`ir_sensors` 自身能发出的红外光，并感应的红外反射的强弱。:data:`state` 属性是一个两元素组成的元组，分别表示左右两个传感器是否接收到红外反射，0 表示没有接收到反射，1 表示有较强的反射
+- 红外传感器 :data:`ir_sensors` 自身能发出的红外光，并感应的红外反射的强弱。:data:`state` 属性是一个3元素组成的元组，分别表示3个传感器是否接收到红外反射，0 表示没有接收到反射，1 表示有较强的反射
 
-
-.. note::
-
-    同马达 :data:`motors` 一样，两个红外传感器 :data:`ir_sensors` 也可以像数组那样使用
 
 查询传感器状态
 ----------------
@@ -90,13 +86,19 @@
     with Robot('xxxx') as robot:
 
         def steer(state):
-            robot.motor.speed = state
+            robot.motor.speed = state[0], state[2]
 
         robot.ir_sensors.when_state_changed = steer
 
         pause()
 
+.. note::
 
+    底部的3个红外传感器 :data:`ir_sensors` 也可以像数组引索那样使用
+
+    >>> robot.ir_sensors.state            # 取得三个3个红外传感器的状态
+    >>> robot.ir_sensors[1].state         # 取得中间红外传感器的状态
+    >>> robot.ir_sensors['middle'].state  # 同上
 
 :data:`touch_sensor` 的回调函数就更丰富了，有 :data:`when_touched` 、:data:`when_released`、 :data:`when_long_touched` 和 :data:`when_double_touched` ，分别是当按钮被触摸、被释放、被长按、被双击时的回调函数，这里就不一一演示了，请试着阅读以下相关的 API，自己测试一下！
 
