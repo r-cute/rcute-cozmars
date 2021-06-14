@@ -8,6 +8,7 @@ import librosa
 from zeroconf import ServiceBrowser, Zeroconf
 import fnmatch
 import logging
+import weakref
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("rcute-cozmars")
@@ -108,7 +109,7 @@ class withmixin:
 
 class Component:
     def __init__(self, robot):
-        self._robot = robot
+        self._robot = weakref.proxy(robot)
 
     @property
     def _mode(self):
@@ -167,7 +168,7 @@ class OutputStream(RPCStream, withmixin):
     """Output Data Stream"""
     def __init__(self, parent, maxsize=0):
         RPCStream.__init__(self, maxsize)
-        self._parent = parent
+        self._parent = weakref.proxy(parent)
 
     @property
     def _lo(self):
