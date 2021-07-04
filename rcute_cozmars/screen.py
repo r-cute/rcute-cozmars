@@ -102,6 +102,8 @@ class Screen(led.LED):
         :param font: Font file, Microsoft Yahei is used by default, it includes Chinese and English chars.
         :type font: str, optional
         """
+        if not text:
+            return
         font = ImageFont.truetype(font or util.resource('msyh.ttc'), size)
         image = Image.new("RGB", self.resolution, util.bgr(bg_color))
         draw = ImageDraw.Draw(image)
