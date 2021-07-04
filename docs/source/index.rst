@@ -5,7 +5,10 @@
 
 rcute-cozmars 是3d打印教育机器人 Cozmars 的 Python SDK，实现对机器人的基本控制，并可以结合 `rcute-ai <https://rcute-ai.readthedocs.io>`_ 完成图像/语音识别等功能
 
+
 `Installation instructions in English <https://github.com/r-cute/rcute-cozmars/blob/master/README.md>`_
+
+`视频 Demo <https://www.bilibili.com/video/BV11v411H7HE?share_source=copy_web>`_
 
 ---------
 
